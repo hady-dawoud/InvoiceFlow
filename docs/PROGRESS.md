@@ -53,9 +53,49 @@
   with session cookie 200.
 - Placeholder landing page + app metadata (full marketing page in Phase 6).
 
-## Phase 4 — Core CRUD
+## Phase 4 — Core CRUD (2026-09-21)
 
-(pending)
+- Pure libs: `money.ts` (integer-cents math, `formatCents`, `parseAmountToCents`),
+  `invoice.ts` (numbering `INV-YYYY-####`, derived overdue, status transitions),
+  `quota.ts` (`FREE_MONTHLY_LIMIT = 3`, calendar-month window).
+- Data layer: invoice summaries (grouped item-sum aggregation merged in TS),
+  client stats, transactional invoice create/update (items replaced atomically),
+  per-user invoice numbering from max existing sequence (delete-safe).
+- Server actions for clients/invoices/billing with validation + ownership
+  checks on every mutation (server actions are reachable over HTTP, so runtime
+  values are re-validated).
+- UI: dashboard shell + nav, stat cards (billed/paid/outstanding/overdue),
+  invoice list with filter tabs, invoice editor with live totals and
+  save-as-draft / save-and-send, detail view with print-friendly document,
+  client manager; free-tier wall rendered server-side (page) and client-side
+  (editor).
+- **Bug found & fixed**: raw correlated subqueries in drizzle render unqualified
+  column refs in single-table queries (`"id"`), so `iv.client_id = "id"`
+  resolved against the subquery's own table and client invoice counts showed 0.
+  Replaced with grouped subqueries merged in TypeScript.
+- Verified: `tsc` clean; data-layer integration checks (12 assertions incl.
+  quota wall, numbering, totals, ownership, client-invoice guard); pages render
+  seed data with correct totals ($8,350 billed = $5,800 paid + $2,100
+  outstanding + $450 overdue).
+
+## Phase 5 — Billing (2026-09-21)
+
+- `stripe.ts`: lazy Stripe client; `isBillingConfigured()` / `isTestMode()`;
+  checkout uses `STRIPE_PRICE_ID` if set, else an inline $9/mo `price_data`
+  (zero dashboard setup to test).
+- Webhook state machine in `stripe-events.ts` — **pure** `decideStripeAction()`
+  (grant on `checkout.session.completed`, revoke on `subscription.deleted` /
+  `updated` when status ∉ {active, trialing, past_due}) + DB executor
+  `applyStripeAction()`; route verifies signatures via
+  `constructEventAsync`, returns 503 when unconfigured, 400 on bad signature.
+- Server actions: `upgradeToProAction` (creates/reuses Stripe customer with
+  `metadata.userId`, checkout session, redirect) and
+  `openCustomerPortalAction`.
+- Pages: `/dashboard/billing` (plan card, upgrade/portal, test-mode hint,
+  success/cancel/error banners) and public `/pricing` (two plans, FAQ,
+  state-aware CTAs). Nav "Billing" → `/dashboard/billing`.
+- Verified: `tsc` clean; 7/7 webhook decision cases; webhook returns 503
+  without keys; both pages render.
 
 ## Phase 5 — Billing
 

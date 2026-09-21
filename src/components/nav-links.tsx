@@ -7,7 +7,7 @@ const LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/dashboard/invoices", label: "Invoices" },
   { href: "/dashboard/clients", label: "Clients" },
-  { href: "/pricing", label: "Billing" },
+  { href: "/dashboard/billing", label: "Billing" },
 ];
 
 export function NavLinks() {
