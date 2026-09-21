@@ -38,10 +38,17 @@ function parseItems(raw: unknown): ParsedItems | null {
     if (typeof entry !== "object" || entry === null) return null;
     const { description, quantity, price } = entry as Record<string, unknown>;
     if (typeof description !== "string" || description.trim().length === 0) return null;
-    if (typeof quantity !== "number" || !Number.isInteger(quantity) || quantity < 1) return null;
+    // The editor keeps input values as strings; accept both representations.
+    const qty =
+      typeof quantity === "number"
+        ? quantity
+        : typeof quantity === "string"
+          ? Number.parseInt(quantity, 10)
+          : Number.NaN;
+    if (!Number.isInteger(qty) || qty < 1) return null;
     const unitPriceCents = typeof price === "string" ? parseAmountToCents(price) : null;
     if (unitPriceCents === null) return null;
-    items.push({ description: description.trim(), quantity, unitPriceCents });
+    items.push({ description: description.trim(), quantity: qty, unitPriceCents });
   }
   return items;
 }

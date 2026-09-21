@@ -6,7 +6,9 @@ import * as schema from "@/db/schema";
 
 export const auth = betterAuth({
   appName: "InvoiceFlow",
-  baseURL: process.env.APP_URL ?? "http://localhost:3000",
+  // Only pin the base URL when explicitly configured (production). Letting
+  // better-auth infer it per-request keeps origins trusted on any port.
+  baseURL: process.env.APP_URL || undefined,
   database: drizzleAdapter(db, {
     provider: "sqlite",
     schema: {
