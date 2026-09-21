@@ -33,6 +33,22 @@ export default async function InvoiceDetailPage({
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <InvoiceActions invoiceId={invoice.id} status={invoice.status} />
           <CopyLinkButton token={invoice.token} />
+          {session.user.isPro ? (
+            <a
+              href={`/api/invoices/${invoice.id}/pdf`}
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Download PDF
+            </a>
+          ) : (
+            <Link
+              href="/pricing"
+              className="rounded-lg border border-dashed border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-100"
+              title="PDF export is a Pro feature"
+            >
+              PDF (Pro)
+            </Link>
+          )}
           <Link
             href={`/dashboard/invoices/${invoice.id}/edit`}
             className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"

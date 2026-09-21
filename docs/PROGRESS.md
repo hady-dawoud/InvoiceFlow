@@ -101,9 +101,23 @@
 
 (pending)
 
-## Phase 6 — Delivery
+## Phase 6 — Delivery (2026-09-21)
 
-(pending)
+- **PDF export (Pro)**: `/api/invoices/[id]/pdf` with pdfkit (Node runtime,
+  `serverExternalPackages` so its font files survive bundling). Ownership
+  checked; non-Pro gets 402; response streams as attachment
+  `<number>.pdf`. Detail page shows "Download PDF" for Pro, "PDF (Pro)"
+  upsell chip for free users.
+- **Public invoice page** `/pay/[token]`: tokenized, no-auth, read-only
+  invoice document + print/save-as-PDF button + `noindex` metadata.
+  Bad token → 404.
+- **Landing page** replaced: hero with mock invoice card, 4 features,
+  3-step how-it-works, CTA bands, footer; auth-aware CTAs on /pricing.
+- Seed updated: demo account is **Pro** (every feature tryable on first
+  login); fresh signups get the free-plan experience. Seed's duplicate-user
+  catch now matches better-auth's actual error text.
+- Verified live: PDF 200 with `%PDF` magic bytes; public page renders;
+  404 on bad token; landing content renders; `tsc` clean.
 
 ## Phase 7 — Quality
 

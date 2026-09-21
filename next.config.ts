@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // pdfkit ships .afm font files that break inside the server bundle.
+  serverExternalPackages: ["pdfkit"],
 };
 
 export default nextConfig;

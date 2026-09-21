@@ -3,10 +3,10 @@
  *
  *   npm run db:seed
  *
- * Demo login: demo@invoiceflow.dev / demo12345
+ * Demo login: demo@invoiceflow.dev / demo12345 (Pro plan, so every feature
+ * is tryable immediately — fresh signups get the free-plan experience).
  *
- * The demo user starts on the Free plan with 5 invoices this month, so the
- * whole product — including the free-tier wall — is visible immediately.
+ * The demo user starts with 5 invoices across all statuses.
  */
 import { randomBytes, randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
@@ -29,7 +29,7 @@ async function main() {
       body: { name: "Demo Freelancer", email: DEMO_EMAIL, password: DEMO_PASSWORD },
     })
     .catch((err) => {
-      if (String(err).includes("USER_ALREADY_EXISTS")) return null;
+      if (/already exists/i.test(String(err))) return null;
       throw err;
     });
 
@@ -40,6 +40,12 @@ async function main() {
     .limit(1);
 
   if (!demoUser) throw new Error("Demo user missing after signup");
+
+  // Demo account is Pro so every feature (PDF export, unlimited invoices)
+  // can be explored immediately; new signups get the free-plan experience.
+  if (!demoUser.isPro) {
+    await db.update(user).set({ isPro: true }).where(eq(user.id, demoUser.id));
+  }
 
   const existing = await db
     .select({ id: clients.id })
