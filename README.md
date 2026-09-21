@@ -21,8 +21,13 @@ seconds, track who paid, get paid.
 npm install
 cp .env.example .env   # defaults work out of the box (no Stripe keys needed)
 npm run db:push        # create the SQLite schema
+npm run db:seed        # optional: demo account with sample data
 npm run dev            # http://localhost:3000
 ```
+
+Demo login after seeding: `demo@invoiceflow.dev` / `demo12345` (Pro plan, with
+sample clients and invoices). New signups get the free plan — 3 invoices per
+calendar month.
 
 Without Stripe keys the app runs with billing disabled (upgrade buttons show a
 notice). With test keys, the whole checkout flow works using card
@@ -42,5 +47,7 @@ notice). With test keys, the whole checkout flow works using card
 | `npm run dev` | Dev server (Turbopack) |
 | `npm run build` / `npm start` | Production build / serve |
 | `npm run db:push` | Apply Drizzle schema to the database |
+| `npm run db:seed` | Seed the demo account (see above) |
 | `npm run db:studio` | Browse the DB in Drizzle Studio |
-| `npm test` | Vitest unit tests |
+| `npm test` | Vitest unit tests (business logic) |
+| `BASE_URL=… node tests/e2e-smoke.mjs` | Playwright E2E smoke test of the whole funnel |

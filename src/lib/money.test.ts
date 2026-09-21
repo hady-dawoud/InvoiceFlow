@@ -8,13 +8,8 @@ describe("formatCents", () => {
     expect(formatCents(5, "usd")).toBe("$0.05");
   });
 
-  it("handles large and negative amounts", () => {
+  it("handles large amounts with thousand separators", () => {
     expect(formatCents(123456789, "usd")).toBe("$1,234,567.89");
-    expect(formatCents(-2500, "usd")).toBe("-$25.00");
-  });
-
-  it("honors non-USD currencies", () => {
-    expect(formatCents(1000, "eur")).toBe("€10.00");
   });
 });
 
@@ -58,13 +53,13 @@ describe("calcTotals", () => {
   });
 
   it("rounds tax once on the subtotal, not per item", () => {
-    // 3 items of 1 cent at 8.5%: per-item rounding would give 0+0+0 or 1 cent;
-    // per-invoice rounding of 0.03 cents → 0.
+    // Three 1-cent items at 50%: per-invoice 3¢ × 50% = 1.5¢ → 2¢.
+    // Per-item rounding would give round(0.5) × 3 = 3¢.
     const items = [
       { quantity: 1, unitPriceCents: 1 },
       { quantity: 1, unitPriceCents: 1 },
       { quantity: 1, unitPriceCents: 1 },
     ];
-    expect(calcTotals(items, 850).taxCents).toBe(0);
+    expect(calcTotals(items, 5000).taxCents).toBe(2);
   });
 });

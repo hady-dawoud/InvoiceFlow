@@ -6,13 +6,15 @@ import type { Session } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
-function drawInvoice(doc: PDFKit.PDFDocument, detail: NonNullable<Awaited<ReturnType<typeof getInvoiceDetail>>>, session: Session) {
-  const { invoice, client, items } = detail;
-  const currency = session.user.currency;
+function drawHeader(
+  doc: PDFKit.PDFDocument,
+  detail: NonNullable<Awaited<ReturnType<typeof getInvoiceDetail>>>,
+  session: Session,
+  left: number,
+  right: number,
+) {
+  const { invoice, client } = detail;
   const businessName = session.user.businessName ?? session.user.name;
-  const totals = calcTotals(items, invoice.taxBps);
-  const left = 50;
-  const right = 545;
 
   doc.fontSize(22).font("Helvetica-Bold").text("INVOICE", left, 50);
   doc.fontSize(10).font("Helvetica").fillColor("#555");
@@ -30,8 +32,15 @@ function drawInvoice(doc: PDFKit.PDFDocument, detail: NonNullable<Awaited<Return
   doc.font("Helvetica").fillColor("#555").text(invoice.issueDate, 300, 136);
   doc.font("Helvetica-Bold").fillColor("#111").text("Due", 420, 120);
   doc.font("Helvetica").fillColor("#555").text(invoice.dueDate, 420, 136);
+}
 
-  // table header
+function drawItemTable(
+  doc: PDFKit.PDFDocument,
+  items: { description: string; quantity: number; unitPriceCents: number }[],
+  currency: string,
+  left: number,
+  right: number,
+): number {
   let y = 190;
   doc.rect(left, y, right - left, 20).fill("#f1f5f9");
   doc.fillColor("#334155").font("Helvetica-Bold").fontSize(9);
@@ -43,7 +52,6 @@ function drawInvoice(doc: PDFKit.PDFDocument, detail: NonNullable<Awaited<Return
   y += 20;
   doc.font("Helvetica").fontSize(10);
   for (const item of items) {
-    const rowHeight = 22;
     doc.fillColor("#111");
     doc.text(item.description, left + 8, y + 6, { width: 290, ellipsis: true });
     doc.fillColor("#555");
@@ -51,26 +59,50 @@ function drawInvoice(doc: PDFKit.PDFDocument, detail: NonNullable<Awaited<Return
     doc.text(formatCents(item.unitPriceCents, currency), 440, y + 6, { width: 60, align: "right" });
     doc.fillColor("#111");
     doc.text(formatCents(item.quantity * item.unitPriceCents, currency), right - 68, y + 6, { width: 60, align: "right" });
-    y += rowHeight;
+    y += 22;
     doc.moveTo(left, y).lineTo(right, y).lineWidth(0.5).strokeColor("#e2e8f0").stroke();
   }
+  return y;
+}
 
-  y += 12;
+function drawTotals(
+  doc: PDFKit.PDFDocument,
+  totals: { subtotalCents: number; taxCents: number; totalCents: number },
+  taxBps: number,
+  currency: string,
+  right: number,
+  y: number,
+) {
   doc.font("Helvetica").fillColor("#555");
   doc.text("Subtotal", 440, y, { width: 60, align: "right" });
   doc.fillColor("#111").text(formatCents(totals.subtotalCents, currency), right - 128, y, { width: 120, align: "right" });
-  y += 16;
   doc.fillColor("#555");
-  doc.text(`Tax (${invoice.taxBps / 100}%)`, 440, y, { width: 60, align: "right" });
-  doc.fillColor("#111").text(formatCents(totals.taxCents, currency), right - 128, y, { width: 120, align: "right" });
-  y += 20;
+  doc.text(`Tax (${taxBps / 100}%)`, 440, y + 16, { width: 60, align: "right" });
+  doc.fillColor("#111").text(formatCents(totals.taxCents, currency), right - 128, y + 16, { width: 120, align: "right" });
   doc.font("Helvetica-Bold").fontSize(11);
   doc.fillColor("#111");
-  doc.text("Total due", 440, y, { width: 60, align: "right" });
-  doc.text(formatCents(totals.totalCents, currency), right - 128, y, { width: 120, align: "right" });
+  doc.text("Total due", 440, y + 36, { width: 60, align: "right" });
+  doc.text(formatCents(totals.totalCents, currency), right - 128, y + 36, { width: 120, align: "right" });
+}
+
+function drawInvoice(
+  doc: PDFKit.PDFDocument,
+  detail: NonNullable<Awaited<ReturnType<typeof getInvoiceDetail>>>,
+  session: Session,
+) {
+  const { invoice, client, items } = detail;
+  const currency = session.user.currency;
+  const left = 50;
+  const right = 545;
+
+  drawHeader(doc, detail, session, left, right);
+  const tableEnd = drawItemTable(doc, items, currency, left, right);
+
+  const totals = calcTotals(items, invoice.taxBps);
+  drawTotals(doc, totals, invoice.taxBps, currency, right, tableEnd + 12);
 
   if (invoice.notes) {
-    y += 40;
+    const y = tableEnd + 76;
     doc.font("Helvetica-Bold").fontSize(9).fillColor("#334155").text("NOTES", left, y);
     doc.font("Helvetica").fontSize(10).fillColor("#555").text(invoice.notes, left, y + 14, { width: right - left });
   }

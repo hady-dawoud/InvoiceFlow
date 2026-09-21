@@ -30,8 +30,10 @@ free tier keeps early fixed costs at $0.
 
 Mature, actively maintained, Drizzle adapter, sensible session-cookie handling.
 Fallback considered: hand-rolled bcrypt + HMAC cookie sessions (~100 LOC). If
-better-auth version churn bites, the fallback remains available; the schema keeps
-its own `users` table joined 1:1 to better-auth's `user` table.
+better-auth version churn bites, the fallback remains available; the app fields
+(businessName, currency, isPro, Stripe ids) live directly on better-auth's `user`
+table via `user.additionalFields`, all marked `input: false` so clients can never
+set them.
 
 ## D5 — Freemium wall: 3 invoices per calendar month (2026-09-21)
 

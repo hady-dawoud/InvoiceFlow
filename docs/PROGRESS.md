@@ -119,10 +119,39 @@
 - Verified live: PDF 200 with `%PDF` magic bytes; public page renders;
   404 on bad token; landing content renders; `tsc` clean.
 
-## Phase 7 — Quality
+## Phase 7 — Quality (2026-09-21/22)
 
-(pending)
+- **Unit tests (vitest, 30 tests, 4 files)**: money math (formatting, parsing,
+  totals incl. a discriminating per-invoice-vs-per-item tax rounding case),
+  invoice numbering/overdue/transitions, quota states, Stripe webhook
+  decisions (7 cases). `vitest.config.mts` with `@` alias.
+- **E2E smoke (Playwright + headless Chromium, `tests/e2e-smoke.mjs`)**:
+  9-step black-box funnel — landing → signup → client → 3 invoices →
+  free-tier wall → billing degradation → Pro demo login → PDF download
+  (asserts `%PDF` magic bytes) → public `/pay` link. Screenshots in
+  `gui-test-screenshots/` (gitignored), console-error capture. **9/9 pass,
+  zero console errors.** Added as a permanent artifact; dev-mode hydration
+  latency accommodated via `settle()` waits.
+- **Two real product bugs caught by E2E and fixed**:
+  1. `parseItems` rejected string quantities — every form-created invoice
+     failed validation. Now accepts string and number.
+  2. `APP_URL=http://localhost:3000` pinned while the server ran on :3001 →
+     better-auth origin mismatch rejected all browser sign-ins (curl passed,
+     sending no Origin header). `baseURL` now inferred per-request unless
+     explicitly set.
+- Also: the ZCode in-app browser was attempted first and abandoned — its
+  input delivery never reached the page (clicks confirmed dropped via a
+  passive listener) while navigation/DOM/screenshot APIs worked; Playwright
+  was adopted instead.
+- **Guard-skill reviews**: clean-code-guard (5 fixed: dead `STATUS_ORDER`,
+  unused schema re-export, unused `clientName` prop, duplicated Pick key,
+  split 65-line `drawInvoice`), test-guard (2 fixed: removed Intl-only
+  assertions, made the tax-rounding test discriminating), docs-guard
+  (7 fixed: unused env var, missing webhook event, wrong auth schema claim,
+  contradictory webhook note, README scripts/demo credentials, duplicate row).
 
-## Phase 8 — Handoff
+## Phase 8 — Handoff (2026-09-22)
 
-(pending)
+- Final verification: `tsc --noEmit` clean, 30/30 unit tests, 9/9 E2E steps.
+- Docs finalized (README, GROWTH, DECISIONS, DEPLOY, this log).
+- Tagged `v0.1.0`.

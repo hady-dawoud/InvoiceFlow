@@ -28,7 +28,6 @@ export default async function EditInvoicePage({
         clients={clientOptions}
         currency={session.user.currency}
         invoiceId={invoice.id}
-        clientName={detail.client.name}
         initial={{
           clientId: invoice.clientId,
           issueDate: invoice.issueDate,

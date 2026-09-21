@@ -14,7 +14,7 @@ export function InvoiceDocument({
   businessEmail,
   currency,
 }: {
-  invoice: Pick<Invoice, "number" | "status" | "issueDate" | "dueDate" | "taxBps" | "notes" | "dueDate">;
+  invoice: Pick<Invoice, "number" | "status" | "issueDate" | "dueDate" | "taxBps" | "notes">;
   client: Pick<Client, "name" | "email" | "address">;
   items: Pick<InvoiceItem, "description" | "quantity" | "unitPriceCents">[];
   businessName: string;

@@ -28,14 +28,12 @@ export function InvoiceEditor({
   currency,
   invoiceId,
   initial,
-  clientName,
 }: {
   clients: { id: string; name: string }[];
   currency: string;
   /** Present in edit mode. */
   invoiceId?: string;
   initial: EditorInitial;
-  clientName?: string;
 }) {
   const router = useRouter();
   const [clientId, setClientId] = useState(initial.clientId);

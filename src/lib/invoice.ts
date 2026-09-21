@@ -42,8 +42,6 @@ export const STATUS_META: Record<
   paid: { label: "Paid", className: "bg-emerald-50 text-emerald-700" },
 };
 
-export const STATUS_ORDER: InvoiceStatus[] = ["draft", "sent", "paid"];
-
 /** Which status transitions the owner may apply manually. */
 export function allowedTransitions(status: InvoiceStatus): InvoiceStatus[] {
   switch (status) {

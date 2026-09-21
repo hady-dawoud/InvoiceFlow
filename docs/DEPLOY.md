@@ -22,11 +22,10 @@ turso db tokens create invoiceflow       # → DATABASE_AUTH_TOKEN
 |---|---|
 | `DATABASE_URL` | `libsql://…` from step 1 |
 | `DATABASE_AUTH_TOKEN` | token from step 1 |
-| `APP_URL` | `https://yourdomain.com` |
+| `APP_URL` | `https://yourdomain.com` — pins better-auth's trusted origin |
 | `STRIPE_SECRET_KEY` | `sk_live_…` |
 | `STRIPE_PRICE_ID` | price ID of the $9/mo Pro price (live mode) |
 | `STRIPE_WEBHOOK_SECRET` | `whsec_…` from step 3 |
-| `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` | `pk_live_…` (optional for Checkout-only flow) |
 
 3. Build command `npm run build` (default). Drizzle schema is applied via
    `npm run db:push` run locally against the Turso URL (set the env vars in your
@@ -37,7 +36,9 @@ turso db tokens create invoiceflow       # → DATABASE_AUTH_TOKEN
 1. Create a **$9/month recurring price** for a product named "InvoiceFlow Pro";
    copy its `price_…` id → `STRIPE_PRICE_ID`.
 2. Webhook endpoint: `https://yourdomain.com/api/stripe/webhook`, subscribed to
-   `checkout.session.completed` and `customer.subscription.deleted` events.
+   `checkout.session.completed`, `customer.subscription.updated` and
+   `customer.subscription.deleted` (Pro is revoked when a subscription is
+   canceled or left unpaid via the updated/deleted events).
    Copy the signing secret → `STRIPE_WEBHOOK_SECRET`.
 3. Test the flow in **test mode first** (card `4242 4242 4242 4242`), then flip to
    live keys.
@@ -49,9 +50,10 @@ stripe listen --forward-to localhost:3000/api/stripe/webhook
 # copy the whsec_… it prints into .env as STRIPE_WEBHOOK_SECRET
 ```
 
-No Stripe CLI? The webhook's state machine is exercised by unit tests, and you can
-verify end-to-end later — checkout itself works without webhooks (Pro unlocks via
-the webhook, so keep it for production).
+No Stripe CLI? The webhook's state machine is covered by unit tests
+(`src/lib/stripe-events.test.ts`), but Pro unlocks **only** via the webhook —
+without it, payments succeed yet accounts stay on Free. Configure it before
+accepting real payments.
 
 ## 4. Post-deploy checklist
 
