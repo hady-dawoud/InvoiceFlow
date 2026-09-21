@@ -24,13 +24,34 @@
 - Added `.env.example`, extended `.gitignore` (SQLite files, `.zcode/`, keep `.env.example`).
 - Created `docs/` with PROGRESS (this file), DECISIONS, GROWTH; wrote README.
 
-## Phase 2 — Data layer
+## Phase 2 — Data layer (2026-09-21)
 
-(pending)
+- `src/db/schema.ts`: better-auth core tables (`user`, `session`, `account`,
+  `verification`) with app fields on `user` (isPro, stripe ids, businessName,
+  currency, proSince) + app tables `clients`, `invoices` (status draft|sent|paid,
+  per-user unique number, public share token, tax in basis points),
+  `invoice_items` (integer cents).
+- `src/db/index.ts` (libsql client; `DATABASE_URL` fallback `file:./app.db`),
+  `drizzle.config.ts` (turso dialect so `file:` URLs work without extra drivers).
+- Verified: `npm run db:push` creates all 7 tables; inspected via sqlite_master.
 
-## Phase 3 — Auth
+## Phase 3 — Auth (2026-09-21)
 
-(pending)
+- `src/lib/auth.ts`: better-auth + drizzleAdapter (sqlite), email+password,
+  `user.additionalFields` for app fields with `input: false` (client can never
+  set `isPro`), `nextCookies()` plugin.
+- Route handler `/api/auth/[...all]`, React client `src/lib/auth-client.ts`.
+- Pages: `/login`, `/signup` (auth route group, shared card layout).
+- `src/middleware.ts`: redirects cookie-less visitors from `/dashboard*` to
+  `/login?next=…` (full session re-validated server-side via
+  `src/lib/session.ts` → `auth.api.getSession`).
+- `src/db/seed.ts`: demo account `demo@invoiceflow.dev` / `demo12345` with
+  3 clients + 5 invoices (2 paid, 2 sent incl. 1 overdue, 1 draft). Seed uses
+  `auth.api.signUpEmail`, which also proved the better-auth↔drizzle wiring.
+- Live smoke test (curl): `/login` 200; `/dashboard` 307→`/login?next=`;
+  `POST /api/auth/sign-in/email` returns user incl. custom fields; `/dashboard`
+  with session cookie 200.
+- Placeholder landing page + app metadata (full marketing page in Phase 6).
 
 ## Phase 4 — Core CRUD
 
