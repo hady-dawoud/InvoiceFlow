@@ -1,8 +1,9 @@
+import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { StatusBadge } from "@/components/status-badge";
 import { listInvoiceSummaries } from "@/lib/data/invoices";
 import { listClientsWithStats } from "@/lib/data/clients";
-import { isOverdue } from "@/lib/invoice";
+import { invoiceOverview } from "@/lib/invoice-overview";
 import { formatCents } from "@/lib/money";
 import { getQuotaState } from "@/lib/quota";
 import { countInvoicesThisMonth } from "@/lib/data/invoices";
@@ -22,18 +23,7 @@ export default async function DashboardPage() {
   ]);
   const quota = getQuotaState(user.isPro, usedThisMonth);
 
-  const billed = summaries
-    .filter((inv) => inv.status !== "draft")
-    .reduce((sum, inv) => sum + inv.totalCents, 0);
-  const paid = summaries
-    .filter((inv) => inv.status === "paid")
-    .reduce((sum, inv) => sum + inv.totalCents, 0);
-  const outstanding = summaries
-    .filter((inv) => inv.status === "sent" && !isOverdue(inv))
-    .reduce((sum, inv) => sum + inv.totalCents, 0);
-  const overdue = summaries
-    .filter((inv) => isOverdue(inv))
-    .reduce((sum, inv) => sum + inv.totalCents, 0);
+  const { billed, paid, outstanding, overdue } = invoiceOverview(summaries);
 
   const recent = summaries.slice(0, 5);
 
@@ -59,7 +49,7 @@ export default async function DashboardPage() {
             href="/pricing"
             className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700"
           >
-            Upgrade to Pro — $9/mo
+            Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
           </Link>
         </div>
       )}

@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { calcTotals, formatCents, parseAmountToCents } from "@/lib/money";
+import { calcTotals, centsToDecimal, formatCents, parseAmountToCents } from "@/lib/money";
+
+it.each([0, 5, 123456, 9007199254740990, Number.MAX_SAFE_INTEGER])(
+  "opening and saving a price preserves every cent (%i)", (cents) => {
+    expect(parseAmountToCents(centsToDecimal(cents))).toBe(cents);
+  },
+);
 
 describe("formatCents", () => {
+  it("preserves cents when formatting the largest safe amount", () => {
+    expect(formatCents(Number.MAX_SAFE_INTEGER, "usd")).toBe("$90,071,992,547,409.91");
+  });
   it("formats integer cents as currency", () => {
     expect(formatCents(123456, "usd")).toBe("$1,234.56");
     expect(formatCents(0, "usd")).toBe("$0.00");
@@ -14,6 +23,10 @@ describe("formatCents", () => {
 });
 
 describe("parseAmountToCents", () => {
+  it("parses cents exactly at the safe-integer boundary", () => {
+    expect(parseAmountToCents("90071992547409.91")).toBe(Number.MAX_SAFE_INTEGER);
+    expect(parseAmountToCents("90071992547409.92")).toBeNull();
+  });
   it("parses common user input", () => {
     expect(parseAmountToCents("1200")).toBe(120000);
     expect(parseAmountToCents("1200.5")).toBe(120050);
@@ -32,6 +45,13 @@ describe("parseAmountToCents", () => {
 });
 
 describe("calcTotals", () => {
+  it.each([
+    [[{ quantity: 2, unitPriceCents: Number.MAX_SAFE_INTEGER }], 0],
+    [[{ quantity: 1, unitPriceCents: Number.MAX_SAFE_INTEGER }], 1],
+    [[{ quantity: 1.5, unitPriceCents: 100 }], 0],
+  ])("rejects totals outside exact integer arithmetic (%j, %i)", (items, tax) => {
+    expect(() => calcTotals(items, tax)).toThrow(RangeError);
+  });
   it("sums line items and applies tax in basis points", () => {
     const items = [
       { quantity: 2, unitPriceCents: 5000 },

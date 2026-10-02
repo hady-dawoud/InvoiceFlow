@@ -18,7 +18,7 @@ export async function listClientsWithStats(userId: string): Promise<ClientWithSt
       n: sql<number>`count(*)`.mapWith(Number),
     })
     .from(invoices)
-    .innerJoin(clients, eq(invoices.clientId, clients.id))
+    .innerJoin(clients, and(eq(invoices.clientId, clients.id), eq(invoices.userId, clients.userId)))
     .where(eq(clients.userId, userId))
     .groupBy(invoices.clientId);
 

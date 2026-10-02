@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   index,
   integer,
+  primaryKey,
   sqliteTable,
   text,
   uniqueIndex,
@@ -159,6 +160,18 @@ export const invoiceItems = sqliteTable(
   },
   (table) => [index("invoice_items_invoice_id_idx").on(table.invoiceId)],
 );
+
+export const invoiceMonthlyUsage = sqliteTable("invoice_monthly_usage", {
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  month: text("month").notNull(),
+  count: integer("count").notNull().default(0),
+}, (table) => [primaryKey({ columns: [table.userId, table.month] })]);
+
+export const invoiceSequences = sqliteTable("invoice_sequences", {
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  year: integer("year").notNull(),
+  sequence: integer("sequence").notNull().default(0),
+}, (table) => [primaryKey({ columns: [table.userId, table.year] })]);
 
 export const invoiceRelations = relations(invoices, ({ one, many }) => ({
   client: one(clients, {

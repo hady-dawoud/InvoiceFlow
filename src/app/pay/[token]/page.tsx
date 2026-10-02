@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { clients, invoices, user } from "@/db/schema";
 import { InvoiceDocument } from "@/components/invoice-document";
@@ -28,7 +28,7 @@ export default async function PublicInvoicePage({
       currency: user.currency,
     })
     .from(invoices)
-    .innerJoin(clients, eq(invoices.clientId, clients.id))
+    .innerJoin(clients, and(eq(invoices.clientId, clients.id), eq(invoices.userId, clients.userId)))
     .innerJoin(user, eq(invoices.userId, user.id))
     .where(eq(invoices.token, token))
     .limit(1);

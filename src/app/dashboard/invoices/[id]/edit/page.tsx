@@ -3,6 +3,7 @@ import { InvoiceEditor } from "@/components/invoice-editor";
 import { listClientOptions } from "@/lib/data/clients";
 import { getInvoiceDetail } from "@/lib/data/invoices";
 import { getSession } from "@/lib/session";
+import { centsToDecimal } from "@/lib/money";
 
 export const metadata = { title: "Edit invoice" };
 
@@ -38,7 +39,7 @@ export default async function EditInvoicePage({
           items: items.map((item) => ({
             description: item.description,
             quantity: String(item.quantity),
-            price: (item.unitPriceCents / 100).toFixed(2),
+            price: centsToDecimal(item.unitPriceCents),
           })),
         }}
       />

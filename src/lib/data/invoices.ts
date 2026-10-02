@@ -1,9 +1,10 @@
 import { randomBytes, randomUUID } from "node:crypto";
-import { and, desc, eq, gte, like, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { clients, invoiceItems, invoices, type Invoice } from "@/db/schema";
+import { clients, invoiceItems, invoices, invoiceMonthlyUsage, user, type Invoice } from "@/db/schema";
 import { calcTotals } from "@/lib/money";
-import { maxInvoiceSequence, nextInvoiceNumber } from "@/lib/invoice";
+import { consumeInvoiceCounters, InvoiceWriteError, monthKey } from "./invoice-counters";
+import { writeTransaction, type WriteTransaction } from "@/db/write-transaction";
 import { startOfMonth } from "@/lib/quota";
 
 /** One invoice joined with its client and pre-computed item sum. */
@@ -17,7 +18,7 @@ export async function listInvoiceSummaries(userId: string): Promise<InvoiceSumma
   const rows = await db
     .select({ invoice: invoices, clientName: clients.name })
     .from(invoices)
-    .innerJoin(clients, eq(invoices.clientId, clients.id))
+    .innerJoin(clients, and(eq(invoices.clientId, clients.id), eq(invoices.userId, clients.userId)))
     .where(eq(invoices.userId, userId))
     .orderBy(desc(invoices.issueDate), desc(invoices.createdAt));
 
@@ -51,18 +52,21 @@ export async function listInvoiceSummaries(userId: string): Promise<InvoiceSumma
 }
 
 export async function countInvoicesThisMonth(userId: string): Promise<number> {
-  const [row] = await db
-    .select({ n: sql<number>`count(*)`.mapWith(Number) })
-    .from(invoices)
-    .where(and(eq(invoices.userId, userId), gte(invoices.createdAt, startOfMonth())));
-  return row?.n ?? 0;
+  const [usage] = await db.select().from(invoiceMonthlyUsage)
+    .where(and(eq(invoiceMonthlyUsage.userId, userId), eq(invoiceMonthlyUsage.month, monthKey())));
+  if (usage) return usage.count;
+  const now = new Date();
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const [row] = await db.select({ n: sql<number>`count(*)`.mapWith(Number) }).from(invoices)
+    .where(and(eq(invoices.userId, userId), gte(invoices.createdAt, startOfMonth(now)), lt(invoices.createdAt, end)));
+  return row.n;
 }
 
 export async function getInvoiceDetail(userId: string, invoiceId: string) {
   const [row] = await db
     .select({ invoice: invoices, client: clients })
     .from(invoices)
-    .innerJoin(clients, eq(invoices.clientId, clients.id))
+    .innerJoin(clients, and(eq(invoices.clientId, clients.id), eq(invoices.userId, clients.userId)))
     .where(and(eq(invoices.id, invoiceId), eq(invoices.userId, userId)))
     .limit(1);
 
@@ -87,82 +91,46 @@ export type InvoiceInput = {
   items: { description: string; quantity: number; unitPriceCents: number }[];
 };
 
-async function generateInvoiceNumber(userId: string): Promise<string> {
-  const year = new Date().getFullYear();
-  const existing = await db
-    .select({ number: invoices.number })
-    .from(invoices)
-    .where(and(eq(invoices.userId, userId), like(invoices.number, `INV-${year}-%`)));
-  const seq = maxInvoiceSequence(existing.map((r) => r.number), year) + 1;
-  return nextInvoiceNumber(year, seq);
+async function requireOwnedClient(tx: WriteTransaction, userId: string, clientId: string) {
+  const [client] = await tx.select({ id: clients.id }).from(clients)
+    .where(and(eq(clients.id, clientId), eq(clients.userId, userId))).limit(1);
+  if (!client) throw new InvoiceWriteError("Unknown client.");
+}
+
+async function insertItems(tx: WriteTransaction, invoiceId: string, items: InvoiceInput["items"]) {
+  await tx.insert(invoiceItems).values(items.map((item, position) => ({
+    id: randomUUID(), invoiceId, position, ...item,
+  })));
 }
 
 export async function createInvoice(userId: string, input: InvoiceInput) {
-  const invoiceId = randomUUID();
-  const number = await generateInvoiceNumber(userId);
-
-  await db.transaction(async (tx) => {
-    await tx.insert(invoices).values({
-      id: invoiceId,
-      userId,
-      clientId: input.clientId,
-      number,
-      status: input.status,
-      issueDate: input.issueDate,
-      dueDate: input.dueDate,
-      taxBps: input.taxBps,
-      notes: input.notes,
-      token: randomBytes(24).toString("hex"),
-    });
-    await tx.insert(invoiceItems).values(
-      input.items.map((item, position) => ({
-        id: randomUUID(),
-        invoiceId,
-        position,
-        ...item,
-      })),
-    );
+  calcTotals(input.items, input.taxBps);
+  return writeTransaction(async (tx) => {
+    await requireOwnedClient(tx, userId, input.clientId);
+    const [owner] = await tx.select({ id: user.id, isPro: user.isPro }).from(user).where(eq(user.id, userId));
+    if (!owner) throw new InvoiceWriteError("Account not found.");
+    const number = await consumeInvoiceCounters(tx, owner);
+    const invoiceId = randomUUID();
+    const { items, ...fields } = input;
+    await tx.insert(invoices).values({ id: invoiceId, userId, number, token: randomBytes(24).toString("hex"), ...fields });
+    await insertItems(tx, invoiceId, items);
+    return { id: invoiceId, number };
   });
-
-  return { id: invoiceId, number };
 }
 
-export async function updateInvoice(
-  userId: string,
-  invoiceId: string,
-  input: InvoiceInput,
-): Promise<boolean> {
-  const owned = await db
-    .select({ id: invoices.id })
-    .from(invoices)
-    .where(and(eq(invoices.id, invoiceId), eq(invoices.userId, userId)))
-    .limit(1);
-  if (owned.length === 0) return false;
-
-  await db.transaction(async (tx) => {
-    await tx
-      .update(invoices)
-      .set({
-        clientId: input.clientId,
-        status: input.status,
-        issueDate: input.issueDate,
-        dueDate: input.dueDate,
-        taxBps: input.taxBps,
-        notes: input.notes,
-        updatedAt: new Date(),
-      })
-      .where(eq(invoices.id, invoiceId));
+export async function updateInvoice(userId: string, invoiceId: string, input: InvoiceInput): Promise<boolean> {
+  calcTotals(input.items, input.taxBps);
+  return writeTransaction(async (tx) => {
+    const owned = and(eq(invoices.id, invoiceId), eq(invoices.userId, userId));
+    const [invoice] = await tx.select({ id: invoices.id }).from(invoices).where(owned);
+    if (!invoice) return false;
+    await requireOwnedClient(tx, userId, input.clientId);
+    const { items, ...fields } = input;
+    await tx.update(invoices).set({ ...fields, updatedAt: new Date() }).where(owned);
     await tx.delete(invoiceItems).where(eq(invoiceItems.invoiceId, invoiceId));
-    await tx.insert(invoiceItems).values(
-      input.items.map((item, position) => ({
-        id: randomUUID(),
-        invoiceId,
-        position,
-        ...item,
-      })),
-    );
+    await insertItems(tx, invoiceId, items);
+    return true;
   });
-  return true;
 }
 
 export async function setInvoiceStatus(
