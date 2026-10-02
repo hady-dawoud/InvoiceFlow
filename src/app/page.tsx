@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
 
 const FEATURES = [
   {
@@ -78,7 +79,7 @@ export default function LandingPage() {
           </Link>
         </div>
         <p className="mt-3 text-xs text-slate-400">
-          No credit card required · 3 free invoices every month
+          No credit card required · {FREE_MONTHLY_LIMIT} free invoices every month
         </p>
 
         {/* Mock invoice preview */}

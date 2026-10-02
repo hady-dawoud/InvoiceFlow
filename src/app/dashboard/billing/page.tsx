@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import {
   openCustomerPortalAction,
   upgradeToProAction,
@@ -14,12 +14,20 @@ const BANNER: Record<string, { text: string; className: string }> = {
     text: "Welcome to Pro! Your subscription is active — enjoy unlimited invoices.",
     className: "border-emerald-200 bg-emerald-50 text-emerald-800",
   },
+  pending: {
+    text: "Checkout received. Activation is pending payment confirmation. Refresh this page to check your plan.",
+    className: "border-amber-200 bg-amber-50 text-amber-800",
+  },
+  "existing-subscription": {
+    text: "You already have a subscription. Manage it using the customer portal.",
+    className: "border-amber-200 bg-amber-50 text-amber-800",
+  },
   canceled: {
     text: "Checkout canceled — no charge was made.",
     className: "border-slate-200 bg-slate-100 text-slate-600",
   },
   "not-configured": {
-    text: "Billing is not configured on this server yet. Set STRIPE_SECRET_KEY in your environment (test keys are fine).",
+    text: "Billing is not configured on this server yet. Please try again once billing is available.",
     className: "border-amber-200 bg-amber-50 text-amber-800",
   },
   "no-subscription": {
@@ -27,7 +35,7 @@ const BANNER: Record<string, { text: string; className: string }> = {
     className: "border-amber-200 bg-amber-50 text-amber-800",
   },
   "checkout-failed": {
-    text: "Stripe did not return a checkout URL. Check your Stripe keys and price configuration.",
+    text: "Checkout could not be started. Please try again later.",
     className: "border-red-200 bg-red-50 text-red-700",
   },
 };
@@ -39,7 +47,7 @@ export default async function BillingPage({
 }) {
   const session = await getSession();
   const { success, canceled, error } = await searchParams;
-  const bannerKey = success ? "success" : canceled ? "canceled" : error;
+  const bannerKey = success ? (session.user.isPro ? "success" : "pending") : canceled ? "canceled" : error;
   const banner = bannerKey ? BANNER[bannerKey] : undefined;
 
   const configured = isBillingConfigured();
@@ -69,7 +77,8 @@ export default async function BillingPage({
                 : `${FREE_MONTHLY_LIMIT} invoices per calendar month`}
             </p>
           </div>
-          {session.user.isPro ? (
+          <div className="flex flex-wrap gap-2">
+          {session.user.stripeCustomerId && (
             <form action={openCustomerPortalAction}>
               <button
                 className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
@@ -78,26 +87,22 @@ export default async function BillingPage({
                 Manage subscription
               </button>
             </form>
-          ) : (
+          )}
+          {!session.user.isPro && (
             <form action={upgradeToProAction}>
               <button
                 className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
                 disabled={!configured}
               >
-                Upgrade to Pro — $9/mo
+                Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
               </button>
             </form>
           )}
+          </div>
         </div>
         {!configured && (
           <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
-            Billing is not configured on this machine. Add your Stripe keys to{" "}
-            <code className="rounded bg-amber-100 px-1">.env</code> (test mode works) and
-            restart the dev server. See{" "}
-            <Link href="/dashboard/billing" className="underline">
-              docs/DEPLOY.md
-            </Link>
-            .
+            Billing is not configured. Your current plan and invoices remain accessible.
           </p>
         )}
         {configured && isTestMode() && (

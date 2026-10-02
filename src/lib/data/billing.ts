@@ -1,44 +1,26 @@
-import { eq } from "drizzle-orm";
+import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import type { StripeAction } from "@/lib/stripe-events";
 
-export async function applyStripeAction(action: StripeAction): Promise<void> {
-  if (action.type === "grant_pro") {
-    await db
-      .update(user)
-      .set({
-        isPro: true,
-        stripeCustomerId: action.customerId,
-        stripeSubscriptionId: action.subscriptionId,
-        proSince: new Date(),
-        updatedAt: new Date(),
-      })
-      .where(eq(user.id, action.userId));
-    return;
-  }
+export async function getBillingAccount(customerId: string) {
+  const [account] = await db.select().from(user).where(eq(user.stripeCustomerId, customerId)).limit(1);
+  return account;
+}
 
-  if (action.type === "revoke_pro") {
-    const revoke = {
-      isPro: false,
-      stripeSubscriptionId: null,
-      updatedAt: new Date(),
-    };
-    // Prefer the subscription id; fall back to the customer when the
-    // subscription id was never stored (e.g. user row created before webhooks).
-    if (action.subscriptionId) {
-      const updated = await db
-        .update(user)
-        .set(revoke)
-        .where(eq(user.stripeSubscriptionId, action.subscriptionId))
-        .returning({ id: user.id });
-      if (updated.length > 0) return;
-    }
-    if (action.customerId) {
-      await db
-        .update(user)
-        .set(revoke)
-        .where(eq(user.stripeCustomerId, action.customerId));
-    }
-  }
+export async function applyStripeAction(action: StripeAction): Promise<void> {
+  if (action.type === "ignore") return;
+  const subscriptionMatches = or(isNull(user.stripeSubscriptionId), eq(user.stripeSubscriptionId, action.subscriptionId),
+    action.type === "grant_pro" && action.replaceSubscriptionId ? eq(user.stripeSubscriptionId, action.replaceSubscriptionId) : undefined);
+  const identity = action.type === "grant_pro" && action.userId
+    ? and(eq(user.id, action.userId), eq(user.stripeCustomerId, action.customerId))
+    : eq(user.stripeCustomerId, action.customerId);
+  const granting = action.type === "grant_pro";
+  await db.update(user).set({
+    isPro: granting,
+    stripeCustomerId: action.customerId,
+    stripeSubscriptionId: action.subscriptionId,
+    proSince: granting ? sql`CASE WHEN ${user.isPro} = 1 THEN ${user.proSince} ELSE ${Math.floor(Date.now() / 1000)} END` : user.proSince,
+    updatedAt: new Date(),
+  }).where(and(identity, subscriptionMatches));
 }

@@ -11,6 +11,8 @@ describe("decideStripeAction", () => {
       event("checkout.session.completed", {
         customer: "cus_123",
         subscription: "sub_123",
+        payment_status: "paid",
+        subscriptionStatus: "active",
         metadata: { userId: "u1" },
       }),
     );
@@ -27,6 +29,9 @@ describe("decideStripeAction", () => {
       event("checkout.session.completed", {
         customer: "cus_1",
         client_reference_id: "u2",
+        subscription: "sub_2",
+        payment_status: "no_payment_required",
+        subscriptionStatus: "trialing",
       }),
     );
     expect(action).toMatchObject({ type: "grant_pro", userId: "u2" });
@@ -56,12 +61,12 @@ describe("decideStripeAction", () => {
     }
   });
 
-  it("keeps Pro for active, trialing and past_due statuses", () => {
+  it("restores Pro for active, trialing and past_due statuses", () => {
     for (const status of ["active", "trialing", "past_due"]) {
       const action = decideStripeAction(
         event("customer.subscription.updated", { id: "sub_9", customer: "cus_9", status }),
       );
-      expect(action).toMatchObject({ type: "ignore", reason: `status ${status} keeps Pro` });
+      expect(action).toMatchObject({ type: "grant_pro", subscriptionId: "sub_9", customerId: "cus_9" });
     }
   });
 
@@ -69,4 +74,17 @@ describe("decideStripeAction", () => {
     expect(decideStripeAction(event("invoice.paid", { id: "in_1" })).type).toBe("ignore");
     expect(decideStripeAction(event("customer.created", { id: "cus_1" })).type).toBe("ignore");
   });
+});
+
+it.each(["unpaid", undefined])("does not fulfill ineligible checkout payment %s", (payment_status) => {
+  expect(decideStripeAction(event("checkout.session.completed", {
+    customer: "cus_123", subscription: "sub_123", metadata: { userId: "u1" },
+    payment_status, subscriptionStatus: "active",
+  })).type).toBe("ignore");
+});
+it("does not grant access to an incomplete paid checkout subscription", () => {
+  expect(decideStripeAction(event("checkout.session.completed", {
+    customer: "cus_123", subscription: "sub_123", metadata: { userId: "u1" },
+    payment_status: "paid", subscriptionStatus: "incomplete",
+  })).type).toBe("ignore");
 });

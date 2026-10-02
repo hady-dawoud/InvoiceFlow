@@ -1,4 +1,5 @@
 import Stripe from "stripe";
+import { PRO_PRICE_CENTS } from "./plans";
 
 let stripeClient: Stripe | null = null;
 
@@ -17,8 +18,6 @@ export function isBillingConfigured(): boolean {
 export function isTestMode(): boolean {
   return (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_test_");
 }
-
-export const PRO_PRICE_CENTS = 900;
 
 /** Stripe Price ID from the dashboard, or an inline $9/mo price is created. */
 export function proLineItem(): Stripe.Checkout.SessionCreateParams.LineItem {

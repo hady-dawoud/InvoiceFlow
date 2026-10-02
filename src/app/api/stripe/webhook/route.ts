@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import { revalidatePath } from "next/cache";
 import { applyStripeAction } from "@/lib/data/billing";
-import { decideStripeAction } from "@/lib/stripe-events";
+import { resolveStripeAction } from "@/lib/stripe-webhook";
 import { getStripe } from "@/lib/stripe";
 
 export const runtime = "nodejs";
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "invalid signature" }, { status: 400 });
   }
 
-  const action = decideStripeAction({
+  const action = await resolveStripeAction(stripe, {
     type: event.type,
     data: { object: event.data.object as unknown as Record<string, unknown> },
   });

@@ -1,3 +1,4 @@
+import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
@@ -7,17 +8,17 @@ import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
 export const metadata = {
   title: "Pricing — simple plans for freelancers",
   description:
-    "Start free with 3 invoices a month. Upgrade to Pro for $9/month for unlimited invoices, PDF export and payment tracking.",
+    `Start free with ${FREE_MONTHLY_LIMIT} invoices a month. Upgrade to Pro for ${PRO_MONTHLY_PRICE_LABEL}/month for unlimited invoices, PDF export and payment tracking.`,
 };
 
 const FAQ = [
   {
     q: "Is the free plan really free?",
-    a: "Yes — no card required. You can create up to 3 invoices every calendar month, forever.",
+    a: `Yes — no card required. You can create up to ${FREE_MONTHLY_LIMIT} invoices every calendar month.`,
   },
   {
     q: "What counts as an invoice?",
-    a: "Any invoice you save, draft or sent. Deleting one frees up your monthly quota again.",
+    a: "Any invoice you save, draft or sent. Deleting an invoice does not restore monthly quota.",
   },
   {
     q: "Can I cancel Pro anytime?",
@@ -84,7 +85,7 @@ export default async function PricingPage() {
           </span>
           <h2 className="text-lg font-semibold text-slate-900">Pro</h2>
           <p className="mt-2 text-3xl font-bold text-slate-900">
-            $9<span className="text-base font-normal text-slate-500">/mo</span>
+            {PRO_MONTHLY_PRICE_LABEL}<span className="text-base font-normal text-slate-500">/mo</span>
           </p>
           <ul className="mt-4 space-y-2 text-sm text-slate-600">
             <li>✓ Unlimited invoices</li>
