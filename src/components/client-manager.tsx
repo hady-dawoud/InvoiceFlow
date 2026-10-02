@@ -1,28 +1,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useState } from "react";
+import { useRequest } from "@/lib/use-request";
 import {
   createClientAction,
   deleteClientAction,
   updateClientAction,
 } from "@/lib/actions/clients";
+import { ClientForm, type FormState } from "./client-form";
 import type { ClientWithStats } from "@/lib/data/clients";
-
-type FormState = {
-  id: string | null; // null = creating
-  name: string;
-  email: string;
-  address: string;
-};
 
 const EMPTY: FormState = { id: null, name: "", email: "", address: "" };
 
 export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
   const router = useRouter();
   const [form, setForm] = useState<FormState | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const { run, pending, error, setError } = useRequest();
 
   function openCreate() {
     setError(null);
@@ -46,7 +40,7 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
     formData.set("name", form.name);
     formData.set("email", form.email);
     formData.set("address", form.address);
-    startTransition(async () => {
+    void run(async () => {
       const result = form.id
         ? await updateClientAction(form.id, formData)
         : await createClientAction(formData);
@@ -62,7 +56,7 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
   function remove(client: ClientWithStats) {
     if (!window.confirm(`Delete client "${client.name}"?`)) return;
     setError(null);
-    startTransition(async () => {
+    void run(async () => {
       const result = await deleteClientAction(client.id);
       if (!result.ok) setError(result.error);
       else router.refresh();
@@ -75,6 +69,7 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
         <h1 className="text-xl font-bold text-slate-900">Clients</h1>
         {!form && (
           <button
+            disabled={pending}
             onClick={openCreate}
             className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
           >
@@ -84,49 +79,11 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
       </div>
 
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
       )}
 
       {form && (
-        <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-          <div className="grid gap-3 sm:grid-cols-3">
-            <input
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="Client name *"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
-              autoFocus
-            />
-            <input
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="Billing email"
-              type="email"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
-            />
-            <input
-              value={form.address}
-              onChange={(e) => setForm({ ...form, address: e.target.value })}
-              placeholder="Address"
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
-            />
-          </div>
-          <div className="mt-3 flex gap-2">
-            <button
-              onClick={save}
-              disabled={pending || form.name.trim().length === 0}
-              className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
-            >
-              {pending ? "Saving…" : form.id ? "Save changes" : "Add client"}
-            </button>
-            <button
-              onClick={() => setForm(null)}
-              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+        <ClientForm form={form} setForm={setForm} pending={pending} save={save} cancel={() => setForm(null)} />
       )}
 
       {clients.length === 0 && !form ? (
@@ -158,12 +115,14 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
                     <td className="px-4 py-2.5 text-slate-600">{client.invoiceCount}</td>
                     <td className="px-4 py-2.5 text-right">
                       <button
+                        disabled={pending}
                         onClick={() => openEdit(client)}
                         className="rounded px-2 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100"
                       >
                         Edit
                       </button>
                       <button
+                        disabled={pending}
                         onClick={() => remove(client)}
                         className="rounded px-2 py-1 text-sm font-medium text-red-600 hover:bg-red-50"
                       >

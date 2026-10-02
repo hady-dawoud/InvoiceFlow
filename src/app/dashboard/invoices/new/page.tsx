@@ -1,9 +1,10 @@
+import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { InvoiceEditor } from "@/components/invoice-editor";
 import { listClientOptions } from "@/lib/data/clients";
 import { countInvoicesThisMonth } from "@/lib/data/invoices";
 import { addDaysIso, todayIso } from "@/lib/invoice";
-import { getQuotaState } from "@/lib/quota";
+import { FREE_MONTHLY_LIMIT, getQuotaState } from "@/lib/quota";
 import { getSession } from "@/lib/session";
 
 export const metadata = { title: "New invoice" };
@@ -45,14 +46,14 @@ export default async function NewInvoicePage() {
         <div className="mx-auto max-w-md rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
           <h2 className="text-lg font-semibold text-amber-900">Free plan limit reached</h2>
           <p className="mt-2 text-sm text-amber-800">
-            You&apos;ve used all 3 free invoices this month. Upgrade to Pro for
+            You&apos;ve used all {FREE_MONTHLY_LIMIT} free invoices this month. Upgrade to Pro for
             unlimited invoices.
           </p>
           <Link
             href="/pricing"
             className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
           >
-            Upgrade to Pro — $9/mo
+            Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
           </Link>
         </div>
       ) : (

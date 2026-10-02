@@ -3,21 +3,20 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRequest } from "@/lib/use-request";
 import { signIn } from "@/lib/auth-client";
 
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [pending, setPending] = useState(false);
+  const { run, pending, error, setError } = useRequest();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    setPending(true);
-    const { error } = await signIn.email({ email, password });
-    setPending(false);
+    const result = await run(() => signIn.email({ email, password }));
+    if (!result) return;
+    const { error } = result;
     if (error) {
       setError(error.message ?? "Invalid email or password.");
       return;
@@ -62,7 +61,7 @@ export default function LoginPage() {
           />
         </div>
         {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+          <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
         )}
         <button
           type="submit"

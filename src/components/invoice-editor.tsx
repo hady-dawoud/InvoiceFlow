@@ -1,5 +1,6 @@
 "use client";
 
+import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -7,9 +8,11 @@ import {
   createInvoiceAction,
   updateInvoiceAction,
 } from "@/lib/actions/invoices";
-import { calcTotals, formatCents, parseAmountToCents } from "@/lib/money";
-
-export type EditorItem = { description: string; quantity: string; price: string };
+import { calcTotals, formatCents, parseAmountToCents, type Totals } from "@/lib/money";
+import { parseInvoiceInput, parseItems } from "@/lib/invoice-validation";
+import { useRequest } from "@/lib/use-request";
+import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
+import { InvoiceItemsEditor, EMPTY_ITEM, type EditorItem } from "./invoice-items-editor";
 
 export type EditorInitial = {
   clientId: string;
@@ -20,8 +23,6 @@ export type EditorInitial = {
   status: "draft" | "sent" | "paid";
   items: EditorItem[];
 };
-
-const EMPTY_ITEM: EditorItem = { description: "", quantity: "1", price: "" };
 
 export function InvoiceEditor({
   clients,
@@ -44,32 +45,20 @@ export function InvoiceEditor({
   const [items, setItems] = useState<EditorItem[]>(
     initial.items.length > 0 ? initial.items : [EMPTY_ITEM],
   );
-  const [error, setError] = useState<string | null>(null);
+  const { run, pending: requestPending, error, setError } = useRequest();
   const [quotaBlocked, setQuotaBlocked] = useState(false);
-  const [pending, setPending] = useState<"draft" | "sent" | null>(null);
-
-  const parsed = items.map((item) => ({
-    description: item.description,
-    quantity: Number.parseInt(item.quantity, 10),
-    unitPriceCents: parseAmountToCents(item.price),
-  }));
-  const validItems = parsed.filter(
-    (item) =>
-      item.description.trim().length > 0 &&
-      Number.isInteger(item.quantity) &&
-      item.quantity > 0 &&
-      item.unitPriceCents !== null,
-  ) as { description: string; quantity: number; unitPriceCents: number }[];
-  const totals = calcTotals(validItems, Math.round(Number(taxRate || 0) * 100));
-
-  function setItem(index: number, patch: Partial<EditorItem>) {
-    setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)));
+  const [savingStatus, setSavingStatus] = useState<"draft" | "sent" | null>(null);
+  const pending = requestPending ? savingStatus : null;
+  const previewItems = parseItems(JSON.stringify(items));
+  const taxBps = parseAmountToCents(taxRate || "0");
+  let totals: Totals | null = null;
+  if (previewItems && taxBps !== null) {
+    try { totals = calcTotals(previewItems, taxBps); }
+    catch (error) { if (!(error instanceof RangeError)) throw error; }
   }
-
   async function handleSubmit(status: "draft" | "sent") {
     setError(null);
-    setPending(status);
-
+    setSavingStatus(status);
     const formData = new FormData();
     formData.set("clientId", clientId);
     formData.set("status", initial.status === "paid" ? "paid" : status);
@@ -78,12 +67,12 @@ export function InvoiceEditor({
     formData.set("taxRate", taxRate);
     formData.set("notes", notes);
     formData.set("itemsJson", JSON.stringify(items));
-
-    const result = invoiceId
-      ? await updateInvoiceAction(invoiceId, formData)
-      : await createInvoiceAction(formData);
-
-    setPending(null);
+    const input = parseInvoiceInput(formData);
+    if (typeof input === "string") { setError(input); return; }
+    const result = await run(() => invoiceId
+      ? updateInvoiceAction(invoiceId, formData)
+      : createInvoiceAction(formData));
+    if (!result) return;
     if (result.ok) {
       router.push(`/dashboard/invoices/${result.id}`);
       router.refresh();
@@ -95,31 +84,30 @@ export function InvoiceEditor({
     }
     setError(result.error);
   }
-
   if (quotaBlocked) {
     return (
       <div className="mx-auto max-w-md rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
         <h2 className="text-lg font-semibold text-amber-900">Free plan limit reached</h2>
         <p className="mt-2 text-sm text-amber-800">
-          You&apos;ve used all 3 free invoices this month. Upgrade to Pro for
+          You&apos;ve used all {FREE_MONTHLY_LIMIT} free invoices this month. Upgrade to Pro for
           unlimited invoices, PDF export and payment tracking.
         </p>
         <Link
           href="/pricing"
           className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
         >
-          Upgrade to Pro — $9/mo
+          Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
         </Link>
       </div>
     );
   }
-
   return (
     <form
       onSubmit={(e) => e.preventDefault()}
       className="space-y-6"
       data-testid="invoice-editor"
     >
+      <fieldset disabled={requestPending} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
         <Field label="Client">
           <select
@@ -157,75 +145,7 @@ export function InvoiceEditor({
           />
         </Field>
       </div>
-
-      <div className="rounded-xl border border-slate-200 bg-white">
-        <table className="w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-            <tr>
-              <th className="px-3 py-2 font-medium">Description</th>
-              <th className="w-20 px-3 py-2 font-medium">Qty</th>
-              <th className="w-32 px-3 py-2 font-medium">Price</th>
-              <th className="w-10" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {items.map((item, index) => (
-              <tr key={index}>
-                <td className="px-3 py-2">
-                  <input
-                    value={item.description}
-                    onChange={(e) => setItem(index, { description: e.target.value })}
-                    placeholder="Design work, consulting…"
-                    className="w-full rounded-md border border-slate-200 px-2 py-1.5 focus:border-emerald-500 focus:outline-none"
-                  />
-                </td>
-                <td className="px-3 py-2">
-                  <input
-                    type="number"
-                    min={1}
-                    value={item.quantity}
-                    onChange={(e) => setItem(index, { quantity: e.target.value })}
-                    className="w-full rounded-md border border-slate-200 px-2 py-1.5 focus:border-emerald-500 focus:outline-none"
-                  />
-                </td>
-                <td className="px-3 py-2">
-                  <input
-                    value={item.price}
-                    onChange={(e) => setItem(index, { price: e.target.value })}
-                    placeholder="0.00"
-                    inputMode="decimal"
-                    className="w-full rounded-md border border-slate-200 px-2 py-1.5 focus:border-emerald-500 focus:outline-none"
-                  />
-                </td>
-                <td className="px-2 py-2 text-center">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setItems((prev) =>
-                        prev.length > 1 ? prev.filter((_, i) => i !== index) : [EMPTY_ITEM],
-                      )
-                    }
-                    className="text-slate-400 hover:text-red-600"
-                    aria-label="Remove line"
-                  >
-                    ✕
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        <div className="border-t border-slate-100 px-3 py-2">
-          <button
-            type="button"
-            onClick={() => setItems((prev) => [...prev, EMPTY_ITEM])}
-            className="text-sm font-medium text-emerald-600 hover:underline"
-          >
-            + Add line item
-          </button>
-        </div>
-      </div>
-
+      <InvoiceItemsEditor items={items} setItems={setItems} />
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-4">
           <Field label="Tax rate % (optional)">
@@ -248,22 +168,20 @@ export function InvoiceEditor({
           </Field>
         </div>
         <div className="ml-auto w-full max-w-xs space-y-1.5 self-start rounded-xl border border-slate-200 bg-white p-4 text-sm">
-          <Row label="Subtotal" value={formatCents(totals.subtotalCents, currency)} />
-          <Row label="Tax" value={formatCents(totals.taxCents, currency)} />
+          <Row label="Subtotal" value={totals ? formatCents(totals.subtotalCents, currency) : "—"} />
+          <Row label="Tax" value={totals ? formatCents(totals.taxCents, currency) : "—"} />
           <div className="border-t border-slate-100 pt-1.5">
-            <Row label="Total" value={formatCents(totals.totalCents, currency)} strong />
+            <Row label="Total" value={totals ? formatCents(totals.totalCents, currency) : "—"} strong />
           </div>
         </div>
       </div>
-
       {error && (
-        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
+        <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>
       )}
-
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          disabled={pending !== null}
+          disabled={requestPending}
           onClick={() => handleSubmit("sent")}
           className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
         >
@@ -271,7 +189,7 @@ export function InvoiceEditor({
         </button>
         <button
           type="button"
-          disabled={pending !== null}
+          disabled={requestPending}
           onClick={() => handleSubmit("draft")}
           className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
         >
@@ -281,16 +199,17 @@ export function InvoiceEditor({
           Cancel
         </Link>
       </div>
+      </fieldset>
     </form>
   );
 }
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div>
-      <label className="block text-sm font-medium text-slate-700">{label}</label>
-      <div className="mt-1">{children}</div>
-    </div>
+    <label className="block">
+      <span className="block text-sm font-medium text-slate-700">{label}</span>
+      <span className="mt-1 block">{children}</span>
+    </label>
   );
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useRequest } from "@/lib/use-request";
 import {
   deleteInvoiceAction,
   setInvoiceStatusAction,
@@ -22,12 +22,11 @@ export function InvoiceActions({
   status: "draft" | "sent" | "paid";
 }) {
   const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-  const [pending, startTransition] = useTransition();
+  const { run, pending, error, setError } = useRequest();
 
   function transition(next: "draft" | "sent" | "paid") {
     setError(null);
-    startTransition(async () => {
+    void run(async () => {
       const result = await setInvoiceStatusAction(invoiceId, next);
       if (!result.ok) setError(result.error);
       else router.refresh();
@@ -37,7 +36,7 @@ export function InvoiceActions({
   function remove() {
     if (!window.confirm("Delete this invoice? This cannot be undone.")) return;
     setError(null);
-    startTransition(async () => {
+    void run(async () => {
       const result = await deleteInvoiceAction(invoiceId);
       if (!result.ok) setError(result.error);
       else {
@@ -70,7 +69,7 @@ export function InvoiceActions({
       >
         Delete
       </button>
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
     </div>
   );
 }
