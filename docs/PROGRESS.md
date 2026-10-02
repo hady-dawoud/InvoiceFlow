@@ -60,7 +60,8 @@
   `quota.ts` (`FREE_MONTHLY_LIMIT = 3`, calendar-month window).
 - Data layer: invoice summaries (grouped item-sum aggregation merged in TS),
   client stats, transactional invoice create/update (items replaced atomically),
-  per-user invoice numbering from max existing sequence (delete-safe).
+  per-user invoice numbering from max existing sequence (replaced by durable
+  counters in the review below).
 - Server actions for clients/invoices/billing with validation + ownership
   checks on every mutation (server actions are reachable over HTTP, so runtime
   values are re-validated).
@@ -155,3 +156,25 @@
 - Final verification: `tsc --noEmit` clean, 30/30 unit tests, 9/9 E2E steps.
 - Docs finalized (README, GROWTH, DECISIONS, DEPLOY, this log).
 - Tagged `v0.1.0`.
+
+## Review corrections (2026-10-02)
+
+- Enforced invoice and client ownership in write transactions and joined reads.
+- Shared strict validation across editor and server actions; rejected impossible
+  dates, fractional/malformed quantities, and overflowing monetary totals.
+- Preserved exact cents through invoice editing and dashboard aggregation.
+- Added additive monthly usage and yearly sequence counters, atomic quota/number
+  allocation, bounded lock retries, and rollback/deletion/upgrade regressions.
+- Reconciled billing against retrieved Stripe state, gated unpaid checkout,
+  restored recovered subscriptions, and protected replacement subscriptions
+  from old events. Preserved activation dates on repeated entitlement delivery.
+- Repaired PDF pagination, column layout, long content, footer placement, and
+  stream error handling; extracted rendering from the route.
+- Added form labels, visible request errors, pending cleanup, and truthful
+  clipboard feedback; extracted focused invoice-item and client-form sections.
+- Removed unused Google Font loading and scaffold assets, selected standard
+  production builds, and documented authentication-secret requirements.
+- Loaded environment files before standalone upgrade and seed connections;
+  verified configured database targets and explicit shell overrides.
+- Added isolated browser testing and rendered PDF review. See TESTING.md for
+  repeatable verification commands. Stripe account setup remains outside scope.

@@ -1,25 +1,19 @@
-/**
- * E2E smoke test — walks the whole InvoiceFlow funnel in a real browser.
- *
- *   BASE_URL=http://localhost:3001 node tests/e2e-smoke.mjs
- *
- * Requires a dev/prod server with a freshly-pushed DB (or any state where the
- * demo account exists and signup is open). Creates one throwaway free-plan
- * user per run (email contains a timestamp), exercises the free-tier wall,
- * then verifies the Pro demo account can export a PDF and share a public link.
- *
- * Screenshots are written to gui-test-screenshots/ as evidence.
- */
+// Exercises an isolated production server and disposable database.
 import { chromium } from "playwright";
 import { mkdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 
-const BASE_URL = process.env.BASE_URL ?? "http://localhost:3001";
+import { startLocalServer } from "./local-server.mjs";
+import assert from "node:assert/strict";
+
+const local = await startLocalServer();
+const BASE_URL = local.url;
 const SHOTS = "gui-test-screenshots";
 mkdirSync(SHOTS, { recursive: true });
 
 const results = [];
 const consoleErrors = [];
+const pageErrors = [];
 
 function record(step, ok, detail = "") {
   results.push({ step, ok, detail });
@@ -27,7 +21,7 @@ function record(step, ok, detail = "") {
 }
 
 async function expectTrue(condition, message) {
-  if (!condition) throw new Error(message);
+  assert.ok(condition, message);
 }
 
 const run = async () => {
@@ -36,22 +30,15 @@ const run = async () => {
     viewport: { width: 1280, height: 900 },
     permissions: ["clipboard-read", "clipboard-write"],
   });
+  try {
   const page = await context.newPage();
-  page.setDefaultTimeout(60000);
-  page.on("pageerror", (err) => consoleErrors.push("pageerror: " + err.message));
+  page.setDefaultTimeout(20000);
+  page.on("pageerror", (error) => pageErrors.push(error.message));
   page.on("console", (msg) => {
     if (msg.type() === "error") consoleErrors.push("console: " + msg.text().slice(0, 200));
   });
 
   const shot = (name) => page.screenshot({ path: join(SHOTS, name), fullPage: false });
-
-  /**
-   * Dev-mode Turbopack hydrates client components lazily (per-page on-demand
-   * compilation), so clicks right after navigation can land on a not-yet-
-   * interactive page. Production builds hydrate instantly; this wait is a
-   * dev-server accommodation, not a product dependency.
-   */
-  const settle = () => page.waitForTimeout(5000);
 
   // T1 — landing page
   await page.goto(BASE_URL + "/", { waitUntil: "domcontentloaded" });
@@ -66,14 +53,17 @@ const run = async () => {
   const email = `e2e+${Date.now()}@example.com`;
   await page.getByRole("link", { name: "Start free" }).first().click();
   await page.waitForURL("**/signup");
-  await settle();
   await page.getByLabel("Your name").fill("E2E Tester");
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill("supersecret9");
   await shot("t2_signup_filled.png");
+  await page.route("**/api/auth/sign-up/email", (route) => route.abort());
+  await page.getByRole("button", { name: "Create free account" }).click();
+  await page.getByRole("alert").filter({ hasText: "Request failed. Please try again." }).waitFor({ state: "visible" });
+  await page.waitForFunction(() => !document.querySelector('button[type="submit"]').disabled);
+  await page.unroute("**/api/auth/sign-up/email");
   await page.getByRole("button", { name: "Create free account" }).click();
   await page.waitForURL("**/dashboard");
-  await settle();
   await expectTrue(
     await page.getByText("Free", { exact: true }).first().isVisible(),
     "Free plan badge missing on dashboard",
@@ -88,11 +78,15 @@ const run = async () => {
   // T3 — create client
   await page.getByRole("link", { name: "Clients" }).click();
   await page.waitForURL("**/dashboard/clients");
-  await settle();
   await page.getByRole("button", { name: "New client" }).click();
-  await page.getByPlaceholder("Client name *").fill("Test Client Co");
-  await page.getByPlaceholder("Billing email").fill("billing@testclient.co");
+  await page.getByLabel("Client name").fill("Test Client Co");
+  await page.getByLabel("Billing email").fill("billing@testclient.co");
   await shot("t3_client_form.png");
+  await page.route("**/dashboard/clients", (route) => route.request().method() === "POST" ? route.abort() : route.continue());
+  await page.getByRole("button", { name: "Add client" }).click();
+  await page.getByRole("alert").filter({ hasText: "Request failed. Please try again." }).waitFor({ state: "visible" });
+  await page.getByRole("button", { name: "Add client" }).waitFor({ state: "visible" });
+  await page.unroute("**/dashboard/clients");
   await page.getByRole("button", { name: "Add client" }).click();
   const clientRow = page.getByRole("cell", { name: /Test Client Co/ });
   try {
@@ -110,9 +104,8 @@ const run = async () => {
   // T4 — create invoice (sent)
   async function createInvoice(description, price, shotName) {
     await page.goto(BASE_URL + "/dashboard/invoices/new", { waitUntil: "domcontentloaded" });
-    await settle();
-    await page.getByPlaceholder("Design work, consulting…").fill(description);
-    await page.getByPlaceholder("0.00").fill(price);
+      await page.getByPlaceholder("Design work, consulting…").fill(description);
+    await page.getByLabel("Price, line 1").fill(price);
     await shot(shotName + "_form.png");
     await page.getByRole("button", { name: "Save & mark as sent" }).click();
     // id is a UUID; exclude the literal /new and /edit segments
@@ -125,6 +118,10 @@ const run = async () => {
   }
   await createInvoice("Website design sprint", "1500", "t4_invoice1");
   record("T4 invoice #1 created and marked sent", true);
+  const firstInvoiceUrl = page.url();
+  const firstInvoiceId = firstInvoiceUrl.split("/").at(-1);
+  const deniedPdf = await context.request.get(`${BASE_URL}/api/invoices/${firstInvoiceId}/pdf`);
+  assert.equal(deniedPdf.status(), 402, "Free account must not download a PDF");
 
   // T5 — fill the free quota, then hit the wall
   await createInvoice("Consulting day", "800", "t5_invoice2");
@@ -144,11 +141,17 @@ const run = async () => {
   );
   await shot("t5_free_wall.png");
   record("T5 free-tier wall blocks invoice #4", true);
+  await page.goto(firstInvoiceUrl);
+  page.once("dialog", (dialog) => dialog.accept());
+  await page.getByRole("button", { name: "Delete", exact: true }).click();
+  await page.waitForURL("**/dashboard/invoices");
+  await page.goto(`${BASE_URL}/dashboard/invoices/new`);
+  await page.getByText("Free plan limit reached", { exact: true }).waitFor({ state: "visible" });
+  record("T5b deletion preserves the quota wall", true);
 
   // T6 — billing page degrades gracefully without Stripe keys
   await page.getByRole("link", { name: "Billing" }).click();
   await page.waitForURL("**/dashboard/billing");
-  await settle();
   const billingBody = await page.locator("main").innerText();
   await expectTrue(
     /Billing is not configured/i.test(billingBody) || /Upgrade to Pro/i.test(billingBody),
@@ -164,7 +167,6 @@ const run = async () => {
   // T7 — switch to the Pro demo account
   await page.getByRole("button", { name: "Sign out" }).click();
   await page.waitForURL("**/login");
-  await settle();
   await page.getByLabel("Email").fill("demo@invoiceflow.dev");
   await page.getByLabel("Password").fill("demo12345");
   await page.getByRole("button", { name: "Sign in" }).click();
@@ -179,9 +181,8 @@ const run = async () => {
   // T8 — PDF export on an invoice
   await page.getByRole("link", { name: "Invoices" }).click();
   await page.waitForURL("**/dashboard/invoices");
-  await page.getByRole("link", { name: /INV-2026-\d+/ }).first().click();
+  await page.getByRole("link", { name: /INV-\d{4}-\d+/ }).first().click();
   await page.waitForURL(/\/dashboard\/invoices\/(?!new$|edit$)[a-zA-Z0-9-]+$/, { timeout: 30000 });
-  await settle();
   const pdfLink = page.getByRole("link", { name: "Download PDF" });
   await expectTrue(await pdfLink.isVisible(), "Download PDF link missing for Pro user");
   const [download] = await Promise.all([page.waitForEvent("download"), pdfLink.click()]);
@@ -205,19 +206,30 @@ const run = async () => {
   );
   await publicPage.screenshot({ path: join(SHOTS, "t9_public_invoice.png") });
   record("T9 public invoice link renders", true, publicUrl);
+  await page.evaluate(() => {
+    navigator.clipboard.writeText = async () => { throw new DOMException("Clipboard denied", "NotAllowedError"); };
+    document.execCommand = () => false;
+  });
+  await page.getByRole("button", { name: "Copy client link" }).click();
+  await page.getByRole("alert").filter({ hasText: "Could not copy" }).waitFor({ state: "visible" });
+  assert.equal(await page.getByLabel("Client link").inputValue(), publicUrl);
+  assert.equal(await page.getByText("Link copied ✓").isVisible(), false);
+  record("T9b clipboard failure offers the link without claiming success", true);
+  assert.deepEqual(pageErrors, [], "Unhandled browser exceptions");
 
-  await browser.close();
+  } finally { await browser.close(); }
 
   const failed = results.filter((r) => !r.ok);
   console.log(`\n${results.length - failed.length}/${results.length} steps passed`);
-  if (consoleErrors.length) {
+  const unexpectedErrors = consoleErrors.filter((error) => !error.includes("net::ERR_FAILED"));
+  if (unexpectedErrors.length) {
     console.log("\nConsole errors observed:");
-    for (const e of consoleErrors) console.log("  " + e);
+    for (const e of unexpectedErrors) console.log("  " + e);
   }
-  if (failed.length) process.exit(1);
+  assert.equal(failed.length, 0);
+  assert.deepEqual(unexpectedErrors, [], "Unexpected console errors");
 };
 
-run().catch((err) => {
-  console.error("E2E SMOKE FAILED:", err.message);
-  process.exit(1);
-});
+try { await run(); }
+catch (error) { console.error("E2E SMOKE FAILED:", error.message); process.exitCode = 1; }
+finally { await local.stop(); }

@@ -80,7 +80,7 @@ async function main() {
     { status: "paid", issueOffset: -20, dueOffset: -5, client: 1, items: [{ description: "Blog articles (batch)", quantity: 4, unitPriceCents: 25000 }] },
     { status: "sent", issueOffset: -6, dueOffset: 8, client: 2, items: [{ description: "Brand identity refresh", quantity: 1, unitPriceCents: 180000 }, { description: "Logo usage guide", quantity: 1, unitPriceCents: 30000 }] },
     { status: "sent", issueOffset: -30, dueOffset: -10, client: 1, items: [{ description: "Newsletter template", quantity: 1, unitPriceCents: 45000 }] },
-    { status: "draft", issueOffset: 0, dueOffset: 14, client: 0, items: [{ description: "Maintenance retainer — October", quantity: 1, unitPriceCents: 60000 }] },
+    { status: "draft", issueOffset: 0, dueOffset: 14, client: 0, items: [{ description: "Maintenance retainer", quantity: 1, unitPriceCents: 60000 }] },
   ];
 
   for (let i = 0; i < seedInvoices.length; i++) {
@@ -90,7 +90,7 @@ async function main() {
       id: invoiceId,
       userId: demoUser.id,
       clientId: seedClients[seed.client]!.id,
-      number: `INV-2026-${String(i + 1).padStart(4, "0")}`,
+      number: `INV-${new Date().getFullYear()}-${String(i + 1).padStart(4, "0")}`,
       status: seed.status,
       issueDate: isoDate(seed.issueOffset),
       dueDate: isoDate(seed.dueOffset),

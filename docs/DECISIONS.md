@@ -39,7 +39,7 @@ set them.
 
 The limit must be hit *quickly* by an active freelancer (3 invoices/month is one
 week's work) but not so fast that the tool can't be evaluated. Server-enforced
-(count of invoices created this calendar month for the user). Pro unlocks unlimited
+(persistent creation count for the server-local calendar month, including deleted invoices). Pro unlocks unlimited
 invoices + PDF export. Monthly (not lifetime) reset keeps the upgrade prompt
 recurring for value-seekers without being punitive.
 
@@ -52,7 +52,7 @@ currency is a v2 candidate.
 ## D7 — Stripe test-mode-first, graceful degradation (2026-09-21)
 
 The full checkout → webhook → `is_pro` flow is implemented and demonstrable with
-Stripe test keys and `4242 4242 4242 4242 4242`. With no keys configured the app
+Stripe test keys and `4242 4242 4242 4242`. With no keys configured the app
 runs with billing disabled and shows an explicit notice — the MVP never crashes
 because billing env vars are missing. Webhook events are processed through a pure
 `decideStripeAction()` function so the state machine is unit-testable without Stripe.
@@ -69,3 +69,17 @@ MVP delivery = public read-only invoice page at `/pay/{token}` + owner marks sta
 manually (draft → sent → paid). Real email sending (Resend/SMTP) requires an API
 key, deliverability setup (SPF/DKIM), and per-mail costs — deferred to v2, noted in
 GROWTH.md so the launch checklist is honest.
+
+## D10 — Durable invoice writes and billing reconciliation (2026-10-02)
+
+Quota and yearly number allocation share the invoice write transaction. Monthly
+usage and yearly sequence counters survive deletion. The additive upgrade can
+only recover history from surviving invoices. Write retries use isolated libsql
+connections so failed native lock acquisition cannot poison the application
+connection pool.
+
+Money parsing and totals use exact integer arithmetic, with per-invoice totals
+limited to JavaScript’s safe-integer range. Tax is rounded once per invoice.
+Checkout fulfillment checks payment eligibility and current subscription state;
+subscription identity remains stored after revocation so recovery and delayed
+old events can be reconciled safely. past_due keeps access as a grace policy.
