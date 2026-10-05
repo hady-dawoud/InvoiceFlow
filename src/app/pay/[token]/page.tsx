@@ -43,8 +43,8 @@ export default async function PublicInvoicePage({
   return (
     <main className="mx-auto max-w-3xl px-4 py-10">
       <div className="mb-4 flex items-center justify-between print:hidden">
-        <Link href="/" className="text-lg font-bold tracking-tight text-slate-900">
-          Invoice<span className="text-emerald-600">Flow</span>
+        <Link href="/" className="wordmark text-2xl">
+          InvoiceFlow
         </Link>
         <PrintButton />
       </div>
@@ -58,7 +58,7 @@ export default async function PublicInvoicePage({
         currency={row.currency}
       />
 
-      <p className="mt-6 text-center text-xs text-slate-400 print:hidden">
+      <p className="mt-6 text-center text-xs text-quiet print:hidden">
         This invoice was created with{" "}
         <Link href="/" className="underline">
           InvoiceFlow

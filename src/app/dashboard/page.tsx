@@ -37,45 +37,46 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       {!quota.isPro && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-          <p className="text-sm text-amber-800">
+        <div className="notice flex flex-wrap items-center justify-between gap-3">
+          <p>
             Free plan: <strong>{quota.used} of {quota.limit}</strong> invoices used this
             month.{" "}
             {quota.blocked
               ? "You've hit the limit — upgrade to keep invoicing."
               : `${quota.remaining} left before the wall.`}
           </p>
-          <Link
-            href="/pricing"
-            className="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm font-semibold text-white hover:bg-emerald-700"
-          >
+          <Link href="/pricing" className="btn">
             Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
           </Link>
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((stat) => (
-          <div
-            key={stat.label}
-            className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm"
-          >
-            <p className="text-xs font-medium text-slate-500">{stat.label}</p>
-            <p
-              className={`mt-1 text-2xl font-bold tracking-tight ${
-                stat.danger ? "text-red-600" : "text-slate-900"
-              }`}
-            >
-              {stat.value}
-            </p>
-          </div>
-        ))}
-      </div>
+      <section aria-labelledby="unpaid-label">
+        <p id="unpaid-label" className="text-quiet">Unpaid</p>
+        <p className="display money text-5xl sm:text-6xl">
+          {formatCents(outstanding + overdue, currency)}
+        </p>
+        <p className="mt-2 text-quiet">
+          {overdue > 0
+            ? `${formatCents(overdue, currency)} is past its due date.`
+            : "Nothing is past its due date."}
+        </p>
+        <dl className="mt-6 grid grid-cols-3 gap-4 border-t border-line pt-4 text-sm">
+          {stats.filter((stat) => stat.label !== "Outstanding").map((stat) => (
+            <div key={stat.label}>
+              <dt className="text-quiet">{stat.label}</dt>
+              <dd className={`money text-lg font-medium ${stat.danger ? "text-overdue" : ""}`}>
+                {stat.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
 
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Recent invoices</h2>
-          <Link href="/dashboard/invoices" className="text-sm font-medium text-emerald-600 hover:underline">
+          <h2 className="text-lg font-medium">Recent invoices</h2>
+          <Link href="/dashboard/invoices" className="text-sm font-medium text-carbon hover:underline">
             View all
           </Link>
         </div>
@@ -85,38 +86,34 @@ export default async function DashboardPage() {
             quotaBlocked={quota.blocked}
           />
         ) : (
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-4 py-2.5 font-medium">Number</th>
-                  <th className="px-4 py-2.5 font-medium">Client</th>
-                  <th className="px-4 py-2.5 font-medium">Due</th>
-                  <th className="px-4 py-2.5 font-medium">Status</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Total</th>
+          <table className="ledger text-sm">
+            <thead>
+              <tr>
+                <th>Number</th>
+                <th>Client</th>
+                <th>Due</th>
+                <th>Status</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {recent.map((inv) => (
+                <tr key={inv.id}>
+                  <td className="font-medium">
+                    <Link href={`/dashboard/invoices/${inv.id}`} className="hover:underline">
+                      {inv.number}
+                    </Link>
+                  </td>
+                  <td>{inv.clientName}</td>
+                  <td>{inv.dueDate}</td>
+                  <td>
+                    <StatusBadge status={inv.status} dueDate={inv.dueDate} />
+                  </td>
+                  <td className="num money">{formatCents(inv.totalCents, currency)}</td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {recent.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-2.5 font-medium text-slate-900">
-                      <Link href={`/dashboard/invoices/${inv.id}`} className="hover:underline">
-                        {inv.number}
-                      </Link>
-                    </td>
-                    <td className="px-4 py-2.5 text-slate-600">{inv.clientName}</td>
-                    <td className="px-4 py-2.5 text-slate-600">{inv.dueDate}</td>
-                    <td className="px-4 py-2.5">
-                      <StatusBadge status={inv.status} dueDate={inv.dueDate} />
-                    </td>
-                    <td className="px-4 py-2.5 text-right font-medium text-slate-900">
-                      {formatCents(inv.totalCents, currency)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         )}
       </section>
     </div>
@@ -125,18 +122,18 @@ export default async function DashboardPage() {
 
 function EmptyState({ hasClients, quotaBlocked }: { hasClients: boolean; quotaBlocked: boolean }) {
   return (
-    <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-      <p className="text-slate-600">No invoices yet.</p>
+    <div className="bg-sheet px-6 py-12 text-center shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
+      <p className="text-quiet">No invoices yet.</p>
       {quotaBlocked ? (
-        <Link href="/pricing" className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+        <Link href="/pricing" className="btn mt-3">
           Upgrade to create invoices
         </Link>
       ) : hasClients ? (
-        <Link href="/dashboard/invoices/new" className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+        <Link href="/dashboard/invoices/new" className="btn mt-3">
           Create your first invoice
         </Link>
       ) : (
-        <Link href="/dashboard/clients" className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+        <Link href="/dashboard/clients" className="btn mt-3">
           Add a client first
         </Link>
       )}

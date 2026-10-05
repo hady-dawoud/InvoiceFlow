@@ -26,7 +26,7 @@ export default async function InvoiceDetailPage({
       <div className="flex flex-wrap items-center gap-2 print:hidden">
         <Link
           href="/dashboard/invoices"
-          className="text-sm text-slate-500 hover:text-slate-900"
+          className="text-sm text-quiet hover:text-ink"
         >
           ← Invoices
         </Link>
@@ -36,14 +36,14 @@ export default async function InvoiceDetailPage({
           {session.user.isPro ? (
             <a
               href={`/api/invoices/${invoice.id}/pdf`}
-              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+              className="btn btn-ghost"
             >
               Download PDF
             </a>
           ) : (
             <Link
               href="/pricing"
-              className="rounded-lg border border-dashed border-emerald-300 bg-emerald-50 px-3 py-1.5 text-sm font-medium text-emerald-700 hover:bg-emerald-100"
+              className="rounded-lg border border-dashed border-carbon bg-sheet px-3 py-1.5 text-sm font-medium text-carbon hover:bg-ink/8"
               title="PDF export is a Pro feature"
             >
               PDF (Pro)
@@ -51,7 +51,7 @@ export default async function InvoiceDetailPage({
           )}
           <Link
             href={`/dashboard/invoices/${invoice.id}/edit`}
-            className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+            className="btn btn-ghost"
           >
             Edit
           </Link>

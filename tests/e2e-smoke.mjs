@@ -43,7 +43,7 @@ const run = async () => {
   // T1 — landing page
   await page.goto(BASE_URL + "/", { waitUntil: "domcontentloaded" });
   await expectTrue(
-    await page.getByRole("heading", { name: /Professional invoices in/i }).isVisible(),
+    await page.getByRole("heading", { name: /Send the invoice before lunch/i }).isVisible(),
     "hero heading missing",
   );
   await shot("t1_landing.png");

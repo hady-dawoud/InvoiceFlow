@@ -12,31 +12,31 @@ export const metadata = { title: "Billing" };
 const BANNER: Record<string, { text: string; className: string }> = {
   success: {
     text: "Welcome to Pro! Your subscription is active — enjoy unlimited invoices.",
-    className: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    className: "text-paid",
   },
   pending: {
     text: "Checkout received. Activation is pending payment confirmation. Refresh this page to check your plan.",
-    className: "border-amber-200 bg-amber-50 text-amber-800",
+    className: "text-ink",
   },
   "existing-subscription": {
     text: "You already have a subscription. Manage it using the customer portal.",
-    className: "border-amber-200 bg-amber-50 text-amber-800",
+    className: "text-ink",
   },
   canceled: {
     text: "Checkout canceled — no charge was made.",
-    className: "border-slate-200 bg-slate-100 text-slate-600",
+    className: "border-line bg-ink/8 text-quiet",
   },
   "not-configured": {
     text: "Billing is not configured on this server yet. Please try again once billing is available.",
-    className: "border-amber-200 bg-amber-50 text-amber-800",
+    className: "text-ink",
   },
   "no-subscription": {
     text: "You don't have an active subscription yet, so there's nothing to manage.",
-    className: "border-amber-200 bg-amber-50 text-amber-800",
+    className: "text-ink",
   },
   "checkout-failed": {
     text: "Checkout could not be started. Please try again later.",
-    className: "border-red-200 bg-red-50 text-red-700",
+    className: "text-overdue",
   },
 };
 
@@ -54,24 +54,22 @@ export default async function BillingPage({
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-xl font-bold text-slate-900">Billing</h1>
+      <h1 className="display text-3xl text-ink">Billing</h1>
 
       {banner && (
-        <p className={`rounded-xl border px-4 py-3 text-sm ${banner.className}`}>
+        <p className={`notice text-sm ${banner.className}`}>
           {banner.text}
         </p>
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-              Current plan
-            </p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
+            <p className="text-quiet">Current plan</p>
+            <p className="display mt-1 text-4xl text-ink">
               {session.user.isPro ? "Pro" : "Free"}
             </p>
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-quiet">
               {session.user.isPro
                 ? `Unlimited invoices${session.user.proSince ? ` · since ${session.user.proSince.toISOString().slice(0, 10)}` : ""}`
                 : `${FREE_MONTHLY_LIMIT} invoices per calendar month`}
@@ -81,7 +79,7 @@ export default async function BillingPage({
           {session.user.stripeCustomerId && (
             <form action={openCustomerPortalAction}>
               <button
-                className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="btn btn-ghost"
                 disabled={!configured}
               >
                 Manage subscription
@@ -91,7 +89,7 @@ export default async function BillingPage({
           {!session.user.isPro && (
             <form action={upgradeToProAction}>
               <button
-                className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+                className="btn"
                 disabled={!configured}
               >
                 Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
@@ -101,26 +99,26 @@ export default async function BillingPage({
           </div>
         </div>
         {!configured && (
-          <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          <p className="notice mt-4 text-sm">
             Billing is not configured. Your current plan and invoices remain accessible.
           </p>
         )}
         {configured && isTestMode() && (
-          <p className="mt-4 rounded-lg bg-blue-50 px-3 py-2 text-sm text-blue-700">
+          <p className="notice mt-4 text-sm">
             Stripe <strong>test mode</strong> is active — use card 4242 4242 4242 4242,
             any future expiry, any CVC. No real charges.
           </p>
         )}
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
-        <h2 className="font-semibold text-slate-900">What you get with Pro</h2>
+      <div className="bg-sheet p-6 text-sm text-quiet shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
+        <h2 className="font-semibold text-ink">What you get with Pro</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
           <li>Unlimited invoices (free plan: {FREE_MONTHLY_LIMIT}/month)</li>
           <li>PDF export for sending to clients</li>
           <li>Payment tracking dashboard</li>
         </ul>
-        <p className="mt-3 text-xs text-slate-400">
+        <p className="mt-3 text-xs text-quiet">
           Cancel anytime from the customer portal. Your invoices stay accessible on the
           free plan.
         </p>

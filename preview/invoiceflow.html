@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>InvoiceFlow preview</title>
+    <meta
+      name="description"
+      content="Visual preview of InvoiceFlow. A paper invoice on a work desk, shown before any app changes."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,560;1,9..144,560&family=Outfit:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="invoiceflow.css" />
+  </head>
+  <body>
+    <a class="skip" href="#content">Skip to content</a>
+    <input class="screen-pick" type="radio" name="screen" id="home" checked />
+    <input class="screen-pick" type="radio" name="screen" id="desk" />
+    <input class="screen-pick" type="radio" name="screen" id="pay" />
+
+    <header class="preview-bar">
+      <p class="preview-note">Preview only. The app is unchanged.</p>
+      <div class="preview-switch" role="radiogroup" aria-label="Preview screen">
+        <label for="home">Home</label>
+        <label for="desk">Your desk</label>
+        <label for="pay">Client link</label>
+      </div>
+    </header>
+
+    <div id="content">
+      <div class="screen home">
+        <header class="wrap top">
+          <a class="wordmark" href="#content">InvoiceFlow</a>
+          <nav aria-label="Site">
+            <a href="#pricing">Pricing</a>
+            <label class="quiet-link" for="desk">Sign in</label>
+          </nav>
+          <div class="top-actions">
+            <label class="button" for="desk">Start free</label>
+          </div>
+        </header>
+
+        <main>
+          <section class="wrap hero">
+            <div>
+              <h1>Send the invoice before lunch.</h1>
+              <p class="lede">
+                Add a client, write the lines, share a link. InvoiceFlow is for
+                freelancers who would rather do the work.
+              </p>
+              <div class="actions">
+                <label class="button" for="desk">Create your first invoice</label>
+                <label class="button ghost" for="pay">See what your client gets</label>
+              </div>
+              <p class="fine">No card. 3 invoices free each month.</p>
+            </div>
+            <article class="sheet" aria-label="Sample invoice">
+              <div class="sheet-head">
+                <div>
+                  <p class="sheet-kicker">Invoice</p>
+                  <h2>INV-2026-0048</h2>
+                </div>
+                <p class="stamp due">Due</p>
+              </div>
+              <div class="sheet-body">
+                <div class="sheet-row">
+                  <span>Brand site, 18 hours</span>
+                  <span class="money">$1,710.00</span>
+                </div>
+                <div class="sheet-row">
+                  <span>Photography direction</span>
+                  <span class="money">$130.00</span>
+                </div>
+                <div class="sheet-total">
+                  <span>Total</span>
+                  <span class="money">$1,840.00</span>
+                </div>
+              </div>
+            </article>
+          </section>
+
+          <section class="band">
+            <div class="wrap">
+              <h2>Three steps. Then you are back to work.</h2>
+              <dl class="steps">
+                <div>
+                  <dt>1</dt>
+                  <dd>
+                    <strong>Add a client</strong>
+                    <span>Name and billing email.</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>2</dt>
+                  <dd>
+                    <strong>Write the invoice</strong>
+                    <span>Line items, tax if you charge it, and a due date. The total updates as you type.</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>3</dt>
+                  <dd>
+                    <strong>Share the link</strong>
+                    <span>Your client opens it and prints it. Mark it paid when the money arrives.</span>
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </section>
+
+          <section class="band" id="pricing">
+            <div class="wrap">
+              <h2>Free until you send more than three.</h2>
+              <div class="prices">
+                <article>
+                  <h3>Free</h3>
+                  <p class="price">$0</p>
+                  <ul>
+                    <li>3 invoices each calendar month</li>
+                    <li>Clients, links, and payment tracking</li>
+                  </ul>
+                </article>
+                <article>
+                  <h3>Pro</h3>
+                  <p class="price">$9<span> / month</span></p>
+                  <ul>
+                    <li>Unlimited invoices</li>
+                    <li>PDF download</li>
+                  </ul>
+                </article>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer class="wrap site-footer">
+          <span>© 2026 InvoiceFlow</span>
+          <a href="#pricing">Pricing</a>
+          <a href="#content">Privacy</a>
+          <a href="#content">Terms</a>
+        </footer>
+      </div>
+
+      <div class="screen desk">
+        <header class="wrap top">
+          <a class="wordmark" href="#content">InvoiceFlow</a>
+          <nav aria-label="Account">
+            <a href="#content" aria-current="page">Dashboard</a>
+            <a href="#ledger">Invoices</a>
+            <a href="#content">Clients</a>
+            <a href="#content">Billing</a>
+          </nav>
+          <div class="top-actions">
+            <span class="plan">Free</span>
+            <label class="quiet-link" for="home">Sign out</label>
+          </div>
+        </header>
+        <main class="wrap">
+          <section class="outstanding" aria-labelledby="outstanding-label">
+            <p id="outstanding-label">Outstanding</p>
+            <strong>$2,450.00</strong>
+            <p>Two invoices are past their due date.</p>
+          </section>
+          <div class="quota">
+            <p>2 of 3 free invoices used this month. One left before the limit.</p>
+            <label class="button" for="home">Upgrade to Pro, $9 a month</label>
+          </div>
+          <div class="ledger-head" id="ledger">
+            <h2>Recent invoices</h2>
+            <a class="quiet-link" href="#ledger">View all</a>
+          </div>
+          <table class="ledger">
+            <thead>
+              <tr>
+                <th scope="col">Number</th>
+                <th scope="col">Client</th>
+                <th scope="col">Due</th>
+                <th scope="col">Status</th>
+                <th scope="col">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><a href="#pay">INV-2026-0048</a></td>
+                <td>Harbor &amp; Co</td>
+                <td>12 Oct</td>
+                <td><span class="stamp due">Due</span></td>
+                <td class="money">$1,840.00</td>
+              </tr>
+              <tr>
+                <td><a href="#pay">INV-2026-0041</a></td>
+                <td>Lina Voss</td>
+                <td>2 Oct</td>
+                <td><span class="stamp overdue">Overdue</span></td>
+                <td class="money">$610.00</td>
+              </tr>
+              <tr>
+                <td><a href="#pay">INV-2026-0036</a></td>
+                <td>Maret Studio</td>
+                <td>28 Sep</td>
+                <td><span class="stamp paid">Paid</span></td>
+                <td class="money">$3,275.50</td>
+              </tr>
+            </tbody>
+          </table>
+        </main>
+      </div>
+
+      <div class="screen pay">
+        <header class="wrap top">
+          <span class="wordmark">InvoiceFlow</span>
+          <div class="top-actions">
+            <label class="button ghost" for="desk">Back to your desk</label>
+            <button class="button" type="button">Print</button>
+          </div>
+        </header>
+        <main class="pay">
+          <div class="wrap pay-frame">
+            <article class="sheet">
+              <div class="sheet-head">
+                <div>
+                  <p class="sheet-kicker">Invoice from Mira Chen</p>
+                  <h2>INV-2026-0048</h2>
+                </div>
+                <p class="stamp due">Due</p>
+              </div>
+              <div class="parties">
+                <div>
+                  <span>To</span>
+                  <p>Harbor &amp; Co<br />billing@harborandco.example</p>
+                </div>
+                <div>
+                  <span>Due</span>
+                  <p>12 Oct 2026</p>
+                </div>
+              </div>
+              <div class="sheet-body">
+                <div class="sheet-row">
+                  <span>Brand site, 18 hours</span>
+                  <span class="money">$1,710.00</span>
+                </div>
+                <div class="sheet-row">
+                  <span>Photography direction</span>
+                  <span class="money">$130.00</span>
+                </div>
+                <div class="sheet-total">
+                  <span>Total</span>
+                  <span class="money">$1,840.00</span>
+                </div>
+              </div>
+            </article>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

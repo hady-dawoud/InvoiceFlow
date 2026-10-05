@@ -86,15 +86,15 @@ export function InvoiceEditor({
   }
   if (quotaBlocked) {
     return (
-      <div className="mx-auto max-w-md rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
-        <h2 className="text-lg font-semibold text-amber-900">Free plan limit reached</h2>
-        <p className="mt-2 text-sm text-amber-800">
+      <div className="mx-auto max-w-md bg-sheet p-6 text-center shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
+        <h2 className="display text-2xl">Free plan limit reached</h2>
+        <p className="mt-2 text-sm text-quiet">
           You&apos;ve used all {FREE_MONTHLY_LIMIT} free invoices this month. Upgrade to Pro for
           unlimited invoices, PDF export and payment tracking.
         </p>
         <Link
           href="/pricing"
-          className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+          className="mt-4 inline-block btn"
         >
           Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
         </Link>
@@ -113,7 +113,7 @@ export function InvoiceEditor({
           <select
             value={clientId}
             onChange={(e) => setClientId(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className="field"
             required
           >
             <option value="" disabled>
@@ -131,7 +131,7 @@ export function InvoiceEditor({
             type="date"
             value={issueDate}
             onChange={(e) => setIssueDate(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className="field"
             required
           />
         </Field>
@@ -140,7 +140,7 @@ export function InvoiceEditor({
             type="date"
             value={dueDate}
             onChange={(e) => setDueDate(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+            className="field"
             required
           />
         </Field>
@@ -154,7 +154,7 @@ export function InvoiceEditor({
               onChange={(e) => setTaxRate(e.target.value)}
               inputMode="decimal"
               placeholder="e.g. 8.5"
-              className="w-32 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+              className="w-32 field"
             />
           </Field>
           <Field label="Notes (optional)">
@@ -163,14 +163,14 @@ export function InvoiceEditor({
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               placeholder="Payment details, thank-you note…"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none"
+              className="field"
             />
           </Field>
         </div>
-        <div className="ml-auto w-full max-w-xs space-y-1.5 self-start rounded-xl border border-slate-200 bg-white p-4 text-sm">
+        <div className="ml-auto w-full max-w-xs space-y-1.5 self-start rounded-xl border border-line bg-white p-4 text-sm">
           <Row label="Subtotal" value={totals ? formatCents(totals.subtotalCents, currency) : "—"} />
           <Row label="Tax" value={totals ? formatCents(totals.taxCents, currency) : "—"} />
-          <div className="border-t border-slate-100 pt-1.5">
+          <div className="border-t border-paper pt-1.5">
             <Row label="Total" value={totals ? formatCents(totals.totalCents, currency) : "—"} strong />
           </div>
         </div>
@@ -183,7 +183,7 @@ export function InvoiceEditor({
           type="button"
           disabled={requestPending}
           onClick={() => handleSubmit("sent")}
-          className="rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="btn"
         >
           {pending === "sent" ? "Saving…" : "Save & mark as sent"}
         </button>
@@ -191,11 +191,11 @@ export function InvoiceEditor({
           type="button"
           disabled={requestPending}
           onClick={() => handleSubmit("draft")}
-          className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+          className="btn btn-ghost"
         >
           {pending === "draft" ? "Saving…" : "Save as draft"}
         </button>
-        <Link href="/dashboard/invoices" className="text-sm text-slate-500 hover:underline">
+        <Link href="/dashboard/invoices" className="text-sm text-quiet hover:underline">
           Cancel
         </Link>
       </div>
@@ -207,7 +207,7 @@ export function InvoiceEditor({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="block text-sm font-medium text-slate-700">{label}</span>
+      <span className="block text-sm font-medium">{label}</span>
       <span className="mt-1 block">{children}</span>
     </label>
   );
@@ -216,8 +216,8 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function Row({ label, value, strong }: { label: string; value: string; strong?: boolean }) {
   return (
     <div className="flex justify-between">
-      <span className={strong ? "font-semibold text-slate-900" : "text-slate-500"}>{label}</span>
-      <span className={strong ? "font-semibold text-slate-900" : "text-slate-700"}>{value}</span>
+      <span className={strong ? "font-semibold text-ink" : "text-quiet"}>{label}</span>
+      <span className={strong ? "font-semibold text-ink" : "text-ink"}>{value}</span>
     </div>
   );
 }

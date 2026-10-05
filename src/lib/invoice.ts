@@ -37,9 +37,9 @@ export const STATUS_META: Record<
   InvoiceStatus,
   { label: string; className: string }
 > = {
-  draft: { label: "Draft", className: "bg-slate-100 text-slate-600" },
-  sent: { label: "Sent", className: "bg-blue-50 text-blue-700" },
-  paid: { label: "Paid", className: "bg-emerald-50 text-emerald-700" },
+  draft: { label: "Draft", className: "stamp-draft" },
+  sent: { label: "Sent", className: "stamp-due" },
+  paid: { label: "Paid", className: "stamp-paid" },
 };
 
 /** Which status transitions the owner may apply manually. */

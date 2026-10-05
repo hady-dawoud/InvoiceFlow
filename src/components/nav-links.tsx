@@ -13,7 +13,7 @@ const LINKS = [
 export function NavLinks() {
   const pathname = usePathname();
   return (
-    <nav className="flex gap-1">
+    <nav className="flex flex-wrap gap-1" aria-label="Account">
       {LINKS.map((link) => {
         const active =
           link.href === "/dashboard"
@@ -23,8 +23,8 @@ export function NavLinks() {
           <Link
             key={link.href}
             href={link.href}
-            className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-              active ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:text-slate-900"
+            className={`min-h-11 px-3 text-sm font-medium ${
+              active ? "bg-ink/8 text-ink" : "text-quiet hover:text-ink"
             }`}
           >
             {link.label}

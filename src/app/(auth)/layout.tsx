@@ -6,11 +6,11 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-slate-50 px-4">
-      <Link href="/" className="mb-8 text-2xl font-bold tracking-tight text-slate-900">
-        Invoice<span className="text-emerald-600">Flow</span>
+    <div className="flex min-h-dvh flex-col items-center justify-center px-4">
+      <Link href="/" className="wordmark mb-8 text-3xl">
+        InvoiceFlow
       </Link>
-      <div className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="w-full max-w-sm bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
         {children}
       </div>
     </div>

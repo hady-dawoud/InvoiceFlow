@@ -37,13 +37,13 @@ export function CopyLinkButton({ token }: { token: string }) {
   return (
     <div>
       <button onClick={copy} disabled={pending}
-        className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+        className="btn btn-ghost">
         {copied ? "Link copied ✓" : "Copy client link"}
       </button>
       {error && <div role="alert" className="mt-2 text-sm text-red-600">
         Could not copy. Select the link below to copy it manually.
         <input aria-label="Client link" readOnly value={url} onFocus={(event) => event.target.select()}
-          className="mt-1 block w-full rounded border border-slate-300 px-2 py-1" />
+          className="mt-1 block w-full rounded border border-line px-2 py-1" />
       </div>}
     </div>
   );

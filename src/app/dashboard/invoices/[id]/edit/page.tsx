@@ -24,7 +24,7 @@ export default async function EditInvoicePage({
 
   return (
     <div className="space-y-6">
-      <h1 className="text-xl font-bold text-slate-900">Edit {invoice.number}</h1>
+      <h1 className="text-xl font-bold text-ink">Edit {invoice.number}</h1>
       <InvoiceEditor
         clients={clientOptions}
         currency={session.user.currency}

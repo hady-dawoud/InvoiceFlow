@@ -27,13 +27,13 @@ export default function LoginPage() {
 
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-900">Welcome back</h1>
-      <p className="mt-1 text-sm text-slate-500">
+      <h1 className="display text-2xl">Welcome back</h1>
+      <p className="mt-1 text-sm text-quiet">
         Sign in to manage your invoices.
       </p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="email" className="block text-sm font-medium">
             Email
           </label>
           <input
@@ -42,12 +42,12 @@ export default function LoginPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="field mt-1"
             placeholder="you@example.com"
           />
         </div>
         <div>
-          <label htmlFor="password" className="block text-sm font-medium text-slate-700">
+          <label htmlFor="password" className="block text-sm font-medium">
             Password
           </label>
           <input
@@ -56,7 +56,7 @@ export default function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-100"
+            className="field mt-1"
             placeholder="••••••••"
           />
         </div>
@@ -66,14 +66,14 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={pending}
-          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+          className="btn w-full"
         >
           {pending ? "Signing in…" : "Sign in"}
         </button>
       </form>
-      <p className="mt-4 text-center text-sm text-slate-500">
+      <p className="mt-4 text-center text-sm text-quiet">
         No account yet?{" "}
-        <Link href="/signup" className="font-medium text-emerald-600 hover:underline">
+        <Link href="/signup" className="font-medium text-carbon hover:underline">
           Start for free
         </Link>
       </p>

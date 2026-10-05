@@ -66,12 +66,12 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-900">Clients</h1>
+        <h1 className="text-xl font-bold text-ink">Clients</h1>
         {!form && (
           <button
             disabled={pending}
             onClick={openCreate}
-            className="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="btn"
           >
             New client
           </button>
@@ -87,37 +87,36 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
       )}
 
       {clients.length === 0 && !form ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center text-slate-600">
+        <div className="rounded-xl border border-dashed border-line bg-white px-6 py-12 text-center text-quiet">
           No clients yet. Add your first client to start invoicing.
         </div>
       ) : (
         clients.length > 0 && (
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <table className="ledger text-sm">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Name</th>
-                  <th className="px-4 py-2.5 font-medium">Email</th>
-                  <th className="px-4 py-2.5 font-medium">Invoices</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Actions</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Invoices</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-paper">
                 {clients.map((client) => (
-                  <tr key={client.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-2.5 font-medium text-slate-900">
+                  <tr key={client.id} className="hover:bg-sheet">
+                    <td className="px-4 py-2.5 font-medium text-ink">
                       {client.name}
                       {client.address && (
-                        <p className="text-xs font-normal text-slate-400">{client.address}</p>
+                        <p className="text-xs font-normal text-quiet">{client.address}</p>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-slate-600">{client.email ?? "—"}</td>
-                    <td className="px-4 py-2.5 text-slate-600">{client.invoiceCount}</td>
+                    <td className="px-4 py-2.5 text-quiet">{client.email ?? "—"}</td>
+                    <td className="px-4 py-2.5 text-quiet">{client.invoiceCount}</td>
                     <td className="px-4 py-2.5 text-right">
                       <button
                         disabled={pending}
                         onClick={() => openEdit(client)}
-                        className="rounded px-2 py-1 text-sm font-medium text-slate-600 hover:bg-slate-100"
+                        className="rounded px-2 py-1 text-sm font-medium text-quiet hover:bg-ink/8"
                       >
                         Edit
                       </button>
@@ -133,7 +132,6 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
                 ))}
               </tbody>
             </table>
-          </div>
         )
       )}
     </div>

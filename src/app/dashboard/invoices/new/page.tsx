@@ -20,11 +20,11 @@ export default async function NewInvoicePage() {
 
   if (clientOptions.length === 0) {
     return (
-      <div className="mx-auto max-w-md rounded-xl border border-dashed border-slate-300 bg-white px-6 py-12 text-center">
-        <p className="text-slate-600">You need a client before you can invoice.</p>
+      <div className="mx-auto max-w-md rounded-xl border border-dashed border-line bg-white px-6 py-12 text-center">
+        <p className="text-quiet">You need a client before you can invoice.</p>
         <Link
           href="/dashboard/clients"
-          className="mt-3 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+          className="mt-3 inline-block btn"
         >
           Add a client
         </Link>
@@ -35,23 +35,23 @@ export default async function NewInvoicePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-bold text-slate-900">New invoice</h1>
+        <h1 className="text-xl font-bold text-ink">New invoice</h1>
         {!quota.isPro && (
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-quiet">
             Free plan: {quota.used} of {quota.limit} invoices used this month.
           </p>
         )}
       </div>
       {quota.blocked ? (
-        <div className="mx-auto max-w-md rounded-xl border border-amber-200 bg-amber-50 p-6 text-center">
-          <h2 className="text-lg font-semibold text-amber-900">Free plan limit reached</h2>
-          <p className="mt-2 text-sm text-amber-800">
+        <div className="mx-auto max-w-md bg-sheet p-6 text-center shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
+          <h2 className="display text-2xl">Free plan limit reached</h2>
+          <p className="mt-2 text-sm text-quiet">
             You&apos;ve used all {FREE_MONTHLY_LIMIT} free invoices this month. Upgrade to Pro for
             unlimited invoices.
           </p>
           <Link
             href="/pricing"
-            className="mt-4 inline-block rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="mt-4 inline-block btn"
           >
             Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
           </Link>

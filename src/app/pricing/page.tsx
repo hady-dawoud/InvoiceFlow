@@ -45,49 +45,46 @@ export default async function PricingPage() {
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-16">
-      <div className="text-center">
-        <Link href="/" className="text-sm font-medium text-slate-500 hover:text-slate-900">
-          ← InvoiceFlow
+      <div>
+        <Link href="/" className="wordmark text-2xl">
+          InvoiceFlow
         </Link>
-        <h1 className="mt-6 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+        <h1 className="display mt-8 text-4xl text-ink sm:text-5xl">
           Simple pricing for freelancers
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-slate-600">
+        <p className="mx-auto mt-3 max-w-xl text-quiet">
           Start free. Upgrade when your client list grows. Cancel anytime.
         </p>
       </div>
 
       <div className="mt-12 grid gap-6 sm:grid-cols-2">
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900">Free</h2>
-          <p className="mt-2 text-3xl font-bold text-slate-900">
-            $0<span className="text-base font-normal text-slate-500">/mo</span>
+        <div className="bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
+          <h2 className="text-lg font-medium text-ink">Free</h2>
+          <p className="display money mt-2 text-4xl text-ink">
+            $0<span className="text-base font-normal text-quiet">/mo</span>
           </p>
-          <ul className="mt-4 space-y-2 text-sm text-slate-600">
+          <ul className="mt-4 space-y-2 text-sm text-quiet">
             <li>✓ {FREE_MONTHLY_LIMIT} invoices per month</li>
             <li>✓ Client management</li>
             <li>✓ Shareable invoice links</li>
-            <li className="text-slate-400">✗ PDF export</li>
+            <li className="text-quiet">✗ PDF export</li>
           </ul>
           {!user && (
             <Link
               href="/signup"
-              className="mt-6 block rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-center text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              className="btn btn-ghost mt-6 w-full"
             >
               Start for free
             </Link>
           )}
         </div>
 
-        <div className="relative rounded-2xl border-2 border-emerald-500 bg-white p-6 shadow-md">
-          <span className="absolute -top-3 left-6 rounded-full bg-emerald-600 px-3 py-1 text-xs font-semibold text-white">
-            Most popular
-          </span>
-          <h2 className="text-lg font-semibold text-slate-900">Pro</h2>
-          <p className="mt-2 text-3xl font-bold text-slate-900">
-            {PRO_MONTHLY_PRICE_LABEL}<span className="text-base font-normal text-slate-500">/mo</span>
+        <div className="bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
+          <h2 className="text-lg font-medium text-ink">Pro</h2>
+          <p className="display money mt-2 text-4xl text-ink">
+            {PRO_MONTHLY_PRICE_LABEL}<span className="text-base font-normal text-quiet">/mo</span>
           </p>
-          <ul className="mt-4 space-y-2 text-sm text-slate-600">
+          <ul className="mt-4 space-y-2 text-sm text-quiet">
             <li>✓ Unlimited invoices</li>
             <li>✓ PDF export</li>
             <li>✓ Payment &amp; overdue tracking</li>
@@ -96,7 +93,7 @@ export default async function PricingPage() {
           {user && !user.isPro && configured && (
             <Link
               href="/dashboard/billing"
-              className="mt-6 block rounded-lg bg-emerald-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-emerald-700"
+              className="btn mt-6 w-full"
             >
               Upgrade to Pro
             </Link>
@@ -108,12 +105,12 @@ export default async function PricingPage() {
         <div className="mt-8 text-center">
           <Link
             href={primaryCta.href}
-            className="rounded-lg bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+            className="btn"
           >
             {primaryCta.label}
           </Link>
           {configured && isTestMode() && (
-            <p className="mt-2 text-xs text-slate-400">
+            <p className="mt-2 text-xs text-quiet">
               Test mode active — card 4242 4242 4242 4242, no real charge.
             </p>
           )}
@@ -121,19 +118,19 @@ export default async function PricingPage() {
       )}
 
       <section className="mt-16">
-        <h2 className="text-center text-xl font-bold text-slate-900">
+        <h2 className="text-center text-xl font-bold text-ink">
           Frequently asked questions
         </h2>
         <div className="mx-auto mt-6 max-w-2xl space-y-4">
           {FAQ.map((item) => (
             <details
               key={item.q}
-              className="rounded-xl border border-slate-200 bg-white px-4 py-3"
+              className="rounded-xl border border-line bg-white px-4 py-3"
             >
-              <summary className="cursor-pointer text-sm font-semibold text-slate-900">
+              <summary className="cursor-pointer text-sm font-semibold text-ink">
                 {item.q}
               </summary>
-              <p className="mt-2 text-sm text-slate-600">{item.a}</p>
+              <p className="mt-2 text-sm text-quiet">{item.a}</p>
             </details>
           ))}
         </div>

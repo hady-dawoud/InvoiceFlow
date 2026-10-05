@@ -12,26 +12,20 @@ export default async function DashboardLayout({
   const { user } = session;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white print:hidden">
-        <div className="mx-auto flex max-w-6xl items-center gap-6 px-4 py-3">
-          <Link href="/dashboard" className="text-lg font-bold tracking-tight text-slate-900">
-            Invoice<span className="text-emerald-600">Flow</span>
+    <div className="min-h-dvh">
+      <header className="border-b border-line print:hidden">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-4 px-5 py-3">
+          <Link href="/dashboard" className="wordmark text-2xl">
+            InvoiceFlow
           </Link>
           <NavLinks />
           <div className="ml-auto flex items-center gap-3">
-            <span
-              className={`rounded-full px-2.5 py-1 text-xs font-semibold ${
-                user.isPro ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"
-              }`}
-            >
-              {user.isPro ? "Pro" : "Free"}
-            </span>
+            <span className="text-sm text-quiet">{user.isPro ? "Pro" : "Free"}</span>
             <SignOutButton />
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8">{children}</main>
+      <main className="mx-auto max-w-6xl px-5 py-8">{children}</main>
     </div>
   );
 }
