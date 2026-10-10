@@ -1,18 +1,95 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { user } from "@/db/schema";
 import { getStripe, proLineItem } from "@/lib/stripe";
 import { ENDED_STATUSES } from "@/lib/stripe-events";
+import { checkoutLocale, createPortalSession, portalLocale } from "@/lib/stripe-locale";
+import { resolveLocale } from "@/lib/locale";
 import type Stripe from "stripe";
 import type { User } from "@/db/schema";
 import { randomBytes } from "node:crypto";
 import { getSession } from "@/lib/session";
 
+const LOCALE_COOKIE = "invoiceflow_locale";
+
+/** Copied from Stripe.BillingPortal.SessionCreateParams.Locale (SDK enum). */
+const PORTAL_LOCALES = [
+  "auto",
+  "bg",
+  "cs",
+  "da",
+  "de",
+  "el",
+  "en",
+  "en-AU",
+  "en-CA",
+  "en-GB",
+  "en-IE",
+  "en-IN",
+  "en-NZ",
+  "en-SG",
+  "es",
+  "es-419",
+  "et",
+  "fi",
+  "fil",
+  "fr",
+  "fr-CA",
+  "hr",
+  "hu",
+  "id",
+  "it",
+  "ja",
+  "ko",
+  "lt",
+  "lv",
+  "ms",
+  "mt",
+  "nb",
+  "nl",
+  "pl",
+  "pt",
+  "pt-BR",
+  "ro",
+  "ru",
+  "sk",
+  "sl",
+  "sv",
+  "th",
+  "tr",
+  "vi",
+  "zh",
+  "zh-HK",
+  "zh-TW",
+] as const;
+
 function appUrl(): string {
   return process.env.APP_URL ?? "http://localhost:3000";
+}
+
+function cookieValue(header: string | null, name: string): string | null {
+  if (!header) return null;
+  for (const part of header.split(";")) {
+    const [key, ...rest] = part.trim().split("=");
+    if (key === name) {
+      const value = rest.join("=");
+      return value.length > 0 ? value : null;
+    }
+  }
+  return null;
+}
+
+async function requestStripeLocale(): Promise<{ cookie: string | null; locale: "en" | "ar" }> {
+  const headerStore = await headers();
+  const cookie = cookieValue(headerStore.get("cookie"), LOCALE_COOKIE);
+  return {
+    cookie,
+    locale: resolveLocale({ cookie, acceptLanguage: headerStore.get("accept-language") }),
+  };
 }
 
 async function requireUpgradeEligibility(stripe: Stripe, account: User) {
@@ -49,6 +126,7 @@ export async function upgradeToProAction(): Promise<void> {
     integration_identifier: `invoiceflow_${Array.from(randomBytes(8), (value) => String.fromCharCode(97 + value % 26)).join("")}`,
     customer: customerId, line_items: [proLineItem()], metadata: { userId: account.id },
     subscription_data: { metadata: { userId: account.id } },
+    locale: checkoutLocale(await requestStripeLocale()),
     success_url: `${appUrl()}/dashboard/billing?success=1`, cancel_url: `${appUrl()}/dashboard/billing?canceled=1`,
   });
   if (!checkout.url) redirect("/dashboard/billing?error=checkout-failed");
@@ -63,9 +141,16 @@ export async function openCustomerPortalAction(): Promise<void> {
   const customerId = session.user.stripeCustomerId;
   if (!customerId) redirect("/dashboard/billing?error=no-subscription");
 
-  const portal = await stripe.billingPortal.sessions.create({
-    customer: customerId,
-    return_url: `${appUrl()}/dashboard/billing`,
-  });
-  redirect(portal.url);
+  const url = await createPortalSession(
+    portalLocale(await requestStripeLocale(), PORTAL_LOCALES),
+    async (locale) => {
+      const portal = await stripe.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: `${appUrl()}/dashboard/billing`,
+        locale: locale as Stripe.BillingPortal.SessionCreateParams.Locale,
+      });
+      return portal.url;
+    },
+  );
+  redirect(url);
 }
