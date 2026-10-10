@@ -155,6 +155,11 @@ export function collectPdfStream(doc: PDFKit.PDFDocument): Promise<Buffer> {
   });
 }
 
+export function invoicePdfDisposition(number: string) {
+  const safe = /^[A-Za-z0-9][A-Za-z0-9._-]{0,40}$/.test(number) ? number : "invoice";
+  return `attachment; filename="${safe}.pdf"`;
+}
+
 export function renderInvoicePdf(detail: PdfInvoice, owner: PdfOwner): Promise<Buffer> {
   const doc = new PDFDocument({ size: "LETTER", margin: 50 });
   const done = collectPdfStream(doc);

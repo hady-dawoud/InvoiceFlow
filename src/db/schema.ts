@@ -39,7 +39,7 @@ export const user = sqliteTable("user", {
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   proSince: integer("pro_since", { mode: "timestamp" }),
-});
+}, (table) => [uniqueIndex("user_stripe_customer_id_idx").on(table.stripeCustomerId)]);
 
 export const session = sqliteTable(
   "session",
@@ -141,6 +141,7 @@ export const invoices = sqliteTable(
   (table) => [
     uniqueIndex("invoices_user_number_idx").on(table.userId, table.number),
     index("invoices_user_id_idx").on(table.userId),
+    index("invoices_user_issue_idx").on(table.userId, table.issueDate),
     index("invoices_client_id_idx").on(table.clientId),
   ],
 );

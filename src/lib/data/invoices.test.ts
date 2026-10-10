@@ -8,7 +8,7 @@ await vi.hoisted(async () => {
   process.env.DATABASE_URL = `file:${join(directory, "test.db").replaceAll("\\", "/")}`;
 });
 
-import { listClientsWithStats } from "./clients";
+import { deleteClient, listClientsWithStats } from "./clients";
 import { createClient } from "@libsql/client";
 import { db } from "@/db";
 import { invoiceItems, invoices, invoiceMonthlyUsage, invoiceSequences, user } from "@/db/schema";
@@ -90,6 +90,19 @@ it("an exhausted write lock fails without consuming quota or numbering", async (
   finally { await lock.rollback(); connection.close(); }
   expect(await countInvoicesThisMonth("owner")).toBe(0);
   expect((await createInvoice("owner", input)).number).toMatch(/-0001$/);
+});
+
+it("does not reveal another account's client through deletion", async () => {
+  await createInvoice("other", { ...input, clientId: "other-client" });
+  expect(await deleteClient("owner", "other-client")).toBe("not-found");
+  expect(await deleteClient("other", "other-client")).toBe("has-invoices");
+});
+
+it("indexes billing lookups and invoice lists", async () => {
+  const result = await db.$client.execute(
+    "SELECT name FROM sqlite_master WHERE type = 'index' AND name IN ('user_stripe_customer_id_idx', 'invoices_user_issue_idx')",
+  );
+  expect(result.rows).toHaveLength(2);
 });
 
 it("legacy cross-account assignments are hidden in joined reads", async () => {

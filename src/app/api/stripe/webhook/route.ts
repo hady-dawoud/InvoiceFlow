@@ -34,5 +34,5 @@ export async function POST(request: NextRequest) {
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/billing");
 
-  return Response.json({ received: true, action: action.type });
+  return Response.json({ received: true });
 }

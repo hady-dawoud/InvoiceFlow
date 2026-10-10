@@ -1,6 +1,13 @@
 import type { InvoiceInput } from "@/lib/data/invoices";
 import { calcTotals, parseAmountToCents } from "@/lib/money";
 
+const MAX_ITEMS_JSON_CHARS = 100_000;
+const MAX_LINE_ITEMS = 40;
+const MAX_DESCRIPTION_CHARS = 400;
+const MAX_QUANTITY = 1_000_000;
+const MAX_NOTES_CHARS = 2_000;
+const LINE_ITEM_ERROR = "Add at least one line item with a valid price.";
+
 type ParsedItems = { description: string; quantity: number; unitPriceCents: number }[];
 
 export function parseQuantity(value: unknown): number | null {
@@ -16,26 +23,32 @@ export function isCalendarDate(value: unknown): value is string {
   return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === value;
 }
 
-export function parseItems(raw: unknown): ParsedItems | null {
-  if (typeof raw !== "string") return null;
+export function parseItems(raw: unknown): ParsedItems | string {
+  if (typeof raw !== "string") return LINE_ITEM_ERROR;
+  if (raw.length > MAX_ITEMS_JSON_CHARS) return "Invoice items are too large.";
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch (error) {
     if (!(error instanceof SyntaxError)) throw error;
-    return null;
+    return LINE_ITEM_ERROR;
   }
-  if (!Array.isArray(parsed) || parsed.length === 0) return null;
+  if (!Array.isArray(parsed) || parsed.length === 0) return LINE_ITEM_ERROR;
+  if (parsed.length > MAX_LINE_ITEMS) return "An invoice can have at most 40 line items.";
 
   const items: ParsedItems = [];
   for (const entry of parsed) {
-    if (typeof entry !== "object" || entry === null) return null;
+    if (typeof entry !== "object" || entry === null) return LINE_ITEM_ERROR;
     const { description, quantity, price } = entry as Record<string, unknown>;
-    if (typeof description !== "string" || description.trim().length === 0) return null;
+    if (typeof description !== "string" || description.trim().length === 0) return LINE_ITEM_ERROR;
+    if (description.trim().length > MAX_DESCRIPTION_CHARS) {
+      return "Line item descriptions must be 400 characters or fewer.";
+    }
     const qty = parseQuantity(quantity);
-    if (qty === null) return null;
+    if (qty === null) return LINE_ITEM_ERROR;
+    if (qty > MAX_QUANTITY) return "Quantity is too large.";
     const unitPriceCents = typeof price === "string" ? parseAmountToCents(price) : null;
-    if (unitPriceCents === null) return null;
+    if (unitPriceCents === null) return LINE_ITEM_ERROR;
     items.push({ description: description.trim(), quantity: qty, unitPriceCents });
   }
   return items;
@@ -64,12 +77,14 @@ export function parseInvoiceInput(formData: FormData): InvoiceInput | string {
     return "Invalid status.";
   }
   const items = parseItems(formData.get("itemsJson"));
-  if (!items) return "Add at least one line item with a valid price.";
+  if (typeof items === "string") return items;
   try { calcTotals(items, taxBps); }
   catch (error) {
     if (!(error instanceof RangeError)) throw error;
     return error.message;
   }
+  const trimmedNotes = typeof notes === "string" ? notes.trim() : "";
+  if (trimmedNotes.length > MAX_NOTES_CHARS) return "Notes are too long.";
 
   return {
     clientId,
@@ -77,7 +92,7 @@ export function parseInvoiceInput(formData: FormData): InvoiceInput | string {
     issueDate,
     dueDate,
     taxBps,
-    notes: typeof notes === "string" && notes.trim().length > 0 ? notes.trim() : null,
+    notes: trimmedNotes.length > 0 ? trimmedNotes : null,
     items,
   };
 }

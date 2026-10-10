@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 import PDFDocument from "pdfkit";
-import { collectPdfStream, renderInvoicePdf, type PdfInvoice } from "./invoice-pdf";
+import { collectPdfStream, invoicePdfDisposition, renderInvoicePdf, type PdfInvoice } from "./invoice-pdf";
 const owner = { businessName: "Example Studio", email: "owner@example.com", currency: "usd" };
 function pdfFixture(count: number): PdfInvoice {
   return {
@@ -15,6 +15,11 @@ it.each([[1, 1], [30, 2]])("renders %i line items in %i pages", async (count, pa
 });
 it("rejects drawing errors rather than leaving the PDF response pending", async () => {
   await expect(renderInvoicePdf(pdfFixture(1), { ...owner, currency: "invalid" })).rejects.toThrow();
+});
+
+it("keeps the download name inside the content-disposition header", () => {
+  expect(invoicePdfDisposition("INV-2026-0001")).toBe('attachment; filename="INV-2026-0001.pdf"');
+  expect(invoicePdfDisposition('INV"\r\nX-Evil: 1')).toBe('attachment; filename="invoice.pdf"');
 });
 
 it("rejects PDF stream errors", async () => {

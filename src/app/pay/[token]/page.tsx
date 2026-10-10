@@ -6,6 +6,8 @@ import { clients, invoices, user } from "@/db/schema";
 import { InvoiceDocument } from "@/components/invoice-document";
 import { PrintButton } from "@/components/print-button";
 
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: "Your invoice",
   robots: { index: false },

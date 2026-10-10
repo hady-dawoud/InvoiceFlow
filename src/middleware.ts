@@ -8,9 +8,7 @@ const SESSION_COOKIES = [
 export function middleware(request: NextRequest) {
   const hasSession = SESSION_COOKIES.some((name) => request.cookies.has(name));
   if (!hasSession) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", request.nextUrl.pathname);
-    return NextResponse.redirect(loginUrl);
+    return NextResponse.redirect(new URL("/login", request.url));
   }
   return NextResponse.next();
 }

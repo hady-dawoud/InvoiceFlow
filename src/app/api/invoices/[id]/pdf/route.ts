@@ -1,5 +1,5 @@
 import { getInvoiceDetail } from "@/lib/data/invoices";
-import { renderInvoicePdf } from "@/lib/invoice-pdf";
+import { invoicePdfDisposition, renderInvoicePdf } from "@/lib/invoice-pdf";
 import { getSession } from "@/lib/session";
 
 export const runtime = "nodejs";
@@ -24,7 +24,7 @@ export async function GET(
   return new Response(new Uint8Array(pdf), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="${detail.invoice.number}.pdf"`,
+      "Content-Disposition": invoicePdfDisposition(detail.invoice.number),
     },
   });
 }

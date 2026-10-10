@@ -49,7 +49,8 @@ export function InvoiceEditor({
   const [quotaBlocked, setQuotaBlocked] = useState(false);
   const [savingStatus, setSavingStatus] = useState<"draft" | "sent" | null>(null);
   const pending = requestPending ? savingStatus : null;
-  const previewItems = parseItems(JSON.stringify(items));
+  const parsedPreview = parseItems(JSON.stringify(items));
+  const previewItems = Array.isArray(parsedPreview) ? parsedPreview : null;
   const taxBps = parseAmountToCents(taxRate || "0");
   let totals: Totals | null = null;
   if (previewItems && taxBps !== null) {

@@ -63,14 +63,16 @@ export async function updateClient(
 export async function deleteClient(userId: string, clientId: string): Promise<
   "ok" | "not-found" | "has-invoices"
 > {
+  const owned = and(eq(clients.id, clientId), eq(clients.userId, userId));
+  const [client] = await db.select({ id: clients.id }).from(clients).where(owned).limit(1);
+  if (!client) return "not-found";
+
   const [inUse] = await db
     .select({ n: sql<number>`count(*)`.mapWith(Number) })
     .from(invoices)
-    .where(eq(invoices.clientId, clientId));
+    .where(and(eq(invoices.clientId, clientId), eq(invoices.userId, userId)));
   if ((inUse?.n ?? 0) > 0) return "has-invoices";
 
-  const result = await db
-    .delete(clients)
-    .where(and(eq(clients.id, clientId), eq(clients.userId, userId)));
+  const result = await db.delete(clients).where(owned);
   return result.rowsAffected > 0 ? "ok" : "not-found";
 }
