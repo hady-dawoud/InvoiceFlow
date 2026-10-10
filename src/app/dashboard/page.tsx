@@ -45,9 +45,8 @@ export default async function DashboardPage() {
       {!quota.isPro && (
         <div className="notice flex flex-wrap items-center justify-between gap-3">
           <p>
-            {t("quotaNotice.prefix")}{" "}
-            <strong>{t("quotaNotice.usedOfLimit", { used: quota.used, limit: quota.limit ?? 0 })}</strong>{" "}
-            {t("quotaNotice.suffix")}{" "}
+            <strong>{t("quotaNotice.label")}:</strong>{" "}
+            {t("quotaNotice.usage", { used: quota.used })}{" "}
             {quota.blocked
               ? t("quotaNotice.blocked")
               : t("quotaNotice.remaining", { remaining: quota.remaining })}

@@ -146,15 +146,14 @@
     },
     "home": {
       "quotaNotice": {
-        "prefix": "Free plan:",
-        "usedOfLimit": "{used} of {limit}",
-        "suffix": "invoices used this month.",
+        "label": "Free plan",
+        "usage": "{used, plural, one {# invoice used this month.} other {# invoices used this month.}}",
         "blocked": "You've hit the limit — upgrade to keep invoicing.",
-        "remaining": "{remaining} left before the wall.",
+        "remaining": "{remaining, plural, one {# invoice left before the wall.} other {# invoices left before the wall.}}",
         "upgrade": "Upgrade to Pro — {price}/mo"
       },
       "unpaidLabel": "Unpaid",
-      "overdueNote": "{amount} is past its due date.",
+      "overdueNote": "Overdue amount: {amount}.",
       "noOverdue": "Nothing is past its due date.",
       "stats": {
         "billed": "Billed (sent + paid)",
