@@ -6,6 +6,12 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // pdfkit ships .afm font files that break inside the server bundle.
   serverExternalPackages: ["pdfkit"],
+  outputFileTracingIncludes: {
+    "/api/invoices/[id]/pdf": [
+      "./fonts/NotoNaskhArabic-Regular.ttf",
+      "./fonts/NotoNaskhArabic-Bold.ttf",
+    ],
+  },
   async headers() {
     return securityHeaders(process.env.NODE_ENV);
   },
