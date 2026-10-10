@@ -159,6 +159,7 @@ function wrapParagraph(
   text: string,
   columnWidth: number,
   widthOf: (start: number, endExclusive: number) => number,
+  widthOfPiece: (piece: string) => number,
 ): { start: number; end: number }[] {
   const lines: { start: number; end: number }[] = [];
   const words: { start: number; end: number }[] = [];
@@ -184,11 +185,7 @@ function wrapParagraph(
   };
 
   const emitPieces = (token: string, at: number) => {
-    const pieces = splitOversizedToken(
-      token,
-      (piece) => widthOf(at, at + piece.length),
-      columnWidth,
-    );
+    const pieces = splitOversizedToken(token, widthOfPiece, columnWidth);
     let offset = at;
     for (const piece of pieces) {
       lines.push({ start: offset, end: offset + piece.length - 1 });
@@ -261,15 +258,14 @@ class InvoicePdfRenderer {
   }
 
   private chooseFace(cluster: string, bold: boolean): Face {
-    const naskhOk = this.naskhCovers(cluster);
     const winAnsiOk = [...cluster].every((ch) => isWinAnsi(ch.codePointAt(0) ?? 0));
     if (this.locale === "ar") {
-      if (naskhOk) return bold ? "naskh-bold" : "naskh";
+      if (this.naskhCovers(cluster)) return bold ? "naskh-bold" : "naskh";
       if (winAnsiOk) return bold ? "helvetica-bold" : "helvetica";
       return "helvetica";
     }
     if (winAnsiOk) return bold ? "helvetica-bold" : "helvetica";
-    if (naskhOk) return bold ? "naskh-bold" : "naskh";
+    if (this.naskhCovers(cluster)) return bold ? "naskh-bold" : "naskh";
     return "helvetica";
   }
 
@@ -495,7 +491,8 @@ class InvoicePdfRenderer {
       const levels = paragraphLevels(paragraph, base);
       const widthOf = (start: number, endExclusive: number) =>
         this.measureRange(paragraph, start, endExclusive - 1, levels, size, bold);
-      const ranges = wrapParagraph(paragraph, width, widthOf);
+      const widthOfPiece = (piece: string) => this.measureString(piece, size, bold);
+      const ranges = wrapParagraph(paragraph, width, widthOf, widthOfPiece);
       if (ranges.length === 0) {
         lines.push({ paragraph, levels, start: 0, end: -1, align: lineAlign });
         continue;

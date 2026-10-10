@@ -95,6 +95,27 @@ it("rejects when a Naskh TTF is missing", async () => {
   }
 });
 
+it("renders an English Helvetica document when Naskh TTF is missing", async () => {
+  const original = naskhFontPaths.regular;
+  naskhFontPaths.regular = path.resolve("fonts/missing-naskh.ttf");
+  try {
+    const buffer = await renderInvoicePdf(pdfFixture(1), owner, enLabels, "en");
+    expect(buffer.toString("latin1")).not.toContain("NotoNaskh");
+  } finally {
+    naskhFontPaths.regular = original;
+  }
+});
+
+it("rejects an English document that needs Naskh when the TTF is missing", async () => {
+  const original = naskhFontPaths.regular;
+  naskhFontPaths.regular = path.resolve("fonts/missing-naskh.ttf");
+  try {
+    await expect(renderInvoicePdf(pdfFixture(1, "مكتب"), owner, enLabels, "en")).rejects.toThrow();
+  } finally {
+    naskhFontPaths.regular = original;
+  }
+});
+
 it("strips bidi isolates from a client name before drawing", async () => {
   const buffer = await renderInvoicePdf(
     pdfFixture(1, "\u2066مكتب\u2069"),
