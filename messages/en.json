@@ -204,6 +204,34 @@
         "saving": "Saving…",
         "cancel": "Cancel"
       }
+    },
+    "billing": {
+      "metaTitle": "Billing",
+      "heading": "Billing",
+      "banner": {
+        "success": "Welcome to Pro! Your subscription is active — enjoy unlimited invoices.",
+        "pending": "Checkout received. Activation is pending payment confirmation. Refresh this page to check your plan.",
+        "existingSubscription": "You already have a subscription. Manage it using the customer portal.",
+        "canceled": "Checkout canceled — no charge was made.",
+        "notConfigured": "Billing is not configured on this server yet. Please try again once billing is available.",
+        "noSubscription": "You don't have an active subscription yet, so there's nothing to manage.",
+        "checkoutFailed": "Checkout could not be started. Please try again later."
+      },
+      "currentPlanLabel": "Current plan",
+      "unlimitedInvoices": "Unlimited invoices",
+      "unlimitedSince": "Unlimited invoices · since {date}",
+      "freeLimit": "{limit, plural, one {# invoice per calendar month} other {# invoices per calendar month}}",
+      "manageSubscription": "Manage subscription",
+      "upgradeToPro": "Upgrade to Pro — {price}/mo",
+      "notConfiguredNotice": "Billing is not configured. Your current plan and invoices remain accessible.",
+      "testMode": "Stripe <strong>test mode</strong> is active — use card {card}, any future expiry, any CVC. No real charges.",
+      "pro": {
+        "heading": "What you get with Pro",
+        "unlimitedFeature": "Unlimited invoices (free plan: {limit, plural, one {# invoice/month} other {# invoices/month}})",
+        "pdfFeature": "PDF export for sending to clients",
+        "trackingFeature": "Payment tracking dashboard",
+        "cancelNote": "Cancel anytime from the customer portal. Your invoices stay accessible on the free plan."
+      }
     }
   },
   "invoice": {

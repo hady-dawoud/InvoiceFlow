@@ -1,3 +1,5 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import {
   openCustomerPortalAction,
@@ -7,37 +9,19 @@ import { isBillingConfigured, isTestMode } from "@/lib/stripe";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
 import { getSession } from "@/lib/session";
 
-export const metadata = { title: "Billing" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboard.billing");
+  return { title: t("metaTitle") };
+}
 
-const BANNER: Record<string, { text: string; className: string }> = {
-  success: {
-    text: "Welcome to Pro! Your subscription is active — enjoy unlimited invoices.",
-    className: "text-paid",
-  },
-  pending: {
-    text: "Checkout received. Activation is pending payment confirmation. Refresh this page to check your plan.",
-    className: "text-ink",
-  },
-  "existing-subscription": {
-    text: "You already have a subscription. Manage it using the customer portal.",
-    className: "text-ink",
-  },
-  canceled: {
-    text: "Checkout canceled — no charge was made.",
-    className: "border-line bg-ink/8 text-quiet",
-  },
-  "not-configured": {
-    text: "Billing is not configured on this server yet. Please try again once billing is available.",
-    className: "text-ink",
-  },
-  "no-subscription": {
-    text: "You don't have an active subscription yet, so there's nothing to manage.",
-    className: "text-ink",
-  },
-  "checkout-failed": {
-    text: "Checkout could not be started. Please try again later.",
-    className: "text-overdue",
-  },
+const BANNER_STYLE: Record<string, { messageKey: string; className: string }> = {
+  success: { messageKey: "banner.success", className: "text-paid" },
+  pending: { messageKey: "banner.pending", className: "text-ink" },
+  "existing-subscription": { messageKey: "banner.existingSubscription", className: "text-ink" },
+  canceled: { messageKey: "banner.canceled", className: "border-line bg-ink/8 text-quiet" },
+  "not-configured": { messageKey: "banner.notConfigured", className: "text-ink" },
+  "no-subscription": { messageKey: "banner.noSubscription", className: "text-ink" },
+  "checkout-failed": { messageKey: "banner.checkoutFailed", className: "text-overdue" },
 };
 
 export default async function BillingPage({
@@ -47,14 +31,20 @@ export default async function BillingPage({
 }) {
   const session = await getSession();
   const { success, canceled, error } = await searchParams;
+  const t = await getTranslations("dashboard.billing");
+  const tPlan = await getTranslations("dashboard.plan");
+
   const bannerKey = success ? (session.user.isPro ? "success" : "pending") : canceled ? "canceled" : error;
-  const banner = bannerKey ? BANNER[bannerKey] : undefined;
+  const bannerStyle = bannerKey ? BANNER_STYLE[bannerKey] : undefined;
+  const banner = bannerStyle
+    ? { text: t(bannerStyle.messageKey), className: bannerStyle.className }
+    : undefined;
 
   const configured = isBillingConfigured();
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="display text-3xl text-ink">Billing</h1>
+      <h1 className="display text-3xl text-ink">{t("heading")}</h1>
 
       {banner && (
         <p className={`notice text-sm ${banner.className}`}>
@@ -65,14 +55,16 @@ export default async function BillingPage({
       <div className="bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <p className="text-quiet">Current plan</p>
+            <p className="text-quiet">{t("currentPlanLabel")}</p>
             <p className="display mt-1 text-4xl text-ink">
-              {session.user.isPro ? "Pro" : "Free"}
+              {session.user.isPro ? tPlan("pro") : tPlan("free")}
             </p>
             <p className="mt-1 text-sm text-quiet">
               {session.user.isPro
-                ? `Unlimited invoices${session.user.proSince ? ` · since ${session.user.proSince.toISOString().slice(0, 10)}` : ""}`
-                : `${FREE_MONTHLY_LIMIT} invoices per calendar month`}
+                ? session.user.proSince
+                  ? t("unlimitedSince", { date: session.user.proSince.toISOString().slice(0, 10) })
+                  : t("unlimitedInvoices")
+                : t("freeLimit", { limit: FREE_MONTHLY_LIMIT })}
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -82,7 +74,7 @@ export default async function BillingPage({
                 className="btn btn-ghost"
                 disabled={!configured}
               >
-                Manage subscription
+                {t("manageSubscription")}
               </button>
             </form>
           )}
@@ -92,7 +84,7 @@ export default async function BillingPage({
                 className="btn"
                 disabled={!configured}
               >
-                Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
+                {t("upgradeToPro", { price: PRO_MONTHLY_PRICE_LABEL })}
               </button>
             </form>
           )}
@@ -100,27 +92,28 @@ export default async function BillingPage({
         </div>
         {!configured && (
           <p className="notice mt-4 text-sm">
-            Billing is not configured. Your current plan and invoices remain accessible.
+            {t("notConfiguredNotice")}
           </p>
         )}
         {configured && isTestMode() && (
           <p className="notice mt-4 text-sm">
-            Stripe <strong>test mode</strong> is active — use card 4242 4242 4242 4242,
-            any future expiry, any CVC. No real charges.
+            {t.rich("testMode", {
+              strong: (chunks) => <strong>{chunks}</strong>,
+              card: "4242 4242 4242 4242",
+            })}
           </p>
         )}
       </div>
 
       <div className="bg-sheet p-6 text-sm text-quiet shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
-        <h2 className="font-semibold text-ink">What you get with Pro</h2>
+        <h2 className="font-semibold text-ink">{t("pro.heading")}</h2>
         <ul className="mt-2 list-disc space-y-1 pl-5">
-          <li>Unlimited invoices (free plan: {FREE_MONTHLY_LIMIT}/month)</li>
-          <li>PDF export for sending to clients</li>
-          <li>Payment tracking dashboard</li>
+          <li>{t("pro.unlimitedFeature", { limit: FREE_MONTHLY_LIMIT })}</li>
+          <li>{t("pro.pdfFeature")}</li>
+          <li>{t("pro.trackingFeature")}</li>
         </ul>
         <p className="mt-3 text-xs text-quiet">
-          Cancel anytime from the customer portal. Your invoices stay accessible on the
-          free plan.
+          {t("pro.cancelNote")}
         </p>
       </div>
     </div>
