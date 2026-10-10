@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { headers } from "next/headers";
@@ -6,11 +7,16 @@ import { auth } from "@/lib/auth";
 import { isBillingConfigured, isTestMode } from "@/lib/stripe";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
 
-export const metadata = {
-  title: "Pricing — simple plans for freelancers",
-  description:
-    `Start free with ${FREE_MONTHLY_LIMIT} invoices a month. Upgrade to Pro for ${PRO_MONTHLY_PRICE_LABEL}/month for unlimited invoices, PDF export and payment tracking.`,
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("marketing.pricing");
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription", {
+      limit: FREE_MONTHLY_LIMIT,
+      price: PRO_MONTHLY_PRICE_LABEL,
+    }),
+  };
+}
 
 export default async function PricingPage() {
   const session = await auth.api.getSession({ headers: await headers() });

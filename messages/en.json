@@ -7,6 +7,8 @@
       "startFree": "Start free"
     },
     "home": {
+      "metaTitle": "InvoiceFlow — Professional invoices in 60 seconds",
+      "metaDescription": "Create, send and track professional invoices in seconds. Built for freelancers.",
       "steps": {
         "step1": {
           "title": "Add a client",
@@ -56,6 +58,8 @@
       }
     },
     "pricing": {
+      "metaTitle": "Pricing — simple plans for freelancers",
+      "metaDescription": "Start free with {limit} invoices a month. Upgrade to Pro for {price}/month for unlimited invoices, PDF export and payment tracking.",
       "heading": "Simple pricing for freelancers",
       "subtitle": "Start free. Upgrade when your client list grows. Cancel anytime.",
       "perMonth": "/mo",
