@@ -3,13 +3,9 @@ import path from "node:path";
 import { createElement, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { NextIntlClientProvider } from "next-intl";
-import { expect, it, vi } from "vitest";
+import { expect, it } from "vitest";
 import { formatCents } from "@/lib/money";
 import { InvoiceDocument, LtrBdi } from "./invoice-document";
-
-vi.mock("@/components/status-badge", () => ({
-  StatusBadge: () => createElement("span"),
-}));
 
 const Provider = NextIntlClientProvider as unknown as (props: {
   locale: string;
@@ -69,6 +65,8 @@ it("uses document-locale labels and ltr bidi for amounts, dates, and the invoice
   expect(html).not.toContain('dir="auto"');
   expect(html).toContain(leaf(ar, "invoice.document.totalDue"));
   expect(html).not.toContain(leaf(en, "invoice.document.totalDue"));
+  expect(html).toContain(leaf(ar, "invoice.status.draft"));
+  expect(html).not.toContain(leaf(en, "invoice.status.draft"));
   expect(bdiDir(html, "$50.00")).toBe("ltr");
   expect(bdiDir(html, "INV-1")).toBe("ltr");
   expect(bdiDir(html, "2026-10-10")).toBe("ltr");

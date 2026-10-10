@@ -75,7 +75,7 @@ export function InvoiceDocument({
             <LtrBdi value={invoice.number} />
           </p>
           <div className="mt-2">
-            <StatusBadge status={invoice.status} dueDate={invoice.dueDate} />
+            <StatusBadge status={invoice.status} dueDate={invoice.dueDate} locale={locale} />
           </div>
         </div>
         <div className="text-end text-sm">

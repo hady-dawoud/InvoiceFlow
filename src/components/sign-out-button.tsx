@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useRequest } from "@/lib/use-request";
+import { signOutFailureMessage } from "@/lib/auth-error";
 import { signOut } from "@/lib/auth-client";
 
 export function SignOutButton() {
@@ -16,7 +17,7 @@ export function SignOutButton() {
       onClick={async () => {
         const result = await run(() => signOut());
         if (!result) return;
-        if (result.error) { setError(result.error.message ?? t("genericError")); return; }
+        if (result.error) { setError(signOutFailureMessage(t, result.error)); return; }
         router.push("/login");
         router.refresh();
       }}

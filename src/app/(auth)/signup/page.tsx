@@ -6,6 +6,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequest } from "@/lib/use-request";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
+import { signUpFailureMessage } from "@/lib/auth-error";
 import { signUp } from "@/lib/auth-client";
 
 export default function SignupPage() {
@@ -22,7 +23,7 @@ export default function SignupPage() {
     if (!result) return;
     const { error } = result;
     if (error) {
-      setError(error.message ?? t("genericError"));
+      setError(signUpFailureMessage(t, error));
       return;
     }
     router.push("/dashboard");

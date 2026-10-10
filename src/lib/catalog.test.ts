@@ -88,6 +88,11 @@ function NumberProbe() {
   return createElement("span", null, t("test", { count: 1234 }));
 }
 
+function SignupSubtitle() {
+  const t = useTranslations("auth.signup");
+  return createElement("span", null, t("subtitle", { limit: 3 }));
+}
+
 describe("number formatting under the ar locale", () => {
   it("renders Western digits instead of Arabic-Indic digits", () => {
     const markup = renderToStaticMarkup(
@@ -99,6 +104,19 @@ describe("number formatting under the ar locale", () => {
     );
 
     expect(markup.replace(/[^0-9]/g, "")).toContain("1234");
+    expect(markup).not.toMatch(/[\u0660-\u0669]/);
+  });
+
+  it("uses the Arabic few form for the free signup limit of 3", () => {
+    const markup = renderToStaticMarkup(
+      createElement(
+        Provider,
+        { locale: "ar", messages: ar as unknown as Record<string, string> },
+        createElement(SignupSubtitle),
+      ),
+    );
+
+    expect(markup).toContain("3 فواتير شهريًا");
     expect(markup).not.toMatch(/[\u0660-\u0669]/);
   });
 });

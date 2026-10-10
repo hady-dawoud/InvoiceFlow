@@ -1,7 +1,7 @@
 import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { StatusBadge } from "@/components/status-badge";
 import { listInvoiceSummaries } from "@/lib/data/invoices";
 import { listClientsWithStats } from "@/lib/data/clients";
@@ -20,7 +20,7 @@ export default async function DashboardPage() {
   const session = await getSession();
   const { user } = session;
   const currency = user.currency;
-  const t = await getTranslations("dashboard.home");
+  const [t, uiLocale] = await Promise.all([getTranslations("dashboard.home"), getLocale()]);
 
   const [summaries, usedThisMonth, clients] = await Promise.all([
     listInvoiceSummaries(user.id),
@@ -113,7 +113,7 @@ export default async function DashboardPage() {
                   <td>{inv.clientName}</td>
                   <td>{inv.dueDate}</td>
                   <td>
-                    <StatusBadge status={inv.status} dueDate={inv.dueDate} />
+                    <StatusBadge status={inv.status} dueDate={inv.dueDate} locale={uiLocale} />
                   </td>
                   <td className="num money">{formatCents(inv.totalCents, currency)}</td>
                 </tr>

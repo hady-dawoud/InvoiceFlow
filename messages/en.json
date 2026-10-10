@@ -111,7 +111,14 @@
       "emailPlaceholder": "you@example.com",
       "passwordLabel": "Password",
       "passwordPlaceholder": "••••••••",
-      "genericError": "Invalid email or password.",
+      "genericError": "Could not sign in. Please try again.",
+      "errors": {
+        "INVALID_EMAIL": "Enter a valid email address.",
+        "INVALID_EMAIL_OR_PASSWORD": "Invalid email or password.",
+        "FAILED_TO_CREATE_SESSION": "Could not start your session. Please try again.",
+        "INVALID_ORIGIN": "Sign-in was blocked. Refresh the page and try again.",
+        "MISSING_OR_NULL_ORIGIN": "Sign-in was blocked. Refresh the page and try again."
+      },
       "submit": "Sign in",
       "submitPending": "Signing in…",
       "noAccount": "No account yet?",
@@ -119,7 +126,7 @@
     },
     "signup": {
       "heading": "Create your account",
-      "subtitle": "Free plan: {limit} invoices per month. No card required.",
+      "subtitle": "Free plan: {limit, plural, one {# invoice per month} other {# invoices per month}}. No card required.",
       "nameLabel": "Your name",
       "namePlaceholder": "Alex Doe",
       "emailLabel": "Email",
@@ -127,6 +134,16 @@
       "passwordLabel": "Password",
       "passwordPlaceholder": "At least 8 characters",
       "genericError": "Could not create your account.",
+      "errors": {
+        "VALIDATION_ERROR": "Check the information you entered and try again.",
+        "PASSWORD_TOO_SHORT": "Password must be at least 8 characters.",
+        "PASSWORD_TOO_LONG": "Password must be at most 128 characters.",
+        "USER_ALREADY_EXISTS_USE_ANOTHER_EMAIL": "An account with this email already exists. Sign in instead.",
+        "FAILED_TO_CREATE_USER": "Could not create your account. Please try again.",
+        "FAILED_TO_CREATE_SESSION": "Your account was created, but signing in failed. Try signing in.",
+        "INVALID_ORIGIN": "Sign-up was blocked. Refresh the page and try again.",
+        "MISSING_OR_NULL_ORIGIN": "Sign-up was blocked. Refresh the page and try again."
+      },
       "submit": "Create free account",
       "submitPending": "Creating account…",
       "haveAccount": "Already have an account?",
@@ -148,7 +165,11 @@
     },
     "signOut": {
       "label": "Sign out",
-      "genericError": "Could not sign out."
+      "genericError": "Could not sign out.",
+      "errors": {
+        "INVALID_ORIGIN": "Sign-out was blocked. Refresh the page and try again.",
+        "MISSING_OR_NULL_ORIGIN": "Sign-out was blocked. Refresh the page and try again."
+      }
     },
     "home": {
       "quotaNotice": {

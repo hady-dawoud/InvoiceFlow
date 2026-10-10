@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRequest } from "@/lib/use-request";
+import { loginFailureMessage } from "@/lib/auth-error";
 import { signIn } from "@/lib/auth-client";
 
 export default function LoginPage() {
@@ -20,7 +21,7 @@ export default function LoginPage() {
     if (!result) return;
     const { error } = result;
     if (error) {
-      setError(error.message ?? t("genericError"));
+      setError(loginFailureMessage(t, error));
       return;
     }
     router.push("/dashboard");

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { StatusBadge } from "@/components/status-badge";
 import { countInvoicesThisMonth, listInvoiceSummaries } from "@/lib/data/invoices";
 import { isOverdue } from "@/lib/invoice";
@@ -22,7 +22,7 @@ export default async function InvoicesPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const session = await getSession();
-  const t = await getTranslations("invoice.list");
+  const [t, uiLocale] = await Promise.all([getTranslations("invoice.list"), getLocale()]);
   const { status: rawStatus } = await searchParams;
   const filter = (FILTERS as readonly string[]).includes(rawStatus ?? "")
     ? (rawStatus as Filter)
@@ -101,7 +101,7 @@ export default async function InvoicesPage({
                 <td>{inv.issueDate}</td>
                 <td>{inv.dueDate}</td>
                 <td>
-                  <StatusBadge status={inv.status} dueDate={inv.dueDate} />
+                  <StatusBadge status={inv.status} dueDate={inv.dueDate} locale={uiLocale} />
                 </td>
                 <td className="num money">{formatCents(inv.totalCents, session.user.currency)}</td>
               </tr>
