@@ -25,7 +25,7 @@ function pdfLabels(locale: "en" | "ar", taxBps: number): PdfLabels {
     unitPrice: t("table.unitPrice"),
     amount: t("table.amount"),
     subtotal: t("subtotal"),
-    tax: t("taxLabel", { pct: taxBps / 100 }),
+    tax: String(t.rich("taxLabel", { pct: taxBps / 100, rate: (chunks) => chunks })),
     totalDue: t("totalDue"),
     notes: t("notes"),
     footer: t("footer"),

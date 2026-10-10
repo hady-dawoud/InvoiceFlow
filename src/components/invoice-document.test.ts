@@ -75,6 +75,17 @@ it("uses document-locale labels and ltr bidi for amounts, dates, and the invoice
   expect(bdiDir(html, "Thank you")).toBe("ltr");
 });
 
+it("keeps the Arabic tax percent in an ltr bdi", async () => {
+  const node = await InvoiceDocument({
+    ...sheetProps,
+    invoice: { ...invoice, taxBps: 850 },
+  });
+  const html = renderToStaticMarkup(createElement(Provider, { locale: "en", messages: en }, node));
+
+  expect(html).toContain("الضريبة");
+  expect(bdiDir(html, "(8.5%)")).toBe("ltr");
+});
+
 it("keeps a leading minus on an ltr amount bdi inside rtl", () => {
   const html = renderToStaticMarkup(
     createElement("div", { dir: "rtl" }, createElement(LtrBdi, { value: formatCents(-5000, "usd") })),

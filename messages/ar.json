@@ -180,7 +180,7 @@
         "upgrade": "الترقية إلى برو — {price}/شهريًا"
       },
       "unpaidLabel": "غير مدفوع",
-      "overdueNote": "مبلغ متأخر قدره {amount}.",
+      "overdueNote": "مبلغ متأخر قدره <ltr>{amount}</ltr>.",
       "noOverdue": "لا توجد فواتير تجاوزت تاريخ استحقاقها.",
       "stats": {
         "billed": "المفوترة (مرسلة + مدفوعة)",
@@ -374,7 +374,7 @@
         "amount": "المبلغ"
       },
       "subtotal": "الإجمالي الفرعي",
-      "taxLabel": "الضريبة ({pct}%)",
+      "taxLabel": "الضريبة <rate>({pct}%)</rate>",
       "totalDue": "الإجمالي المستحق",
       "notes": "ملاحظات",
       "footer": "أُنشئت باستخدام InvoiceFlow",

@@ -158,7 +158,12 @@ export function InvoiceDocument({
             <LtrBdi value={formatCents(totals.subtotalCents, currency)} />
           </div>
           <div className="flex justify-between text-quiet">
-            <span>{t("taxLabel", { pct: invoice.taxBps / 100 })}</span>
+            <span>
+              {t.rich("taxLabel", {
+                pct: invoice.taxBps / 100,
+                rate: (chunks) => <bdi dir="ltr">{chunks}</bdi>,
+              })}
+            </span>
             <LtrBdi value={formatCents(totals.taxCents, currency)} />
           </div>
           <div className="flex justify-between border-t border-line pt-2 text-base font-bold text-ink">

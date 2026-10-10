@@ -86,7 +86,16 @@ const graphemeSegmenter = new Intl.Segmenter("ar", { granularity: "grapheme" });
 
 type Face = "naskh" | "naskh-bold" | "helvetica" | "helvetica-bold";
 type Align = "start" | "end" | "numeric" | "notes";
-type Column = { text: string; x: number; width: number; align: Align; bold?: boolean; size?: number };
+type ColumnLine = string | string[];
+type Column = {
+  text?: string;
+  x: number;
+  width: number;
+  align: Align;
+  bold?: boolean;
+  size?: number;
+  lines?: ColumnLine[];
+};
 type Position = { xAdvance: number; advanceWidth: number; xOffset: number; yOffset: number };
 type FontkitGlyph = { id: number; codePoints: number[]; advanceWidth: number };
 type FontkitPos = { xAdvance: number; yAdvance: number; xOffset: number; yOffset: number };
@@ -123,6 +132,9 @@ type WrappedLine = {
   end: number;
   align: Align;
 };
+type DrawnLine =
+  | { kind: "wrapped"; line: WrappedLine }
+  | { kind: "segments"; segments: string[] };
 
 function isWinAnsi(codePoint: number): boolean {
   if (codePoint >= 0x20 && codePoint <= 0x7e) return true;
@@ -136,6 +148,12 @@ function isNaskh(face: Face) {
 
 function documentRtl(locale: DocumentLocale) {
   return locale === "ar";
+}
+
+function labelWithRate(label: string): ColumnLine {
+  const match = /^(.*\S)\s+(\([^()\n]*\))$/.exec(label);
+  if (!match) return label;
+  return [match[1], match[2]];
 }
 
 function placeX(x: number, width: number, rtl: boolean) {
@@ -539,6 +557,41 @@ class InvoicePdfRenderer {
     if (this.y + height > CONTENT_BOTTOM) this.newPage(table);
   }
 
+  private drawSegments(
+    segments: string[],
+    boxX: number,
+    boxWidth: number,
+    size: number,
+    bold: boolean,
+    align: Align,
+  ) {
+    const gap = this.measureString(" ", size, bold);
+    const parts = segments.filter((segment) => segment !== "").map((text) => {
+      const base = align === "numeric" ? "ltr" as const : textDirection(text);
+      const levels = paragraphLevels(text, base);
+      const end = text.length - 1;
+      const width = this.measureRange(text, 0, end, levels, size, bold);
+      return { text, levels, end, width };
+    });
+    const total = parts.reduce((sum, part) => sum + part.width, 0) + gap * Math.max(0, parts.length - 1);
+    let x = this.lineX(boxX, boxWidth, total, align);
+    const order = this.rtl ? [...parts].reverse() : parts;
+    for (const part of order) {
+      this.drawVisualLine(part.text, part.levels, 0, part.end, size, bold, x);
+      x += part.width + gap;
+    }
+  }
+
+  private columnLines(column: Column, size: number): DrawnLine[] {
+    const bold = Boolean(column.bold);
+    const wrapped = (text: string): DrawnLine[] =>
+      this.wrapCell(text, column.width, size, bold, column.align).map((line) => ({ kind: "wrapped", line }));
+    if (!column.lines) return wrapped(column.text ?? "");
+    return column.lines.flatMap((entry) =>
+      Array.isArray(entry) ? [{ kind: "segments", segments: entry }] : wrapped(entry),
+    );
+  }
+
   private columns(columns: Column[], table = false) {
     const rtl = this.rtl;
     const placed = columns.map((column) => ({
@@ -548,18 +601,25 @@ class InvoicePdfRenderer {
     }));
     const sizes = placed.map((column) => {
       if (column.align !== "numeric") return column.size;
-      const width = this.measureString(column.text.replace(/\n/g, ""), column.size, Boolean(column.bold));
+      const source = column.lines ? column.lines.flat().join("") : (column.text ?? "").replace(/\n/g, "");
+      const width = this.measureString(source, column.size, Boolean(column.bold));
       return Math.min(column.size, (column.width / Math.max(width, 0.01)) * (column.size * 0.98));
     });
-    const lines = placed.map((column, i) => this.wrapCell(column.text, column.width, sizes[i], Boolean(column.bold), column.align));
+    const lines = placed.map((column, i) => this.columnLines(column, sizes[i]));
     const count = Math.max(...lines.map((column) => column.length));
     const height = count * LINE_HEIGHT;
     if (height < CONTENT_BOTTOM - 110) this.ensureSpace(height + 12, table);
     for (let i = 0; i < count; i++) {
       this.ensureSpace(LINE_HEIGHT, table);
       placed.forEach((column, index) => {
-        const line = lines[index][i];
-        if (!line || !line.paragraph || line.end < line.start) return;
+        const drawn = lines[index][i];
+        if (!drawn) return;
+        if (drawn.kind === "segments") {
+          this.drawSegments(drawn.segments, column.x, column.width, sizes[index], Boolean(column.bold), column.align);
+          return;
+        }
+        const line = drawn.line;
+        if (!line.paragraph || line.end < line.start) return;
         const width = this.measureRange(line.paragraph, line.start, line.end, line.levels, sizes[index], Boolean(column.bold));
         const x = this.lineX(column.x, column.width, width, line.align);
         this.drawVisualLine(line.paragraph, line.levels, line.start, line.end, sizes[index], Boolean(column.bold), x);
@@ -583,7 +643,15 @@ class InvoicePdfRenderer {
     const { client, invoice } = this.detail;
     this.columns([
       { text: [this.labels.billedTo, client.name, client.email, client.address].filter(Boolean).join("\n"), x: LEFT, width: 240, align: "start" },
-      { text: `${this.labels.issued}: ${invoice.issueDate}\n${this.labels.due}: ${invoice.dueDate}`, x: 322, width: 240, align: "end" },
+      {
+        lines: [
+          [`${this.labels.issued}:`, invoice.issueDate],
+          [`${this.labels.due}:`, invoice.dueDate],
+        ],
+        x: 322,
+        width: 240,
+        align: "end",
+      },
     ]);
     this.y += 22;
   }
@@ -623,7 +691,12 @@ class InvoicePdfRenderer {
     const totals = calcTotals(this.detail.items, this.detail.invoice.taxBps);
     this.doc.fillColor("#555");
     this.columns([
-      { text: `${this.labels.subtotal}\n${this.labels.tax}\n${this.labels.totalDue}`, x: 322, width: 112, align: "start" },
+      {
+        lines: [this.labels.subtotal, labelWithRate(this.labels.tax), this.labels.totalDue],
+        x: 322,
+        width: 112,
+        align: "start",
+      },
       { text: [totals.subtotalCents, totals.taxCents, totals.totalCents].map((value) => formatCents(value, this.owner.currency)).join("\n"), x: 442, width: 120, align: "numeric" },
     ]);
     this.y += 22;

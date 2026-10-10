@@ -9,6 +9,7 @@ import {
   deleteClientAction,
   updateClientAction,
 } from "@/lib/actions/clients";
+import { textDirection } from "@/lib/text-direction";
 import { ClientForm, type FormState } from "./client-form";
 import type { ClientWithStats } from "@/lib/data/clients";
 
@@ -110,12 +111,16 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
                 {clients.map((client) => (
                   <tr key={client.id} className="hover:bg-sheet">
                     <td className="px-4 py-2.5 font-medium text-ink">
-                      {client.name}
+                      <bdi dir={textDirection(client.name)}>{client.name}</bdi>
                       {client.address && (
-                        <p className="text-xs font-normal text-quiet">{client.address}</p>
+                        <p className="text-xs font-normal text-quiet">
+                          <bdi dir={textDirection(client.address)}>{client.address}</bdi>
+                        </p>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-quiet">{client.email ?? t("noEmail")}</td>
+                    <td className="px-4 py-2.5 text-quiet">
+                      {client.email ? <bdi dir={textDirection(client.email)}>{client.email}</bdi> : t("noEmail")}
+                    </td>
                     <td className="px-4 py-2.5 text-quiet">{client.invoiceCount}</td>
                     <td className="px-4 py-2.5 text-end">
                       <button

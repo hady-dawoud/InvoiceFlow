@@ -2,6 +2,7 @@ import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
+import { OverdueNote } from "@/components/overdue-note";
 import { StatusBadge } from "@/components/status-badge";
 import { listInvoiceSummaries } from "@/lib/data/invoices";
 import { listClientsWithStats } from "@/lib/data/clients";
@@ -63,9 +64,7 @@ export default async function DashboardPage() {
           {formatCents(outstanding + overdue, currency)}
         </p>
         <p className="mt-2 text-quiet">
-          {overdue > 0
-            ? t("overdueNote", { amount: formatCents(overdue, currency) })
-            : t("noOverdue")}
+          {overdue > 0 ? <OverdueNote amount={formatCents(overdue, currency)} /> : t("noOverdue")}
         </p>
         <dl className="mt-6 grid grid-cols-3 gap-4 border-t border-line pt-4 text-sm">
           {stats.filter((stat) => stat.key !== "outstanding").map((stat) => (

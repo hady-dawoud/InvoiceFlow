@@ -180,7 +180,7 @@
         "upgrade": "Upgrade to Pro — {price}/mo"
       },
       "unpaidLabel": "Unpaid",
-      "overdueNote": "Overdue amount: {amount}.",
+      "overdueNote": "Overdue amount: <ltr>{amount}</ltr>.",
       "noOverdue": "Nothing is past its due date.",
       "stats": {
         "billed": "Billed (sent + paid)",
@@ -374,7 +374,7 @@
         "amount": "Amount"
       },
       "subtotal": "Subtotal",
-      "taxLabel": "Tax ({pct}%)",
+      "taxLabel": "Tax <rate>({pct}%)</rate>",
       "totalDue": "Total due",
       "notes": "Notes",
       "footer": "Created with InvoiceFlow",
