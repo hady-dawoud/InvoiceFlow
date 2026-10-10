@@ -55,3 +55,6 @@ next-env.d.ts
 # scratch scripts
 tmp/
 gui-test-screenshots/
+
+# local git worktrees
+.worktrees/
