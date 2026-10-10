@@ -2,18 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const LINKS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/dashboard/invoices", label: "Invoices" },
-  { href: "/dashboard/clients", label: "Clients" },
-  { href: "/dashboard/billing", label: "Billing" },
-];
+  { href: "/dashboard", key: "dashboard" },
+  { href: "/dashboard/invoices", key: "invoices" },
+  { href: "/dashboard/clients", key: "clients" },
+  { href: "/dashboard/billing", key: "billing" },
+] as const;
 
 export function NavLinks() {
   const pathname = usePathname();
+  const t = useTranslations("dashboard.nav");
   return (
-    <nav className="flex flex-wrap gap-1" aria-label="Account">
+    <nav className="flex flex-wrap gap-1" aria-label={t("ariaLabel")}>
       {LINKS.map((link) => {
         const active =
           link.href === "/dashboard"
@@ -27,7 +29,7 @@ export function NavLinks() {
               active ? "bg-ink/8 text-ink" : "text-quiet hover:text-ink"
             }`}
           >
-            {link.label}
+            {t(link.key)}
           </Link>
         );
       })}

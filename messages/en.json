@@ -126,5 +126,85 @@
       "haveAccount": "Already have an account?",
       "loginCta": "Sign in"
     }
+  },
+  "dashboard": {
+    "metaTitle": "Dashboard",
+    "nav": {
+      "ariaLabel": "Account",
+      "dashboard": "Dashboard",
+      "invoices": "Invoices",
+      "clients": "Clients",
+      "billing": "Billing"
+    },
+    "plan": {
+      "pro": "Pro",
+      "free": "Free"
+    },
+    "signOut": {
+      "label": "Sign out",
+      "genericError": "Could not sign out."
+    },
+    "home": {
+      "quotaNotice": {
+        "prefix": "Free plan:",
+        "usedOfLimit": "{used} of {limit}",
+        "suffix": "invoices used this month.",
+        "blocked": "You've hit the limit — upgrade to keep invoicing.",
+        "remaining": "{remaining} left before the wall.",
+        "upgrade": "Upgrade to Pro — {price}/mo"
+      },
+      "unpaidLabel": "Unpaid",
+      "overdueNote": "{amount} is past its due date.",
+      "noOverdue": "Nothing is past its due date.",
+      "stats": {
+        "billed": "Billed (sent + paid)",
+        "paid": "Paid",
+        "outstanding": "Outstanding",
+        "overdue": "Overdue"
+      },
+      "recentInvoices": "Recent invoices",
+      "viewAll": "View all",
+      "table": {
+        "number": "Number",
+        "client": "Client",
+        "due": "Due",
+        "status": "Status",
+        "total": "Total"
+      },
+      "empty": {
+        "noInvoices": "No invoices yet.",
+        "upgradeToCreate": "Upgrade to create invoices",
+        "createFirst": "Create your first invoice",
+        "addClientFirst": "Add a client first"
+      }
+    },
+    "clients": {
+      "metaTitle": "Clients",
+      "heading": "Clients",
+      "newClient": "New client",
+      "empty": "No clients yet. Add your first client to start invoicing.",
+      "noEmail": "—",
+      "edit": "Edit",
+      "delete": "Delete",
+      "deleteConfirm": "Delete client \"{name}\"?",
+      "table": {
+        "name": "Name",
+        "email": "Email",
+        "invoices": "Invoices",
+        "actions": "Actions"
+      },
+      "form": {
+        "nameLabel": "Client name",
+        "namePlaceholder": "Client name *",
+        "emailLabel": "Billing email",
+        "emailPlaceholder": "Billing email",
+        "addressLabel": "Address",
+        "addressPlaceholder": "Address",
+        "add": "Add client",
+        "save": "Save changes",
+        "saving": "Saving…",
+        "cancel": "Cancel"
+      }
+    }
   }
 }

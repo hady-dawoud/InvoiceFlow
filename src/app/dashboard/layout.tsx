@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import { NavLinks } from "@/components/nav-links";
 import { SignOutButton } from "@/components/sign-out-button";
 import { getSession } from "@/lib/session";
@@ -10,6 +11,7 @@ export default async function DashboardLayout({
 }) {
   const session = await getSession();
   const { user } = session;
+  const t = await getTranslations("dashboard.plan");
 
   return (
     <div className="min-h-dvh">
@@ -20,7 +22,7 @@ export default async function DashboardLayout({
           </Link>
           <NavLinks />
           <div className="ml-auto flex items-center gap-3">
-            <span className="text-sm text-quiet">{user.isPro ? "Pro" : "Free"}</span>
+            <span className="text-sm text-quiet">{user.isPro ? t("pro") : t("free")}</span>
             <SignOutButton />
           </div>
         </div>

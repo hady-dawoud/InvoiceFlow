@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRequest } from "@/lib/use-request";
 import {
   createClientAction,
@@ -15,6 +16,7 @@ const EMPTY: FormState = { id: null, name: "", email: "", address: "" };
 
 export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
   const router = useRouter();
+  const t = useTranslations("dashboard.clients");
   const [form, setForm] = useState<FormState | null>(null);
   const { run, pending, error, setError } = useRequest();
 
@@ -54,7 +56,7 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
   }
 
   function remove(client: ClientWithStats) {
-    if (!window.confirm(`Delete client "${client.name}"?`)) return;
+    if (!window.confirm(t("deleteConfirm", { name: client.name }))) return;
     setError(null);
     void run(async () => {
       const result = await deleteClientAction(client.id);
@@ -66,14 +68,14 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-ink">Clients</h1>
+        <h1 className="text-xl font-bold text-ink">{t("heading")}</h1>
         {!form && (
           <button
             disabled={pending}
             onClick={openCreate}
             className="btn"
           >
-            New client
+            {t("newClient")}
           </button>
         )}
       </div>
@@ -88,17 +90,17 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
 
       {clients.length === 0 && !form ? (
         <div className="rounded-xl border border-dashed border-line bg-white px-6 py-12 text-center text-quiet">
-          No clients yet. Add your first client to start invoicing.
+          {t("empty")}
         </div>
       ) : (
         clients.length > 0 && (
           <table className="ledger text-sm">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Email</th>
-                  <th>Invoices</th>
-                  <th>Actions</th>
+                  <th>{t("table.name")}</th>
+                  <th>{t("table.email")}</th>
+                  <th>{t("table.invoices")}</th>
+                  <th>{t("table.actions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-paper">
@@ -110,7 +112,7 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
                         <p className="text-xs font-normal text-quiet">{client.address}</p>
                       )}
                     </td>
-                    <td className="px-4 py-2.5 text-quiet">{client.email ?? "—"}</td>
+                    <td className="px-4 py-2.5 text-quiet">{client.email ?? t("noEmail")}</td>
                     <td className="px-4 py-2.5 text-quiet">{client.invoiceCount}</td>
                     <td className="px-4 py-2.5 text-right">
                       <button
@@ -118,14 +120,14 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
                         onClick={() => openEdit(client)}
                         className="rounded px-2 py-1 text-sm font-medium text-quiet hover:bg-ink/8"
                       >
-                        Edit
+                        {t("edit")}
                       </button>
                       <button
                         disabled={pending}
                         onClick={() => remove(client)}
                         className="rounded px-2 py-1 text-sm font-medium text-red-600 hover:bg-red-50"
                       >
-                        Delete
+                        {t("delete")}
                       </button>
                     </td>
                   </tr>
@@ -137,4 +139,3 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
     </div>
   );
 }
-

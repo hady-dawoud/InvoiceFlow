@@ -126,5 +126,85 @@
       "haveAccount": "لديك حساب مسبقًا؟",
       "loginCta": "تسجيل الدخول"
     }
+  },
+  "dashboard": {
+    "metaTitle": "لوحة التحكم",
+    "nav": {
+      "ariaLabel": "الحساب",
+      "dashboard": "لوحة التحكم",
+      "invoices": "الفواتير",
+      "clients": "العملاء",
+      "billing": "الفوترة"
+    },
+    "plan": {
+      "pro": "برو",
+      "free": "مجاني"
+    },
+    "signOut": {
+      "label": "تسجيل الخروج",
+      "genericError": "تعذّر تسجيل الخروج."
+    },
+    "home": {
+      "quotaNotice": {
+        "prefix": "الخطة المجانية:",
+        "usedOfLimit": "{used} من {limit}",
+        "suffix": "فاتورة مستخدمة هذا الشهر.",
+        "blocked": "لقد بلغت الحد الأقصى — قم بالترقية لمتابعة إصدار الفواتير.",
+        "remaining": "تبقّى {remaining} قبل الوصول إلى الحد.",
+        "upgrade": "الترقية إلى برو — {price}/شهريًا"
+      },
+      "unpaidLabel": "غير مدفوع",
+      "overdueNote": "{amount} تجاوزت تاريخ استحقاقها.",
+      "noOverdue": "لا توجد فواتير تجاوزت تاريخ استحقاقها.",
+      "stats": {
+        "billed": "المفوترة (مرسلة + مدفوعة)",
+        "paid": "مدفوعة",
+        "outstanding": "مستحقة",
+        "overdue": "متأخرة"
+      },
+      "recentInvoices": "الفواتير الأخيرة",
+      "viewAll": "عرض الكل",
+      "table": {
+        "number": "الرقم",
+        "client": "العميل",
+        "due": "تاريخ الاستحقاق",
+        "status": "الحالة",
+        "total": "الإجمالي"
+      },
+      "empty": {
+        "noInvoices": "لا توجد فواتير حتى الآن.",
+        "upgradeToCreate": "قم بالترقية لإصدار الفواتير",
+        "createFirst": "أنشئ فاتورتك الأولى",
+        "addClientFirst": "أضف عميلاً أولاً"
+      }
+    },
+    "clients": {
+      "metaTitle": "العملاء",
+      "heading": "العملاء",
+      "newClient": "عميل جديد",
+      "empty": "لا يوجد عملاء حتى الآن. أضف عميلك الأول لبدء الفوترة.",
+      "noEmail": "—",
+      "edit": "تعديل",
+      "delete": "حذف",
+      "deleteConfirm": "حذف العميل \"{name}\"؟",
+      "table": {
+        "name": "الاسم",
+        "email": "البريد الإلكتروني",
+        "invoices": "الفواتير",
+        "actions": "الإجراءات"
+      },
+      "form": {
+        "nameLabel": "اسم العميل",
+        "namePlaceholder": "اسم العميل *",
+        "emailLabel": "البريد الإلكتروني للفوترة",
+        "emailPlaceholder": "البريد الإلكتروني للفوترة",
+        "addressLabel": "العنوان",
+        "addressPlaceholder": "العنوان",
+        "add": "إضافة عميل",
+        "save": "حفظ التغييرات",
+        "saving": "جارٍ الحفظ…",
+        "cancel": "إلغاء"
+      }
+    }
   }
 }

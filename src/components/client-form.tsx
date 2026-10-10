@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export type FormState = {
   id: string | null; // null = creating
   name: string;
@@ -10,30 +12,31 @@ export type FormState = {
 export function ClientForm({ form, setForm, pending, save, cancel }: {
   form: FormState; setForm: (form: FormState) => void; pending: boolean; save: () => void; cancel: () => void;
 }) {
+  const t = useTranslations("dashboard.clients.form");
   return (
         <div className="rounded-xl border border-line bg-white p-4 shadow-sm">
           <fieldset disabled={pending} className="grid gap-3 sm:grid-cols-3">
             <input
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              aria-label="Client name"
-              placeholder="Client name *"
+              aria-label={t("nameLabel")}
+              placeholder={t("namePlaceholder")}
               className="field"
               autoFocus
             />
             <input
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              aria-label="Billing email"
-              placeholder="Billing email"
+              aria-label={t("emailLabel")}
+              placeholder={t("emailPlaceholder")}
               type="email"
               className="field"
             />
             <input
               value={form.address}
               onChange={(e) => setForm({ ...form, address: e.target.value })}
-              aria-label="Address"
-              placeholder="Address"
+              aria-label={t("addressLabel")}
+              placeholder={t("addressPlaceholder")}
               className="field"
             />
           </fieldset>
@@ -43,14 +46,14 @@ export function ClientForm({ form, setForm, pending, save, cancel }: {
               disabled={pending || form.name.trim().length === 0}
               className="btn disabled:opacity-60"
             >
-              {pending ? "Saving…" : form.id ? "Save changes" : "Add client"}
+              {pending ? t("saving") : form.id ? t("save") : t("add")}
             </button>
             <button
               disabled={pending}
               onClick={cancel}
               className="btn btn-ghost"
             >
-              Cancel
+              {t("cancel")}
             </button>
           </div>
         </div>

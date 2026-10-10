@@ -1,5 +1,7 @@
 import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { StatusBadge } from "@/components/status-badge";
 import { listInvoiceSummaries } from "@/lib/data/invoices";
 import { listClientsWithStats } from "@/lib/data/clients";
@@ -9,12 +11,16 @@ import { getQuotaState } from "@/lib/quota";
 import { countInvoicesThisMonth } from "@/lib/data/invoices";
 import { getSession } from "@/lib/session";
 
-export const metadata = { title: "Dashboard" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("dashboard");
+  return { title: t("metaTitle") };
+}
 
 export default async function DashboardPage() {
   const session = await getSession();
   const { user } = session;
   const currency = user.currency;
+  const t = await getTranslations("dashboard.home");
 
   const [summaries, usedThisMonth, clients] = await Promise.all([
     listInvoiceSummaries(user.id),
@@ -27,11 +33,11 @@ export default async function DashboardPage() {
 
   const recent = summaries.slice(0, 5);
 
-  const stats = [
-    { label: "Billed (sent + paid)", value: formatCents(billed, currency) },
-    { label: "Paid", value: formatCents(paid, currency) },
-    { label: "Outstanding", value: formatCents(outstanding, currency) },
-    { label: "Overdue", value: formatCents(overdue, currency), danger: overdue > 0 },
+  const stats: { key: "billed" | "paid" | "outstanding" | "overdue"; value: string; danger: boolean }[] = [
+    { key: "billed", value: formatCents(billed, currency), danger: false },
+    { key: "paid", value: formatCents(paid, currency), danger: false },
+    { key: "outstanding", value: formatCents(outstanding, currency), danger: false },
+    { key: "overdue", value: formatCents(overdue, currency), danger: overdue > 0 },
   ];
 
   return (
@@ -39,32 +45,33 @@ export default async function DashboardPage() {
       {!quota.isPro && (
         <div className="notice flex flex-wrap items-center justify-between gap-3">
           <p>
-            Free plan: <strong>{quota.used} of {quota.limit}</strong> invoices used this
-            month.{" "}
+            {t("quotaNotice.prefix")}{" "}
+            <strong>{t("quotaNotice.usedOfLimit", { used: quota.used, limit: quota.limit ?? 0 })}</strong>{" "}
+            {t("quotaNotice.suffix")}{" "}
             {quota.blocked
-              ? "You've hit the limit — upgrade to keep invoicing."
-              : `${quota.remaining} left before the wall.`}
+              ? t("quotaNotice.blocked")
+              : t("quotaNotice.remaining", { remaining: quota.remaining })}
           </p>
           <Link href="/pricing" className="btn">
-            Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
+            {t("quotaNotice.upgrade", { price: PRO_MONTHLY_PRICE_LABEL })}
           </Link>
         </div>
       )}
 
       <section aria-labelledby="unpaid-label">
-        <p id="unpaid-label" className="text-quiet">Unpaid</p>
+        <p id="unpaid-label" className="text-quiet">{t("unpaidLabel")}</p>
         <p className="display money text-5xl sm:text-6xl">
           {formatCents(outstanding + overdue, currency)}
         </p>
         <p className="mt-2 text-quiet">
           {overdue > 0
-            ? `${formatCents(overdue, currency)} is past its due date.`
-            : "Nothing is past its due date."}
+            ? t("overdueNote", { amount: formatCents(overdue, currency) })
+            : t("noOverdue")}
         </p>
         <dl className="mt-6 grid grid-cols-3 gap-4 border-t border-line pt-4 text-sm">
-          {stats.filter((stat) => stat.label !== "Outstanding").map((stat) => (
-            <div key={stat.label}>
-              <dt className="text-quiet">{stat.label}</dt>
+          {stats.filter((stat) => stat.key !== "outstanding").map((stat) => (
+            <div key={stat.key}>
+              <dt className="text-quiet">{t(`stats.${stat.key}`)}</dt>
               <dd className={`money text-lg font-medium ${stat.danger ? "text-overdue" : ""}`}>
                 {stat.value}
               </dd>
@@ -75,9 +82,9 @@ export default async function DashboardPage() {
 
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-medium">Recent invoices</h2>
+          <h2 className="text-lg font-medium">{t("recentInvoices")}</h2>
           <Link href="/dashboard/invoices" className="text-sm font-medium text-carbon hover:underline">
-            View all
+            {t("viewAll")}
           </Link>
         </div>
         {recent.length === 0 ? (
@@ -89,11 +96,11 @@ export default async function DashboardPage() {
           <table className="ledger text-sm">
             <thead>
               <tr>
-                <th>Number</th>
-                <th>Client</th>
-                <th>Due</th>
-                <th>Status</th>
-                <th>Total</th>
+                <th>{t("table.number")}</th>
+                <th>{t("table.client")}</th>
+                <th>{t("table.due")}</th>
+                <th>{t("table.status")}</th>
+                <th>{t("table.total")}</th>
               </tr>
             </thead>
             <tbody>
@@ -120,21 +127,22 @@ export default async function DashboardPage() {
   );
 }
 
-function EmptyState({ hasClients, quotaBlocked }: { hasClients: boolean; quotaBlocked: boolean }) {
+async function EmptyState({ hasClients, quotaBlocked }: { hasClients: boolean; quotaBlocked: boolean }) {
+  const t = await getTranslations("dashboard.home.empty");
   return (
     <div className="bg-sheet px-6 py-12 text-center shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
-      <p className="text-quiet">No invoices yet.</p>
+      <p className="text-quiet">{t("noInvoices")}</p>
       {quotaBlocked ? (
         <Link href="/pricing" className="btn mt-3">
-          Upgrade to create invoices
+          {t("upgradeToCreate")}
         </Link>
       ) : hasClients ? (
         <Link href="/dashboard/invoices/new" className="btn mt-3">
-          Create your first invoice
+          {t("createFirst")}
         </Link>
       ) : (
         <Link href="/dashboard/clients" className="btn mt-3">
-          Add a client first
+          {t("addClientFirst")}
         </Link>
       )}
     </div>
