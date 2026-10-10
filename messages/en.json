@@ -291,8 +291,11 @@
         "issueDate": "Issue date",
         "dueDate": "Due date",
         "taxRate": "Tax rate % (optional)",
-        "notes": "Notes (optional)"
+        "notes": "Notes (optional)",
+        "documentLocale": "Invoice language"
       },
+      "localeEn": "English",
+      "localeAr": "Arabic",
       "selectClientPlaceholder": "Select a client…",
       "taxRatePlaceholder": "e.g. 8.5",
       "notesPlaceholder": "Payment details, thank-you note…",
@@ -380,6 +383,7 @@
     "invalidDueDate": "Invalid due date.",
     "invalidTaxRate": "Tax rate must be between 0 and 50 with at most two decimals.",
     "invalidStatus": "Invalid status.",
+    "invalidDocumentLocale": "Invalid invoice language.",
     "notesTooLong": "Notes are too long.",
     "invalidLineItem": "Invalid line item.",
     "totalTooLarge": "Invoice total is too large.",

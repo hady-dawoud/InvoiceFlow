@@ -134,6 +134,8 @@ export const invoices = sqliteTable(
     /** Tax in basis points: 8.5% → 850. */
     taxBps: integer("tax_bps").notNull().default(0),
     notes: text("notes"),
+    /** Sheet, print, public invoice, and PDF language: en | ar. */
+    documentLocale: text("document_locale").notNull().default("en"),
     /** Opaque public token for the shareable client-facing invoice link. */
     token: text("token").notNull().unique(),
     ...timestamps,

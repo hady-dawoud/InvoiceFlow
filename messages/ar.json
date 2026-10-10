@@ -291,8 +291,11 @@
         "issueDate": "تاريخ الإصدار",
         "dueDate": "تاريخ الاستحقاق",
         "taxRate": "نسبة الضريبة % (اختياري)",
-        "notes": "ملاحظات (اختياري)"
+        "notes": "ملاحظات (اختياري)",
+        "documentLocale": "لغة الفاتورة"
       },
+      "localeEn": "الإنجليزية",
+      "localeAr": "العربية",
       "selectClientPlaceholder": "اختر عميلاً…",
       "taxRatePlaceholder": "مثال: 8.5",
       "notesPlaceholder": "تفاصيل الدفع، أو رسالة شكر…",
@@ -380,6 +383,7 @@
     "invalidDueDate": "تاريخ الاستحقاق غير صالح.",
     "invalidTaxRate": "يجب أن تكون نسبة الضريبة بين 0 و50 بحد أقصى رقمين عشريين.",
     "invalidStatus": "الحالة غير صالحة.",
+    "invalidDocumentLocale": "لغة الفاتورة غير صالحة.",
     "notesTooLong": "الملاحظات طويلة جدًا.",
     "invalidLineItem": "عنصر غير صالح.",
     "totalTooLarge": "إجمالي الفاتورة كبير جدًا.",

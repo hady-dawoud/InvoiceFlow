@@ -42,6 +42,7 @@ export default async function EditInvoicePage({
           taxBps: invoice.taxBps,
           notes: invoice.notes ?? "",
           status: invoice.status,
+          documentLocale: invoice.documentLocale === "ar" ? "ar" : "en",
           items: items.map((item) => ({
             description: item.description,
             quantity: String(item.quantity),

@@ -82,6 +82,8 @@ export async function getInvoiceDetail(userId: string, invoiceId: string) {
   return { ...row, items };
 }
 
+export type DocumentLocale = "en" | "ar";
+
 export type InvoiceInput = {
   clientId: string;
   status: "draft" | "sent" | "paid";
@@ -90,6 +92,7 @@ export type InvoiceInput = {
   taxBps: number;
   notes: string | null;
   items: { description: string; quantity: number; unitPriceCents: number }[];
+  documentLocale?: DocumentLocale;
 };
 
 async function requireOwnedClient(tx: WriteTransaction, userId: string, clientId: string) {
@@ -104,24 +107,27 @@ async function insertItems(tx: WriteTransaction, invoiceId: string, items: Invoi
   })));
 }
 
-async function insertInvoice(userId: string, input: InvoiceInput) {
+async function insertInvoice(userId: string, input: InvoiceInput, locale: DocumentLocale) {
   return writeTransaction(async (tx) => {
     await requireOwnedClient(tx, userId, input.clientId);
     const [owner] = await tx.select({ id: user.id, isPro: user.isPro }).from(user).where(eq(user.id, userId));
     if (!owner) throw new InvoiceWriteError("Account not found.");
     const number = await consumeInvoiceCounters(tx, owner);
     const invoiceId = randomUUID();
-    const { items, ...fields } = input;
-    await tx.insert(invoices).values({ id: invoiceId, userId, number, token: randomBytes(24).toString("hex"), ...fields });
+    const { items, documentLocale, ...fields } = input;
+    await tx.insert(invoices).values({
+      id: invoiceId, userId, number, token: randomBytes(24).toString("hex"), ...fields,
+      documentLocale: documentLocale ?? locale,
+    });
     await insertItems(tx, invoiceId, items);
     return { id: invoiceId, number };
   });
 }
 
-export async function createInvoice(userId: string, input: InvoiceInput) {
+export async function createInvoice(userId: string, input: InvoiceInput, locale: DocumentLocale = "en") {
   calcTotals(input.items, input.taxBps);
   try {
-    const created = await insertInvoice(userId, input);
+    const created = await insertInvoice(userId, input, locale);
     await recordProductEvent("invoice_created", userId);
     return created;
   } catch (error) {
@@ -139,8 +145,12 @@ export async function updateInvoice(userId: string, invoiceId: string, input: In
     const [invoice] = await tx.select({ id: invoices.id }).from(invoices).where(owned);
     if (!invoice) return false;
     await requireOwnedClient(tx, userId, input.clientId);
-    const { items, ...fields } = input;
-    await tx.update(invoices).set({ ...fields, updatedAt: new Date() }).where(owned);
+    const { items, documentLocale, ...fields } = input;
+    await tx.update(invoices).set({
+      ...fields,
+      ...(documentLocale ? { documentLocale } : {}),
+      updatedAt: new Date(),
+    }).where(owned);
     await tx.delete(invoiceItems).where(eq(invoiceItems.invoiceId, invoiceId));
     await insertItems(tx, invoiceId, items);
     return true;

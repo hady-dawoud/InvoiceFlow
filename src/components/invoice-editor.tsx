@@ -4,7 +4,7 @@ import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import {
   createInvoiceAction,
   updateInvoiceAction,
@@ -23,6 +23,7 @@ export type EditorInitial = {
   notes: string;
   status: "draft" | "sent" | "paid";
   items: EditorItem[];
+  documentLocale?: "en" | "ar";
 };
 
 export function InvoiceEditor({
@@ -39,6 +40,7 @@ export function InvoiceEditor({
 }) {
   const router = useRouter();
   const t = useTranslations("invoice.editor");
+  const uiLocale = useLocale();
   // Validation and action errors come back as catalog keys (e.g.
   // "invoice.chooseClient"); translate them with an unscoped translator.
   const tError = useTranslations();
@@ -47,6 +49,9 @@ export function InvoiceEditor({
   const [dueDate, setDueDate] = useState(initial.dueDate);
   const [taxRate, setTaxRate] = useState(String(initial.taxBps / 100));
   const [notes, setNotes] = useState(initial.notes);
+  const [documentLocale, setDocumentLocale] = useState<"en" | "ar">(
+    initial.documentLocale ?? (uiLocale === "ar" ? "ar" : "en"),
+  );
   const [items, setItems] = useState<EditorItem[]>(
     initial.items.length > 0 ? initial.items : [EMPTY_ITEM],
   );
@@ -72,6 +77,7 @@ export function InvoiceEditor({
     formData.set("dueDate", dueDate);
     formData.set("taxRate", taxRate);
     formData.set("notes", notes);
+    formData.set("documentLocale", documentLocale);
     formData.set("itemsJson", JSON.stringify(items));
     const input = parseInvoiceInput(formData);
     if (typeof input === "string") { setError(tError(input)); return; }
@@ -149,6 +155,16 @@ export function InvoiceEditor({
             className="field"
             required
           />
+        </Field>
+        <Field label={t("fields.documentLocale")}>
+          <select
+            value={documentLocale}
+            onChange={(e) => setDocumentLocale(e.target.value === "ar" ? "ar" : "en")}
+            className="field"
+          >
+            <option value="en">{t("localeEn")}</option>
+            <option value="ar">{t("localeAr")}</option>
+          </select>
         </Field>
       </div>
       <InvoiceItemsEditor items={items} setItems={setItems} />

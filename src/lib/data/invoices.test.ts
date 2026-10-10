@@ -69,6 +69,59 @@ describe("invoice persistence", () => {
   });
 });
 
+it("persists document locale on create and update", async () => {
+  const created = await createInvoice("owner", { ...input, documentLocale: "ar" });
+  expect((await getInvoiceDetail("owner", created.id))?.invoice.documentLocale).toBe("ar");
+  await updateInvoice("owner", created.id, { ...input, documentLocale: "en" });
+  expect((await getInvoiceDetail("owner", created.id))?.invoice.documentLocale).toBe("en");
+});
+
+it("stores the caller locale when documentLocale is omitted on create", async () => {
+  const created = await createInvoice("owner", input, "ar");
+  expect((await getInvoiceDetail("owner", created.id))?.invoice.documentLocale).toBe("ar");
+});
+
+it("upgrade backfills document_locale to en on rows inserted without the column", async () => {
+  await db.$client.executeMultiple(`
+    PRAGMA foreign_keys = OFF;
+    DROP TABLE invoices;
+    CREATE TABLE invoices (
+      id TEXT PRIMARY KEY NOT NULL,
+      user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+      client_id TEXT NOT NULL REFERENCES clients(id) ON DELETE RESTRICT,
+      number TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'draft',
+      issue_date TEXT NOT NULL,
+      due_date TEXT NOT NULL,
+      tax_bps INTEGER NOT NULL DEFAULT 0,
+      notes TEXT,
+      token TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+    PRAGMA foreign_keys = ON;
+  `);
+  const now = Math.floor(Date.now() / 1000);
+  await db.$client.execute({
+    sql: `INSERT INTO invoices (id, user_id, client_id, number, status, issue_date, due_date, token, created_at, updated_at)
+          VALUES (?, ?, ?, ?, 'draft', ?, ?, ?, ?, ?)`,
+    args: ["legacy-locale", "owner", "owner-client", "INV-2026-0100", input.issueDate, input.dueDate, "legacy-locale-token", now, now],
+  });
+  try {
+    await upgradeInvoiceCounters();
+    expect((await getInvoiceDetail("owner", "legacy-locale"))?.invoice.documentLocale).toBe("en");
+    await upgradeInvoiceCounters();
+    expect((await getInvoiceDetail("owner", "legacy-locale"))?.invoice.documentLocale).toBe("en");
+  } finally {
+    await db.$client.executeMultiple(`
+      CREATE UNIQUE INDEX IF NOT EXISTS invoices_user_number_idx ON invoices (user_id, number);
+      CREATE INDEX IF NOT EXISTS invoices_user_id_idx ON invoices (user_id);
+      CREATE INDEX IF NOT EXISTS invoices_user_issue_idx ON invoices (user_id, issue_date);
+      CREATE INDEX IF NOT EXISTS invoices_client_id_idx ON invoices (client_id);
+    `);
+  }
+});
+
 it("additive upgrade initializes surviving history and preserves counters on rerun", async () => {
   const year = new Date().getFullYear();
   await db.insert(invoices).values({ id: "legacy", userId: "owner", clientId: "owner-client", number: `INV-${year}-0042`, status: "draft", issueDate: input.issueDate, dueDate: input.dueDate, token: "legacy-token" });

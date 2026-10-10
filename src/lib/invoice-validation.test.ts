@@ -21,6 +21,12 @@ describe("invoice input validation", () => {
   it("rejects overflowing line totals", () => {
     expect(typeof parseInvoiceInput(form({ itemsJson: JSON.stringify([{ description: "Work", quantity: "2", price: "90071992547409.91" }]) }))).toBe("string");
   });
+  it.each(["fr", "arc", "EN", ""])("rejects document locale %s", (documentLocale) => {
+    expect(parseInvoiceInput(form({ documentLocale }))).toBe("invoice.invalidDocumentLocale");
+  });
+  it.each(["en", "ar"] as const)("accepts document locale %s", (documentLocale) => {
+    expect(parseInvoiceInput(form({ documentLocale }))).toMatchObject({ documentLocale });
+  });
   it.each([
     ["a description over 400 characters", { itemsJson: JSON.stringify([{ description: "x".repeat(401), quantity: "1", price: "1" }]) }, "invoice.descriptionTooLong"],
     ["more than 40 line items", { itemsJson: JSON.stringify(Array.from({ length: 41 }, () => ({ description: "Work", quantity: "1", price: "1" }))) }, "invoice.tooManyLineItems"],

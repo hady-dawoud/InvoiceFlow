@@ -85,6 +85,10 @@ export function parseInvoiceInput(formData: FormData): InvoiceInput | string {
   if (status !== "draft" && status !== "sent" && status !== "paid") {
     return "invoice.invalidStatus";
   }
+  const documentLocale = formData.get("documentLocale");
+  if (documentLocale !== null && documentLocale !== "en" && documentLocale !== "ar") {
+    return "invoice.invalidDocumentLocale";
+  }
   const items = parseItems(formData.get("itemsJson"));
   if (typeof items === "string") return items;
   try { calcTotals(items, taxBps); }
@@ -103,5 +107,6 @@ export function parseInvoiceInput(formData: FormData): InvoiceInput | string {
     taxBps,
     notes: trimmedNotes.length > 0 ? trimmedNotes : null,
     items,
+    ...(documentLocale === "en" || documentLocale === "ar" ? { documentLocale } : {}),
   };
 }
