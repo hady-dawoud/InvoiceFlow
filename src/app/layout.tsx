@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Fraunces, Noto_Naskh_Arabic, Outfit } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale } from "next-intl/server";
 import { LatinDigitsForArabic } from "@/i18n/latin-digits-client";
 import { siteOrigin } from "@/lib/site";
 import "./globals.css";
@@ -14,17 +14,15 @@ const notoNaskhArabic = Noto_Naskh_Arabic({
   variable: "--font-noto-naskh-arabic",
 });
 
-export async function generateMetadata(): Promise<Metadata> {
-  const t = await getTranslations("marketing.home");
-  return {
-    metadataBase: new URL(siteOrigin()),
-    title: {
-      default: t("metaTitle"),
-      template: "%s · InvoiceFlow",
-    },
-    description: t("metaDescription"),
-  };
-}
+export const metadata: Metadata = {
+  metadataBase: new URL(siteOrigin()),
+  title: {
+    default: "InvoiceFlow — Professional invoices in 60 seconds",
+    template: "%s · InvoiceFlow",
+  },
+  description:
+    "Create, send and track professional invoices in seconds. Built for freelancers.",
+};
 
 export default async function RootLayout({
   children,

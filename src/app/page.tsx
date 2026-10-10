@@ -1,7 +1,19 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
 import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("marketing.home");
+  return {
+    // `absolute` bypasses the root layout's `%s · InvoiceFlow` title template —
+    // this title already includes the brand name, matching the layout's prior
+    // static `title.default` behavior (used verbatim, no template suffix).
+    title: { absolute: t("metaTitle") },
+    description: t("metaDescription"),
+  };
+}
 
 export default async function LandingPage() {
   const tNav = await getTranslations("marketing.nav");
