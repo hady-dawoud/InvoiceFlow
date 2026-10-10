@@ -6,6 +6,7 @@ import { calcTotals } from "@/lib/money";
 import { consumeInvoiceCounters, InvoiceWriteError, monthKey } from "./invoice-counters";
 import { writeTransaction, type WriteTransaction } from "@/db/write-transaction";
 import { startOfMonth } from "@/lib/quota";
+import { recordProductEvent } from "@/lib/analytics";
 
 /** One invoice joined with its client and pre-computed item sum. */
 export type InvoiceSummary = Invoice & {
@@ -103,8 +104,7 @@ async function insertItems(tx: WriteTransaction, invoiceId: string, items: Invoi
   })));
 }
 
-export async function createInvoice(userId: string, input: InvoiceInput) {
-  calcTotals(input.items, input.taxBps);
+async function insertInvoice(userId: string, input: InvoiceInput) {
   return writeTransaction(async (tx) => {
     await requireOwnedClient(tx, userId, input.clientId);
     const [owner] = await tx.select({ id: user.id, isPro: user.isPro }).from(user).where(eq(user.id, userId));
@@ -116,6 +116,20 @@ export async function createInvoice(userId: string, input: InvoiceInput) {
     await insertItems(tx, invoiceId, items);
     return { id: invoiceId, number };
   });
+}
+
+export async function createInvoice(userId: string, input: InvoiceInput) {
+  calcTotals(input.items, input.taxBps);
+  try {
+    const created = await insertInvoice(userId, input);
+    await recordProductEvent("invoice_created", userId);
+    return created;
+  } catch (error) {
+    if (error instanceof InvoiceWriteError && error.message === "quota") {
+      await recordProductEvent("upgrade_wall", userId);
+    }
+    throw error;
+  }
 }
 
 export async function updateInvoice(userId: string, invoiceId: string, input: InvoiceInput): Promise<boolean> {

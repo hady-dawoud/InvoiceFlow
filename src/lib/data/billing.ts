@@ -1,6 +1,7 @@
 import { and, eq, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { user } from "@/db/schema";
+import { recordProductEvent } from "@/lib/analytics";
 import type { StripeAction } from "@/lib/stripe-events";
 
 export async function getBillingAccount(customerId: string) {
@@ -16,11 +17,16 @@ export async function applyStripeAction(action: StripeAction): Promise<void> {
     ? and(eq(user.id, action.userId), eq(user.stripeCustomerId, action.customerId))
     : eq(user.stripeCustomerId, action.customerId);
   const granting = action.type === "grant_pro";
+  const matches = and(identity, subscriptionMatches);
+  const [previous] = granting
+    ? await db.select({ id: user.id, isPro: user.isPro }).from(user).where(matches).limit(1)
+    : [];
   await db.update(user).set({
     isPro: granting,
     stripeCustomerId: action.customerId,
     stripeSubscriptionId: action.subscriptionId,
     proSince: granting ? sql`CASE WHEN ${user.isPro} = 1 THEN ${user.proSince} ELSE ${Math.floor(Date.now() / 1000)} END` : user.proSince,
     updatedAt: new Date(),
-  }).where(and(identity, subscriptionMatches));
+  }).where(matches);
+  if (previous && !previous.isPro) await recordProductEvent("pro_conversion", previous.id);
 }

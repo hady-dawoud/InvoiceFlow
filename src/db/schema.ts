@@ -167,6 +167,19 @@ export const invoiceMonthlyUsage = sqliteTable("invoice_monthly_usage", {
   count: integer("count").notNull().default(0),
 }, (table) => [primaryKey({ columns: [table.userId, table.month] })]);
 
+export const productEvents = sqliteTable(
+  "product_events",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    userId: text("user_id"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+  },
+  (table) => [index("product_events_name_idx").on(table.name)],
+);
+
 export const invoiceSequences = sqliteTable("invoice_sequences", {
   userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
   year: integer("year").notNull(),
