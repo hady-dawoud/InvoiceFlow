@@ -98,14 +98,16 @@ export default async function LandingPage() {
         <section className="border-t border-line py-14">
           <div className="mx-auto max-w-6xl px-5">
             <h2 className="display text-3xl">{t("stepsHeading")}</h2>
-            <dl className="mt-8 grid max-w-2xl gap-x-8 gap-y-6 sm:grid-cols-[5rem_1fr]">
+            <dl className="mt-8 grid max-w-2xl gap-y-6">
               {steps.map((step) => (
-                <div key={step.n} className="contents">
-                  <dt className="display text-2xl">{step.n}</dt>
-                  <dd>
-                    <strong className="block">{step.title}</strong>
-                    <span className="text-quiet">{step.body}</span>
+                <div key={step.n} className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+                  <dt className="display row-start-1 self-center text-2xl leading-none tabular-nums lining-nums">
+                    {step.n}
+                  </dt>
+                  <dd className="col-start-2 row-start-1 self-center min-w-0 leading-none">
+                    <strong>{step.title}</strong>
                   </dd>
+                  <dd className="col-start-2 row-start-2 min-w-0 text-quiet">{step.body}</dd>
                 </div>
               ))}
             </dl>
