@@ -205,5 +205,141 @@
         "cancel": "Cancel"
       }
     }
+  },
+  "invoice": {
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "paid": "Paid",
+      "overdue": "Overdue"
+    },
+    "list": {
+      "metaTitle": "Invoices",
+      "filters": {
+        "all": "All",
+        "draft": "Draft",
+        "sent": "Sent",
+        "paid": "Paid",
+        "overdue": "Overdue"
+      },
+      "quotaBlockedCta": "Free limit reached — upgrade for unlimited",
+      "newInvoice": "New invoice",
+      "empty": {
+        "all": "No invoices.",
+        "draft": "No draft invoices.",
+        "sent": "No sent invoices.",
+        "paid": "No paid invoices.",
+        "overdue": "No overdue invoices."
+      },
+      "table": {
+        "number": "Number",
+        "client": "Client",
+        "issued": "Issued",
+        "due": "Due",
+        "status": "Status",
+        "total": "Total"
+      }
+    },
+    "new": {
+      "metaTitle": "New invoice",
+      "needsClient": "You need a client before you can invoice.",
+      "addClient": "Add a client",
+      "heading": "New invoice",
+      "quotaNotice": {
+        "label": "Free plan",
+        "usage": "{used, plural, one {# invoice used this month.} other {# invoices used this month.}}"
+      },
+      "quotaBlocked": {
+        "heading": "Free plan limit reached",
+        "usedAll": "{limit, plural, one {# free invoice used this month.} other {# free invoices used this month.}}",
+        "upgradeNote": "Upgrade to Pro for unlimited invoices.",
+        "upgradeCta": "Upgrade to Pro — {price}/mo"
+      }
+    },
+    "editor": {
+      "fields": {
+        "client": "Client",
+        "issueDate": "Issue date",
+        "dueDate": "Due date",
+        "taxRate": "Tax rate % (optional)",
+        "notes": "Notes (optional)"
+      },
+      "selectClientPlaceholder": "Select a client…",
+      "taxRatePlaceholder": "e.g. 8.5",
+      "notesPlaceholder": "Payment details, thank-you note…",
+      "summary": {
+        "subtotal": "Subtotal",
+        "tax": "Tax",
+        "total": "Total"
+      },
+      "saving": "Saving…",
+      "saveSent": "Save & mark as sent",
+      "saveDraft": "Save as draft",
+      "cancel": "Cancel",
+      "quotaBlocked": {
+        "heading": "Free plan limit reached",
+        "usedAll": "{limit, plural, one {# free invoice used this month.} other {# free invoices used this month.}}",
+        "upgradeNote": "Upgrade to Pro for unlimited invoices, PDF export and payment tracking.",
+        "upgradeCta": "Upgrade to Pro — {price}/mo"
+      }
+    },
+    "items": {
+      "table": {
+        "description": "Description",
+        "qty": "Qty",
+        "price": "Price"
+      },
+      "descriptionAria": "Description, line {line}",
+      "quantityAria": "Quantity, line {line}",
+      "priceAria": "Price, line {line}",
+      "descriptionPlaceholder": "Design work, consulting…",
+      "pricePlaceholder": "0.00",
+      "removeLine": "Remove line",
+      "addLine": "+ Add line item"
+    },
+    "actions": {
+      "markSent": "Mark as sent",
+      "markPaid": "Mark as paid",
+      "revertToDraft": "Revert to draft",
+      "delete": "Delete",
+      "deleteConfirm": "Delete this invoice? This cannot be undone."
+    },
+    "document": {
+      "label": "Invoice",
+      "billedTo": "Billed to",
+      "issued": "Issued",
+      "due": "Due",
+      "table": {
+        "description": "Description",
+        "qty": "Qty",
+        "unitPrice": "Unit price",
+        "amount": "Amount"
+      },
+      "subtotal": "Subtotal",
+      "taxLabel": "Tax ({pct}%)",
+      "totalDue": "Total due",
+      "notes": "Notes"
+    },
+    "detail": {
+      "metaTitle": "Invoice",
+      "back": "← Invoices",
+      "downloadPdf": "Download PDF",
+      "pdfProLabel": "PDF (Pro)",
+      "pdfProTitle": "PDF export is a Pro feature",
+      "edit": "Edit"
+    },
+    "edit": {
+      "metaTitle": "Edit invoice",
+      "heading": "Edit {number}"
+    },
+    "copyLink": {
+      "copy": "Copy client link",
+      "copied": "Link copied ✓",
+      "errorMessage": "Could not copy. Select the link below to copy it manually.",
+      "linkAria": "Client link"
+    },
+    "print": {
+      "button": "Print / save as PDF"
+    }
   }
 }

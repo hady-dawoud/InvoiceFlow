@@ -4,6 +4,7 @@ import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import {
   createInvoiceAction,
   updateInvoiceAction,
@@ -37,6 +38,7 @@ export function InvoiceEditor({
   initial: EditorInitial;
 }) {
   const router = useRouter();
+  const t = useTranslations("invoice.editor");
   const [clientId, setClientId] = useState(initial.clientId);
   const [issueDate, setIssueDate] = useState(initial.issueDate);
   const [dueDate, setDueDate] = useState(initial.dueDate);
@@ -88,16 +90,16 @@ export function InvoiceEditor({
   if (quotaBlocked) {
     return (
       <div className="mx-auto max-w-md bg-sheet p-6 text-center shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
-        <h2 className="display text-2xl">Free plan limit reached</h2>
+        <h2 className="display text-2xl">{t("quotaBlocked.heading")}</h2>
         <p className="mt-2 text-sm text-quiet">
-          You&apos;ve used all {FREE_MONTHLY_LIMIT} free invoices this month. Upgrade to Pro for
-          unlimited invoices, PDF export and payment tracking.
+          {t("quotaBlocked.usedAll", { limit: FREE_MONTHLY_LIMIT })}{" "}
+          {t("quotaBlocked.upgradeNote")}
         </p>
         <Link
           href="/pricing"
           className="mt-4 inline-block btn"
         >
-          Upgrade to Pro — {PRO_MONTHLY_PRICE_LABEL}/mo
+          {t("quotaBlocked.upgradeCta", { price: PRO_MONTHLY_PRICE_LABEL })}
         </Link>
       </div>
     );
@@ -110,7 +112,7 @@ export function InvoiceEditor({
     >
       <fieldset disabled={requestPending} className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        <Field label="Client">
+        <Field label={t("fields.client")}>
           <select
             value={clientId}
             onChange={(e) => setClientId(e.target.value)}
@@ -118,7 +120,7 @@ export function InvoiceEditor({
             required
           >
             <option value="" disabled>
-              Select a client…
+              {t("selectClientPlaceholder")}
             </option>
             {clients.map((client) => (
               <option key={client.id} value={client.id}>
@@ -127,7 +129,7 @@ export function InvoiceEditor({
             ))}
           </select>
         </Field>
-        <Field label="Issue date">
+        <Field label={t("fields.issueDate")}>
           <input
             type="date"
             value={issueDate}
@@ -136,7 +138,7 @@ export function InvoiceEditor({
             required
           />
         </Field>
-        <Field label="Due date">
+        <Field label={t("fields.dueDate")}>
           <input
             type="date"
             value={dueDate}
@@ -149,30 +151,30 @@ export function InvoiceEditor({
       <InvoiceItemsEditor items={items} setItems={setItems} />
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-4">
-          <Field label="Tax rate % (optional)">
+          <Field label={t("fields.taxRate")}>
             <input
               value={taxRate}
               onChange={(e) => setTaxRate(e.target.value)}
               inputMode="decimal"
-              placeholder="e.g. 8.5"
+              placeholder={t("taxRatePlaceholder")}
               className="w-32 field"
             />
           </Field>
-          <Field label="Notes (optional)">
+          <Field label={t("fields.notes")}>
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
-              placeholder="Payment details, thank-you note…"
+              placeholder={t("notesPlaceholder")}
               className="field"
             />
           </Field>
         </div>
         <div className="ml-auto w-full max-w-xs space-y-1.5 self-start rounded-xl border border-line bg-white p-4 text-sm">
-          <Row label="Subtotal" value={totals ? formatCents(totals.subtotalCents, currency) : "—"} />
-          <Row label="Tax" value={totals ? formatCents(totals.taxCents, currency) : "—"} />
+          <Row label={t("summary.subtotal")} value={totals ? formatCents(totals.subtotalCents, currency) : "—"} />
+          <Row label={t("summary.tax")} value={totals ? formatCents(totals.taxCents, currency) : "—"} />
           <div className="border-t border-paper pt-1.5">
-            <Row label="Total" value={totals ? formatCents(totals.totalCents, currency) : "—"} strong />
+            <Row label={t("summary.total")} value={totals ? formatCents(totals.totalCents, currency) : "—"} strong />
           </div>
         </div>
       </div>
@@ -186,7 +188,7 @@ export function InvoiceEditor({
           onClick={() => handleSubmit("sent")}
           className="btn"
         >
-          {pending === "sent" ? "Saving…" : "Save & mark as sent"}
+          {pending === "sent" ? t("saving") : t("saveSent")}
         </button>
         <button
           type="button"
@@ -194,10 +196,10 @@ export function InvoiceEditor({
           onClick={() => handleSubmit("draft")}
           className="btn btn-ghost"
         >
-          {pending === "draft" ? "Saving…" : "Save as draft"}
+          {pending === "draft" ? t("saving") : t("saveDraft")}
         </button>
         <Link href="/dashboard/invoices" className="text-sm text-quiet hover:underline">
-          Cancel
+          {t("cancel")}
         </Link>
       </div>
       </fieldset>

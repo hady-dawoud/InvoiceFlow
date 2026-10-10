@@ -1,4 +1,6 @@
 import Link from "next/link";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { StatusBadge } from "@/components/status-badge";
 import { countInvoicesThisMonth, listInvoiceSummaries } from "@/lib/data/invoices";
 import { isOverdue } from "@/lib/invoice";
@@ -6,7 +8,10 @@ import { formatCents } from "@/lib/money";
 import { getQuotaState } from "@/lib/quota";
 import { getSession } from "@/lib/session";
 
-export const metadata = { title: "Invoices" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("invoice.list");
+  return { title: t("metaTitle") };
+}
 
 const FILTERS = ["all", "draft", "sent", "paid", "overdue"] as const;
 type Filter = (typeof FILTERS)[number];
@@ -17,6 +22,7 @@ export default async function InvoicesPage({
   searchParams: Promise<{ status?: string }>;
 }) {
   const session = await getSession();
+  const t = await getTranslations("invoice.list");
   const { status: rawStatus } = await searchParams;
   const filter = (FILTERS as readonly string[]).includes(rawStatus ?? "")
     ? (rawStatus as Filter)
@@ -46,7 +52,7 @@ export default async function InvoicesPage({
                 filter === f ? "bg-ink/8 text-ink" : "text-quiet hover:text-ink"
               }`}
             >
-              {f}
+              {t(`filters.${f}`)}
             </Link>
           ))}
         </div>
@@ -55,32 +61,32 @@ export default async function InvoicesPage({
             href="/pricing"
             className="btn"
           >
-            Free limit reached — upgrade for unlimited
+            {t("quotaBlockedCta")}
           </Link>
         ) : (
           <Link
             href="/dashboard/invoices/new"
             className="btn"
           >
-            New invoice
+            {t("newInvoice")}
           </Link>
         )}
       </div>
 
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-line bg-white px-6 py-12 text-center text-quiet">
-          No {filter === "all" ? "" : filter} invoices.
+          {t(`empty.${filter}`)}
         </div>
       ) : (
         <table className="ledger text-sm">
           <thead>
             <tr>
-              <th>Number</th>
-              <th>Client</th>
-              <th>Issued</th>
-              <th>Due</th>
-              <th>Status</th>
-              <th>Total</th>
+              <th>{t("table.number")}</th>
+              <th>{t("table.client")}</th>
+              <th>{t("table.issued")}</th>
+              <th>{t("table.due")}</th>
+              <th>{t("table.status")}</th>
+              <th>{t("table.total")}</th>
             </tr>
           </thead>
           <tbody>

@@ -1,6 +1,7 @@
 "use client";
 
 import type { Dispatch, SetStateAction } from "react";
+import { useTranslations } from "next-intl";
 
 export type EditorItem = { description: string; quantity: string; price: string };
 export const EMPTY_ITEM: EditorItem = { description: "", quantity: "1", price: "" };
@@ -8,6 +9,7 @@ export const EMPTY_ITEM: EditorItem = { description: "", quantity: "1", price: "
 export function InvoiceItemsEditor({ items, setItems }: {
   items: EditorItem[]; setItems: Dispatch<SetStateAction<EditorItem[]>>;
 }) {
+  const t = useTranslations("invoice.items");
   function setItem(index: number, patch: Partial<EditorItem>) {
     setItems((prev) => prev.map((item, i) => (i === index ? { ...item, ...patch } : item)));
   }
@@ -16,9 +18,9 @@ export function InvoiceItemsEditor({ items, setItems }: {
         <table className="w-full text-sm">
           <thead className="text-left text-sm text-quiet">
             <tr>
-              <th className="px-3 py-2 font-medium">Description</th>
-              <th className="w-20 px-3 py-2 font-medium">Qty</th>
-              <th className="w-32 px-3 py-2 font-medium">Price</th>
+              <th className="px-3 py-2 font-medium">{t("table.description")}</th>
+              <th className="w-20 px-3 py-2 font-medium">{t("table.qty")}</th>
+              <th className="w-32 px-3 py-2 font-medium">{t("table.price")}</th>
               <th className="w-10" />
             </tr>
           </thead>
@@ -27,10 +29,10 @@ export function InvoiceItemsEditor({ items, setItems }: {
               <tr key={index}>
                 <td className="px-3 py-2">
                   <input
-                    aria-label={`Description, line ${index + 1}`}
+                    aria-label={t("descriptionAria", { line: index + 1 })}
                     value={item.description}
                     onChange={(e) => setItem(index, { description: e.target.value })}
-                    placeholder="Design work, consulting…"
+                    placeholder={t("descriptionPlaceholder")}
                     className="field"
                   />
                 </td>
@@ -38,7 +40,7 @@ export function InvoiceItemsEditor({ items, setItems }: {
                   <input
                     type="number"
                     step={1}
-                    aria-label={`Quantity, line ${index + 1}`}
+                    aria-label={t("quantityAria", { line: index + 1 })}
                     min={1}
                     value={item.quantity}
                     onChange={(e) => setItem(index, { quantity: e.target.value })}
@@ -47,10 +49,10 @@ export function InvoiceItemsEditor({ items, setItems }: {
                 </td>
                 <td className="px-3 py-2">
                   <input
-                    aria-label={`Price, line ${index + 1}`}
+                    aria-label={t("priceAria", { line: index + 1 })}
                     value={item.price}
                     onChange={(e) => setItem(index, { price: e.target.value })}
-                    placeholder="0.00"
+                    placeholder={t("pricePlaceholder")}
                     inputMode="decimal"
                     className="field"
                   />
@@ -64,7 +66,7 @@ export function InvoiceItemsEditor({ items, setItems }: {
                       )
                     }
                     className="text-quiet hover:text-red-600"
-                    aria-label="Remove line"
+                    aria-label={t("removeLine")}
                   >
                     ✕
                   </button>
@@ -79,7 +81,7 @@ export function InvoiceItemsEditor({ items, setItems }: {
             onClick={() => setItems((prev) => [...prev, EMPTY_ITEM])}
             className="text-sm font-medium text-carbon hover:underline"
           >
-            + Add line item
+            {t("addLine")}
           </button>
         </div>
       </div>

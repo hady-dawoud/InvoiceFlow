@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { CopyLinkButton } from "@/components/copy-link-button";
 import { InvoiceActions } from "@/components/invoice-actions";
 import { InvoiceDocument } from "@/components/invoice-document";
 import { getInvoiceDetail } from "@/lib/data/invoices";
 import { getSession } from "@/lib/session";
 
-export const metadata = { title: "Invoice" };
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("invoice.detail");
+  return { title: t("metaTitle") };
+}
 
 export default async function InvoiceDetailPage({
   params,
@@ -14,6 +19,7 @@ export default async function InvoiceDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const session = await getSession();
+  const t = await getTranslations("invoice.detail");
   const { id } = await params;
   const detail = await getInvoiceDetail(session.user.id, id);
   if (!detail) notFound();
@@ -28,7 +34,7 @@ export default async function InvoiceDetailPage({
           href="/dashboard/invoices"
           className="text-sm text-quiet hover:text-ink"
         >
-          ← Invoices
+          {t("back")}
         </Link>
         <div className="ml-auto flex flex-wrap items-center gap-2">
           <InvoiceActions invoiceId={invoice.id} status={invoice.status} />
@@ -38,22 +44,22 @@ export default async function InvoiceDetailPage({
               href={`/api/invoices/${invoice.id}/pdf`}
               className="btn btn-ghost"
             >
-              Download PDF
+              {t("downloadPdf")}
             </a>
           ) : (
             <Link
               href="/pricing"
               className="rounded-lg border border-dashed border-carbon bg-sheet px-3 py-1.5 text-sm font-medium text-carbon hover:bg-ink/8"
-              title="PDF export is a Pro feature"
+              title={t("pdfProTitle")}
             >
-              PDF (Pro)
+              {t("pdfProLabel")}
             </Link>
           )}
           <Link
             href={`/dashboard/invoices/${invoice.id}/edit`}
             className="btn btn-ghost"
           >
-            Edit
+            {t("edit")}
           </Link>
         </div>
       </div>

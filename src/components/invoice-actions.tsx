@@ -1,17 +1,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useRequest } from "@/lib/use-request";
 import {
   deleteInvoiceAction,
   setInvoiceStatusAction,
 } from "@/lib/actions/invoices";
-import { allowedTransitions, STATUS_META } from "@/lib/invoice";
+import { allowedTransitions } from "@/lib/invoice";
 
-const NEXT_STATUS_LABEL: Record<string, string> = {
-  sent: "Mark as sent",
-  paid: "Mark as paid",
-  draft: "Revert to draft",
+const NEXT_STATUS_KEY: Record<string, "markSent" | "markPaid" | "revertToDraft"> = {
+  sent: "markSent",
+  paid: "markPaid",
+  draft: "revertToDraft",
 };
 
 export function InvoiceActions({
@@ -22,6 +23,7 @@ export function InvoiceActions({
   status: "draft" | "sent" | "paid";
 }) {
   const router = useRouter();
+  const t = useTranslations("invoice.actions");
   const { run, pending, error, setError } = useRequest();
 
   function transition(next: "draft" | "sent" | "paid") {
@@ -34,7 +36,7 @@ export function InvoiceActions({
   }
 
   function remove() {
-    if (!window.confirm("Delete this invoice? This cannot be undone.")) return;
+    if (!window.confirm(t("deleteConfirm"))) return;
     setError(null);
     void run(async () => {
       const result = await deleteInvoiceAction(invoiceId);
@@ -59,7 +61,7 @@ export function InvoiceActions({
               : "btn btn-ghost disabled:opacity-60"
           }
         >
-          {NEXT_STATUS_LABEL[next] ?? STATUS_META[next].label}
+          {t(NEXT_STATUS_KEY[next])}
         </button>
       ))}
       <button
@@ -67,7 +69,7 @@ export function InvoiceActions({
         disabled={pending}
         className="rounded-lg px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-60"
       >
-        Delete
+        {t("delete")}
       </button>
       {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
     </div>
