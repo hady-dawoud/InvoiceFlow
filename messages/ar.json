@@ -355,7 +355,9 @@
       "subtotal": "الإجمالي الفرعي",
       "taxLabel": "الضريبة ({pct}%)",
       "totalDue": "الإجمالي المستحق",
-      "notes": "ملاحظات"
+      "notes": "ملاحظات",
+      "footer": "أُنشئت باستخدام InvoiceFlow",
+      "continued": "(يتبع)"
     },
     "detail": {
       "metaTitle": "فاتورة",

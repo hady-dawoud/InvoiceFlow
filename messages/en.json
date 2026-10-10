@@ -355,7 +355,9 @@
       "subtotal": "Subtotal",
       "taxLabel": "Tax ({pct}%)",
       "totalDue": "Total due",
-      "notes": "Notes"
+      "notes": "Notes",
+      "footer": "Created with InvoiceFlow",
+      "continued": "(continued)"
     },
     "detail": {
       "metaTitle": "Invoice",

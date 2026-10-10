@@ -31,6 +31,8 @@ export type PdfLabels = {
   tax: string;
   totalDue: string;
   notes: string;
+  footer: string;
+  continued: string;
 };
 
 export const naskhFontPaths = {
@@ -506,8 +508,22 @@ class InvoicePdfRenderer {
   }
 
   private footer() {
-    this.doc.font("Helvetica").fontSize(8).fillColor("#94a3b8")
-      .text("Created with InvoiceFlow", 252, 750, { lineBreak: false });
+    const size = 8;
+    const lines = this.wrapCell(this.labels.footer, RIGHT - LEFT, size, false, "start");
+    const saved = this.y;
+    this.y = 750;
+    this.doc.fillColor("#94a3b8");
+    for (const line of lines) {
+      if (!line.paragraph || line.end < line.start) {
+        this.y += LINE_HEIGHT;
+        continue;
+      }
+      const width = this.measureRange(line.paragraph, line.start, line.end, line.levels, size, false);
+      const x = (LEFT + RIGHT - width) / 2;
+      this.drawVisualLine(line.paragraph, line.levels, line.start, line.end, size, false, x);
+      this.y += LINE_HEIGHT;
+    }
+    this.y = saved;
   }
 
   private newPage(table: boolean) {
@@ -516,7 +532,7 @@ class InvoicePdfRenderer {
     this.y = 50;
     this.doc.fillColor("#555");
     this.columns([
-      { text: `${this.detail.invoice.number} (continued)`, x: LEFT, width: 240, align: "start", size: this.bodySize },
+      { text: `${this.detail.invoice.number} ${this.labels.continued}`, x: LEFT, width: 240, align: "start", size: this.bodySize },
     ]);
     this.y = 78;
     if (table) this.tableHeading();

@@ -28,6 +28,8 @@ function pdfLabels(locale: "en" | "ar", taxBps: number): PdfLabels {
     tax: t("taxLabel", { pct: taxBps / 100 }),
     totalDue: t("totalDue"),
     notes: t("notes"),
+    footer: t("footer"),
+    continued: t("continued"),
   };
 }
 

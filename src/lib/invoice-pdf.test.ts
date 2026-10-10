@@ -25,6 +25,8 @@ const enLabels: PdfLabels = {
   tax: "Tax (8.5%)",
   totalDue: "Total due",
   notes: "NOTES",
+  footer: "Created with InvoiceFlow",
+  continued: "(continued)",
 };
 
 const arLabels: PdfLabels = {
@@ -40,6 +42,8 @@ const arLabels: PdfLabels = {
   tax: "الضريبة (8.5%)",
   totalDue: "الإجمالي المستحق",
   notes: "ملاحظات",
+  footer: "أُنشئت باستخدام InvoiceFlow",
+  continued: "(يتبع)",
 };
 
 function pdfFixture(count: number, clientName = "Example Client"): PdfInvoice {
