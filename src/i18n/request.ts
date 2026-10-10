@@ -1,6 +1,9 @@
 import { cookies, headers } from "next/headers";
 import { getRequestConfig } from "next-intl/server";
 import { resolveLocale } from "@/lib/locale";
+import { installLatinDigitsForArabic } from "./latin-digits";
+
+installLatinDigitsForArabic();
 
 const LOCALE_COOKIE = "invoiceflow_locale";
 

@@ -11,8 +11,8 @@
   --color-paper: #ddd4c4;
   --color-paid: #1e5c3a;
   --color-overdue: #8c3a32;
-  --font-sans: var(--font-outfit), "Segoe UI", sans-serif;
-  --font-display: var(--font-fraunces), Georgia, serif;
+  --font-sans: var(--font-outfit), var(--font-noto-naskh-arabic), "Segoe UI", sans-serif;
+  --font-display: var(--font-fraunces), var(--font-noto-naskh-arabic), Georgia, serif;
 }
 
 body {

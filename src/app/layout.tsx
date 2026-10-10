@@ -3,6 +3,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { Fraunces, Noto_Naskh_Arabic, Outfit } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale } from "next-intl/server";
+import { LatinDigitsForArabic } from "@/i18n/latin-digits-client";
 import { siteOrigin } from "@/lib/site";
 import "./globals.css";
 
@@ -36,6 +37,7 @@ export default async function RootLayout({
         className={`${outfit.variable} ${fraunces.variable} ${notoNaskhArabic.variable} antialiased`}
       >
         <NextIntlClientProvider>
+          <LatinDigitsForArabic />
           {children}
           <Analytics />
         </NextIntlClientProvider>
