@@ -1,6 +1,11 @@
 {
   "quota": "{count, plural, one {# invoice left this month} other {# invoices left this month}}",
   "requestFailed": "Request failed. Please try again.",
+  "languageSwitcher": {
+    "ariaLabel": "Language",
+    "en": "English",
+    "ar": "Arabic"
+  },
   "marketing": {
     "nav": {
       "pricing": "Pricing",

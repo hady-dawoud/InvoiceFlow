@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { NavLinks } from "@/components/nav-links";
 import { SignOutButton } from "@/components/sign-out-button";
 import { getSession } from "@/lib/session";
@@ -22,6 +23,7 @@ export default async function DashboardLayout({
           </Link>
           <NavLinks />
           <div className="ms-auto flex items-center gap-3">
+            <LanguageSwitcher />
             <span className="text-sm text-quiet">{user.isPro ? t("pro") : t("free")}</span>
             <SignOutButton />
           </div>

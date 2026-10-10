@@ -6,6 +6,7 @@ import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { clients, invoices, user } from "@/db/schema";
 import { InvoiceDocument } from "@/components/invoice-document";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { PrintButton } from "@/components/print-button";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +52,10 @@ export default async function PublicInvoicePage({
         <Link href="/" className="wordmark text-2xl">
           InvoiceFlow
         </Link>
-        <PrintButton />
+        <div className="flex items-center gap-3">
+          <LanguageSwitcher />
+          <PrintButton />
+        </div>
       </div>
 
       <InvoiceDocument

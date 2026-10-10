@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { headers } from "next/headers";
@@ -42,9 +43,12 @@ export default async function PricingPage() {
   return (
     <main className="mx-auto max-w-4xl px-4 py-16">
       <div>
-        <Link href="/" className="wordmark text-2xl">
-          InvoiceFlow
-        </Link>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <Link href="/" className="wordmark text-2xl">
+            InvoiceFlow
+          </Link>
+          <LanguageSwitcher />
+        </div>
         <h1 className="display mt-8 text-4xl text-ink sm:text-5xl">
           {t("heading")}
         </h1>

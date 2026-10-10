@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getTranslations } from "next-intl/server";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
 import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 
@@ -39,9 +40,12 @@ export default async function LandingPage() {
             {tNav("signIn")}
           </Link>
         </nav>
-        <Link href="/signup" className="btn ms-auto">
-          {tNav("startFree")}
-        </Link>
+        <div className="ms-auto flex items-center gap-3">
+          <LanguageSwitcher />
+          <Link href="/signup" className="btn">
+            {tNav("startFree")}
+          </Link>
+        </div>
       </header>
 
       <main>

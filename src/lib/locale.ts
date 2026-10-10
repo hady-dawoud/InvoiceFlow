@@ -1,4 +1,32 @@
-type Locale = "en" | "ar";
+export type Locale = "en" | "ar";
+
+const LOCALE_COOKIE_NAME = "invoiceflow_locale";
+const ONE_YEAR_SECONDS = 31536000;
+
+export function localeCookie(
+  locale: Locale,
+  options: { secure: boolean },
+): {
+  name: "invoiceflow_locale";
+  value: Locale;
+  path: "/";
+  sameSite: "lax";
+  maxAge: 31536000;
+  secure: boolean;
+} {
+  if (locale !== "en" && locale !== "ar") {
+    throw new Error(`Unsupported locale: ${String(locale)}`);
+  }
+
+  return {
+    name: LOCALE_COOKIE_NAME,
+    value: locale,
+    path: "/",
+    sameSite: "lax",
+    maxAge: ONE_YEAR_SECONDS,
+    secure: options.secure,
+  };
+}
 
 const languageRangePattern = /^[A-Za-z]{1,8}(?:-[A-Za-z0-9]{1,8})*$/;
 const qValuePattern = /^(?:0(?:\.\d{0,3})?|1(?:\.0{0,3})?)$/;
