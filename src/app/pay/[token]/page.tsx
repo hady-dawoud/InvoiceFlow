@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { and, eq } from "drizzle-orm";
+import { getTranslations } from "next-intl/server";
 import { db } from "@/db";
 import { clients, invoices, user } from "@/db/schema";
 import { InvoiceDocument } from "@/components/invoice-document";
@@ -8,10 +10,10 @@ import { PrintButton } from "@/components/print-button";
 
 export const dynamic = "force-dynamic";
 
-export const metadata = {
-  title: "Your invoice",
-  robots: { index: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("pay");
+  return { title: t("metaTitle"), robots: { index: false } };
+}
 
 export default async function PublicInvoicePage({
   params,
@@ -19,6 +21,7 @@ export default async function PublicInvoicePage({
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
+  const t = await getTranslations("pay");
 
   const [row] = await db
     .select({
@@ -61,11 +64,11 @@ export default async function PublicInvoicePage({
       />
 
       <p className="mt-6 text-center text-xs text-quiet print:hidden">
-        This invoice was created with{" "}
+        {t("createdWith")}{" "}
         <Link href="/" className="underline">
           InvoiceFlow
         </Link>{" "}
-        — professional invoices for freelancers.
+        {t("tagline")}
       </p>
     </main>
   );

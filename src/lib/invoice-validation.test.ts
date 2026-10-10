@@ -13,7 +13,7 @@ describe("invoice input validation", () => {
     expect(typeof result).toBe("string");
   });
   it.each(["2025-02-29", "2026-04-31", "2026-00-10", "2026-13-01"])("rejects impossible date %s", (date) => {
-    expect(parseInvoiceInput(form({ issueDate: date }))).toBe("Invalid issue date.");
+    expect(parseInvoiceInput(form({ issueDate: date }))).toBe("invoice.invalidIssueDate");
   });
   it("preserves valid leap dates and zero prices", () => {
     expect(parseInvoiceInput(form())).toMatchObject({ issueDate: "2024-02-29", items: [{ quantity: 1, unitPriceCents: 0 }] });
@@ -22,11 +22,11 @@ describe("invoice input validation", () => {
     expect(typeof parseInvoiceInput(form({ itemsJson: JSON.stringify([{ description: "Work", quantity: "2", price: "90071992547409.91" }]) }))).toBe("string");
   });
   it.each([
-    ["a description over 400 characters", { itemsJson: JSON.stringify([{ description: "x".repeat(401), quantity: "1", price: "1" }]) }, "Line item descriptions must be 400 characters or fewer."],
-    ["more than 40 line items", { itemsJson: JSON.stringify(Array.from({ length: 41 }, () => ({ description: "Work", quantity: "1", price: "1" }))) }, "An invoice can have at most 40 line items."],
-    ["a quantity over one million", { itemsJson: JSON.stringify([{ description: "Work", quantity: "1000001", price: "1" }]) }, "Quantity is too large."],
-    ["an items payload over 100kb", { itemsJson: "x".repeat(100_001) }, "Invoice items are too large."],
-    ["notes over 2000 characters", { notes: "x".repeat(2001) }, "Notes are too long."],
+    ["a description over 400 characters", { itemsJson: JSON.stringify([{ description: "x".repeat(401), quantity: "1", price: "1" }]) }, "invoice.descriptionTooLong"],
+    ["more than 40 line items", { itemsJson: JSON.stringify(Array.from({ length: 41 }, () => ({ description: "Work", quantity: "1", price: "1" }))) }, "invoice.tooManyLineItems"],
+    ["a quantity over one million", { itemsJson: JSON.stringify([{ description: "Work", quantity: "1000001", price: "1" }]) }, "invoice.quantityTooLarge"],
+    ["an items payload over 100kb", { itemsJson: "x".repeat(100_001) }, "invoice.itemsTooLarge"],
+    ["notes over 2000 characters", { notes: "x".repeat(2001) }, "invoice.notesTooLong"],
   ])("rejects %s", (_label, overrides, message) => {
     expect(parseInvoiceInput(form(overrides))).toBe(message);
   });

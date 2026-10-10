@@ -24,13 +24,16 @@ export function InvoiceActions({
 }) {
   const router = useRouter();
   const t = useTranslations("invoice.actions");
+  // Action errors come back as catalog keys (e.g. "invoice.notFound");
+  // translate them with an unscoped translator.
+  const tError = useTranslations();
   const { run, pending, error, setError } = useRequest();
 
   function transition(next: "draft" | "sent" | "paid") {
     setError(null);
     void run(async () => {
       const result = await setInvoiceStatusAction(invoiceId, next);
-      if (!result.ok) setError(result.error);
+      if (!result.ok) setError(tError(result.error));
       else router.refresh();
     });
   }
@@ -40,7 +43,7 @@ export function InvoiceActions({
     setError(null);
     void run(async () => {
       const result = await deleteInvoiceAction(invoiceId);
-      if (!result.ok) setError(result.error);
+      if (!result.ok) setError(tError(result.error));
       else {
         router.push("/dashboard/invoices");
         router.refresh();

@@ -18,24 +18,24 @@ export function parseClientInput(formData: FormData): ClientInputResult {
   const address = formData.get("address");
 
   if (typeof name !== "string" || name.trim().length === 0) {
-    return { ok: false, error: "Client name is required." };
+    return { ok: false, error: "client.nameRequired" };
   }
   const trimmedName = name.trim();
   if (trimmedName.length > MAX_NAME_CHARS) {
-    return { ok: false, error: "Client name must be 120 characters or fewer." };
+    return { ok: false, error: "client.nameTooLong" };
   }
 
   const emailTrimmed = typeof email === "string" ? email.trim() : "";
   if (emailTrimmed.length > MAX_EMAIL_CHARS) {
-    return { ok: false, error: "Email must be 254 characters or fewer." };
+    return { ok: false, error: "client.emailTooLong" };
   }
   if (emailTrimmed.length > 0 && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailTrimmed)) {
-    return { ok: false, error: "Invalid email address." };
+    return { ok: false, error: "client.invalidEmail" };
   }
 
   const addressTrimmed = typeof address === "string" ? address.trim() : "";
   if (addressTrimmed.length > MAX_ADDRESS_CHARS) {
-    return { ok: false, error: "Address must be 500 characters or fewer." };
+    return { ok: false, error: "client.addressTooLong" };
   }
 
   return {

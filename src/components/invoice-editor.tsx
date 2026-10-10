@@ -39,6 +39,9 @@ export function InvoiceEditor({
 }) {
   const router = useRouter();
   const t = useTranslations("invoice.editor");
+  // Validation and action errors come back as catalog keys (e.g.
+  // "invoice.chooseClient"); translate them with an unscoped translator.
+  const tError = useTranslations();
   const [clientId, setClientId] = useState(initial.clientId);
   const [issueDate, setIssueDate] = useState(initial.issueDate);
   const [dueDate, setDueDate] = useState(initial.dueDate);
@@ -71,7 +74,7 @@ export function InvoiceEditor({
     formData.set("notes", notes);
     formData.set("itemsJson", JSON.stringify(items));
     const input = parseInvoiceInput(formData);
-    if (typeof input === "string") { setError(input); return; }
+    if (typeof input === "string") { setError(tError(input)); return; }
     const result = await run(() => invoiceId
       ? updateInvoiceAction(invoiceId, formData)
       : createInvoiceAction(formData));
@@ -85,7 +88,7 @@ export function InvoiceEditor({
       setQuotaBlocked(true);
       return;
     }
-    setError(result.error);
+    setError(tError(result.error));
   }
   if (quotaBlocked) {
     return (
@@ -170,7 +173,7 @@ export function InvoiceEditor({
             />
           </Field>
         </div>
-        <div className="ml-auto w-full max-w-xs space-y-1.5 self-start rounded-xl border border-line bg-white p-4 text-sm">
+        <div className="ms-auto w-full max-w-xs space-y-1.5 self-start rounded-xl border border-line bg-white p-4 text-sm">
           <Row label={t("summary.subtotal")} value={totals ? formatCents(totals.subtotalCents, currency) : "—"} />
           <Row label={t("summary.tax")} value={totals ? formatCents(totals.taxCents, currency) : "—"} />
           <div className="border-t border-paper pt-1.5">

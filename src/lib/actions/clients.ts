@@ -32,7 +32,7 @@ export async function updateClientAction(
   if (!parsed.ok) return { ok: false, error: parsed.error };
 
   const updated = await updateClient(session.user.id, clientId, parsed.input);
-  if (!updated) return { ok: false, error: "Client not found." };
+  if (!updated) return { ok: false, error: "client.notFound" };
 
   revalidatePath("/dashboard/clients");
   return { ok: true };
@@ -42,10 +42,10 @@ export async function deleteClientAction(clientId: string): Promise<ClientAction
   const session = await getSession();
   const result = await deleteClient(session.user.id, clientId);
   if (result === "has-invoices") {
-    return { ok: false, error: "This client has invoices — delete those first." };
+    return { ok: false, error: "client.hasInvoices" };
   }
   if (result === "not-found") {
-    return { ok: false, error: "Client not found." };
+    return { ok: false, error: "client.notFound" };
   }
   revalidatePath("/dashboard/clients");
   return { ok: true };

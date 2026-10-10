@@ -350,7 +350,7 @@
     },
     "detail": {
       "metaTitle": "فاتورة",
-      "back": "← الفواتير",
+      "back": "الفواتير",
       "downloadPdf": "تحميل PDF",
       "pdfProLabel": "PDF (برو)",
       "pdfProTitle": "تصدير PDF ميزة في خطة برو",
@@ -368,6 +368,36 @@
     },
     "print": {
       "button": "طباعة / حفظ كـ PDF"
-    }
+    },
+    "lineItemRequired": "أضف عنصرًا واحدًا على الأقل بسعر صالح.",
+    "itemsTooLarge": "عناصر الفاتورة كبيرة جدًا.",
+    "tooManyLineItems": "يمكن أن تحتوي الفاتورة على 40 عنصرًا كحد أقصى.",
+    "descriptionTooLong": "يجب ألا يتجاوز وصف العنصر 400 حرف.",
+    "quantityTooLarge": "الكمية كبيرة جدًا.",
+    "chooseClient": "اختر عميلاً.",
+    "invalidIssueDate": "تاريخ الإصدار غير صالح.",
+    "invalidDueDate": "تاريخ الاستحقاق غير صالح.",
+    "invalidTaxRate": "يجب أن تكون نسبة الضريبة بين 0 و50 بحد أقصى رقمين عشريين.",
+    "invalidStatus": "الحالة غير صالحة.",
+    "notesTooLong": "الملاحظات طويلة جدًا.",
+    "invalidLineItem": "عنصر غير صالح.",
+    "totalTooLarge": "إجمالي الفاتورة كبير جدًا.",
+    "notFound": "لم يتم العثور على الفاتورة.",
+    "unknownClient": "عميل غير معروف.",
+    "accountNotFound": "لم يتم العثور على الحساب."
+  },
+  "client": {
+    "nameRequired": "اسم العميل مطلوب.",
+    "nameTooLong": "يجب ألا يتجاوز اسم العميل 120 حرفًا.",
+    "emailTooLong": "يجب ألا يتجاوز البريد الإلكتروني 254 حرفًا.",
+    "invalidEmail": "عنوان البريد الإلكتروني غير صالح.",
+    "addressTooLong": "يجب ألا يتجاوز العنوان 500 حرف.",
+    "notFound": "لم يتم العثور على العميل.",
+    "hasInvoices": "لدى هذا العميل فواتير — احذفها أولاً."
+  },
+  "pay": {
+    "metaTitle": "فاتورتك",
+    "createdWith": "تم إنشاء هذه الفاتورة باستخدام",
+    "tagline": "— فواتير محترفة للعاملين المستقلين."
   }
 }

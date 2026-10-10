@@ -16,7 +16,7 @@ export function InvoiceItemsEditor({ items, setItems }: {
   return (
 <div className="bg-sheet shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
         <table className="w-full text-sm">
-          <thead className="text-left text-sm text-quiet">
+          <thead className="text-start text-sm text-quiet">
             <tr>
               <th className="px-3 py-2 font-medium">{t("table.description")}</th>
               <th className="w-20 px-3 py-2 font-medium">{t("table.qty")}</th>

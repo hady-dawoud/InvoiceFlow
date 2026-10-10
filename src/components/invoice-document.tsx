@@ -39,7 +39,7 @@ export async function InvoiceDocument({
             <StatusBadge status={invoice.status} dueDate={invoice.dueDate} />
           </div>
         </div>
-        <div className="text-right text-sm">
+        <div className="text-end text-sm">
           <p className="font-semibold text-ink">{businessName}</p>
           {businessEmail && <p className="text-quiet">{businessEmail}</p>}
         </div>
@@ -63,23 +63,23 @@ export async function InvoiceDocument({
       </div>
 
       <table className="mt-8 w-full text-sm">
-        <thead className="border-b border-paper text-left text-sm text-quiet">
+        <thead className="border-b border-paper text-start text-sm text-quiet">
           <tr>
             <th className="py-2 font-medium">{t("table.description")}</th>
-            <th className="py-2 text-right font-medium">{t("table.qty")}</th>
-            <th className="py-2 text-right font-medium">{t("table.unitPrice")}</th>
-            <th className="py-2 text-right font-medium">{t("table.amount")}</th>
+            <th className="py-2 text-end font-medium">{t("table.qty")}</th>
+            <th className="py-2 text-end font-medium">{t("table.unitPrice")}</th>
+            <th className="py-2 text-end font-medium">{t("table.amount")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-paper">
           {items.map((item, index) => (
             <tr key={index}>
               <td className="py-2.5 text-ink">{item.description}</td>
-              <td className="py-2.5 text-right text-quiet">{item.quantity}</td>
-              <td className="py-2.5 text-right text-quiet">
+              <td className="py-2.5 text-end text-quiet">{item.quantity}</td>
+              <td className="py-2.5 text-end text-quiet">
                 {formatCents(item.unitPriceCents, currency)}
               </td>
-              <td className="py-2.5 text-right font-medium text-ink">
+              <td className="py-2.5 text-end font-medium text-ink">
                 {formatCents(item.quantity * item.unitPriceCents, currency)}
               </td>
             </tr>

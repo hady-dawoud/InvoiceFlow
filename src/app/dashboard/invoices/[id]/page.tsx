@@ -32,11 +32,14 @@ export default async function InvoiceDetailPage({
       <div className="flex flex-wrap items-center gap-2 print:hidden">
         <Link
           href="/dashboard/invoices"
-          className="text-sm text-quiet hover:text-ink"
+          className="inline-flex items-center gap-1 text-sm text-quiet hover:text-ink"
         >
+          <span aria-hidden="true" className="rtl:rotate-180">
+            ←
+          </span>
           {t("back")}
         </Link>
-        <div className="ml-auto flex flex-wrap items-center gap-2">
+        <div className="ms-auto flex flex-wrap items-center gap-2">
           <InvoiceActions invoiceId={invoice.id} status={invoice.status} />
           <CopyLinkButton token={invoice.token} />
           {session.user.isPro ? (

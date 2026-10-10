@@ -6,7 +6,16 @@ const MAX_LINE_ITEMS = 40;
 const MAX_DESCRIPTION_CHARS = 400;
 const MAX_QUANTITY = 1_000_000;
 const MAX_NOTES_CHARS = 2_000;
-const LINE_ITEM_ERROR = "Add at least one line item with a valid price.";
+const LINE_ITEM_ERROR = "invoice.lineItemRequired";
+
+// `calcTotals` throws defensively on inputs that upstream validation should
+// have already rejected. Map its messages to catalog keys too, so a message
+// never reaches the UI as a raw English sentence.
+const CALC_TOTALS_ERROR_KEYS: Record<string, string> = {
+  "Invalid tax rate.": "invoice.invalidTaxRate",
+  "Invalid line item.": "invoice.invalidLineItem",
+  "Invoice total is too large.": "invoice.totalTooLarge",
+};
 
 type ParsedItems = { description: string; quantity: number; unitPriceCents: number }[];
 
@@ -25,7 +34,7 @@ export function isCalendarDate(value: unknown): value is string {
 
 export function parseItems(raw: unknown): ParsedItems | string {
   if (typeof raw !== "string") return LINE_ITEM_ERROR;
-  if (raw.length > MAX_ITEMS_JSON_CHARS) return "Invoice items are too large.";
+  if (raw.length > MAX_ITEMS_JSON_CHARS) return "invoice.itemsTooLarge";
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
@@ -34,7 +43,7 @@ export function parseItems(raw: unknown): ParsedItems | string {
     return LINE_ITEM_ERROR;
   }
   if (!Array.isArray(parsed) || parsed.length === 0) return LINE_ITEM_ERROR;
-  if (parsed.length > MAX_LINE_ITEMS) return "An invoice can have at most 40 line items.";
+  if (parsed.length > MAX_LINE_ITEMS) return "invoice.tooManyLineItems";
 
   const items: ParsedItems = [];
   for (const entry of parsed) {
@@ -42,11 +51,11 @@ export function parseItems(raw: unknown): ParsedItems | string {
     const { description, quantity, price } = entry as Record<string, unknown>;
     if (typeof description !== "string" || description.trim().length === 0) return LINE_ITEM_ERROR;
     if (description.trim().length > MAX_DESCRIPTION_CHARS) {
-      return "Line item descriptions must be 400 characters or fewer.";
+      return "invoice.descriptionTooLong";
     }
     const qty = parseQuantity(quantity);
     if (qty === null) return LINE_ITEM_ERROR;
-    if (qty > MAX_QUANTITY) return "Quantity is too large.";
+    if (qty > MAX_QUANTITY) return "invoice.quantityTooLarge";
     const unitPriceCents = typeof price === "string" ? parseAmountToCents(price) : null;
     if (unitPriceCents === null) return LINE_ITEM_ERROR;
     items.push({ description: description.trim(), quantity: qty, unitPriceCents });
@@ -62,29 +71,29 @@ export function parseInvoiceInput(formData: FormData): InvoiceInput | string {
   const notes = formData.get("notes");
   const status = formData.get("status");
 
-  if (typeof clientId !== "string" || clientId.length === 0) return "Choose a client.";
-  if (!isCalendarDate(issueDate)) return "Invalid issue date.";
-  if (!isCalendarDate(dueDate)) return "Invalid due date.";
+  if (typeof clientId !== "string" || clientId.length === 0) return "invoice.chooseClient";
+  if (!isCalendarDate(issueDate)) return "invoice.invalidIssueDate";
+  if (!isCalendarDate(dueDate)) return "invoice.invalidDueDate";
 
   let taxBps = 0;
   if (typeof taxRate === "string" && taxRate.trim().length > 0) {
     const rate = parseAmountToCents(taxRate);
-    if (rate === null || rate > 5000) return "Tax rate must be between 0 and 50 with at most two decimals.";
+    if (rate === null || rate > 5000) return "invoice.invalidTaxRate";
     taxBps = rate;
   }
 
   if (status !== "draft" && status !== "sent" && status !== "paid") {
-    return "Invalid status.";
+    return "invoice.invalidStatus";
   }
   const items = parseItems(formData.get("itemsJson"));
   if (typeof items === "string") return items;
   try { calcTotals(items, taxBps); }
   catch (error) {
     if (!(error instanceof RangeError)) throw error;
-    return error.message;
+    return CALC_TOTALS_ERROR_KEYS[error.message] ?? error.message;
   }
   const trimmedNotes = typeof notes === "string" ? notes.trim() : "";
-  if (trimmedNotes.length > MAX_NOTES_CHARS) return "Notes are too long.";
+  if (trimmedNotes.length > MAX_NOTES_CHARS) return "invoice.notesTooLong";
 
   return {
     clientId,

@@ -21,7 +21,7 @@ export default async function DashboardLayout({
             InvoiceFlow
           </Link>
           <NavLinks />
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ms-auto flex items-center gap-3">
             <span className="text-sm text-quiet">{user.isPro ? t("pro") : t("free")}</span>
             <SignOutButton />
           </div>

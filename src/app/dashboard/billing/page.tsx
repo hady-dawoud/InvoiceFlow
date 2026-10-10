@@ -107,7 +107,7 @@ export default async function BillingPage({
 
       <div className="bg-sheet p-6 text-sm text-quiet shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
         <h2 className="font-semibold text-ink">{t("pro.heading")}</h2>
-        <ul className="mt-2 list-disc space-y-1 pl-5">
+        <ul className="mt-2 list-disc space-y-1 ps-5">
           <li>{t("pro.unlimitedFeature", { limit: FREE_MONTHLY_LIMIT })}</li>
           <li>{t("pro.pdfFeature")}</li>
           <li>{t("pro.trackingFeature")}</li>

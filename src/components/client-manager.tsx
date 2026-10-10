@@ -17,6 +17,9 @@ const EMPTY: FormState = { id: null, name: "", email: "", address: "" };
 export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
   const router = useRouter();
   const t = useTranslations("dashboard.clients");
+  // Validation and action errors come back as catalog keys (e.g.
+  // "client.nameRequired"); translate them with an unscoped translator.
+  const tError = useTranslations();
   const [form, setForm] = useState<FormState | null>(null);
   const { run, pending, error, setError } = useRequest();
 
@@ -47,7 +50,7 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
         ? await updateClientAction(form.id, formData)
         : await createClientAction(formData);
       if (!result.ok) {
-        setError(result.error);
+        setError(tError(result.error));
         return;
       }
       setForm(null);
@@ -60,7 +63,7 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
     setError(null);
     void run(async () => {
       const result = await deleteClientAction(client.id);
-      if (!result.ok) setError(result.error);
+      if (!result.ok) setError(tError(result.error));
       else router.refresh();
     });
   }
@@ -114,7 +117,7 @@ export function ClientManager({ clients }: { clients: ClientWithStats[] }) {
                     </td>
                     <td className="px-4 py-2.5 text-quiet">{client.email ?? t("noEmail")}</td>
                     <td className="px-4 py-2.5 text-quiet">{client.invoiceCount}</td>
-                    <td className="px-4 py-2.5 text-right">
+                    <td className="px-4 py-2.5 text-end">
                       <button
                         disabled={pending}
                         onClick={() => openEdit(client)}

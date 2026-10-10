@@ -39,7 +39,7 @@ export default async function LandingPage() {
             {tNav("signIn")}
           </Link>
         </nav>
-        <Link href="/signup" className="btn ml-auto">
+        <Link href="/signup" className="btn ms-auto">
           {tNav("startFree")}
         </Link>
       </header>

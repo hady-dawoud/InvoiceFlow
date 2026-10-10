@@ -16,9 +16,9 @@ describe("client input validation", () => {
   });
 
   it.each([
-    ["a name over 120 characters", { name: "a".repeat(121) }, "Client name must be 120 characters or fewer."],
-    ["an email over 254 characters", { email: `${"a".repeat(250)}@b.co` }, "Email must be 254 characters or fewer."],
-    ["an address over 500 characters", { address: "a".repeat(501) }, "Address must be 500 characters or fewer."],
+    ["a name over 120 characters", { name: "a".repeat(121) }, "client.nameTooLong"],
+    ["an email over 254 characters", { email: `${"a".repeat(250)}@b.co` }, "client.emailTooLong"],
+    ["an address over 500 characters", { address: "a".repeat(501) }, "client.addressTooLong"],
   ])("rejects %s", (_label, overrides, message) => {
     expect(parseClientInput(form(overrides))).toEqual({ ok: false, error: message });
   });
