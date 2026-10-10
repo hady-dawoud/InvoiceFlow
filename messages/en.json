@@ -96,5 +96,35 @@
         "a4": "Never. InvoiceFlow is a flat subscription — what your client pays is yours."
       }
     }
+  },
+  "auth": {
+    "login": {
+      "heading": "Welcome back",
+      "subtitle": "Sign in to manage your invoices.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "••••••••",
+      "genericError": "Invalid email or password.",
+      "submit": "Sign in",
+      "submitPending": "Signing in…",
+      "noAccount": "No account yet?",
+      "signupCta": "Start for free"
+    },
+    "signup": {
+      "heading": "Create your account",
+      "subtitle": "Free plan: {limit} invoices per month. No card required.",
+      "nameLabel": "Your name",
+      "namePlaceholder": "Alex Doe",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "genericError": "Could not create your account.",
+      "submit": "Create free account",
+      "submitPending": "Creating account…",
+      "haveAccount": "Already have an account?",
+      "loginCta": "Sign in"
+    }
   }
 }

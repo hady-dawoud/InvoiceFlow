@@ -3,10 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRequest } from "@/lib/use-request";
 import { signIn } from "@/lib/auth-client";
 
 export default function LoginPage() {
+  const t = useTranslations("auth.login");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,7 +20,7 @@ export default function LoginPage() {
     if (!result) return;
     const { error } = result;
     if (error) {
-      setError(error.message ?? "Invalid email or password.");
+      setError(error.message ?? t("genericError"));
       return;
     }
     router.push("/dashboard");
@@ -27,14 +29,12 @@ export default function LoginPage() {
 
   return (
     <div>
-      <h1 className="display text-2xl">Welcome back</h1>
-      <p className="mt-1 text-sm text-quiet">
-        Sign in to manage your invoices.
-      </p>
+      <h1 className="display text-2xl">{t("heading")}</h1>
+      <p className="mt-1 text-sm text-quiet">{t("subtitle")}</p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
           <label htmlFor="email" className="block text-sm font-medium">
-            Email
+            {t("emailLabel")}
           </label>
           <input
             id="email"
@@ -43,12 +43,12 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="field mt-1"
-            placeholder="you@example.com"
+            placeholder={t("emailPlaceholder")}
           />
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium">
-            Password
+            {t("passwordLabel")}
           </label>
           <input
             id="password"
@@ -57,7 +57,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="field mt-1"
-            placeholder="••••••••"
+            placeholder={t("passwordPlaceholder")}
           />
         </div>
         {error && (
@@ -68,13 +68,13 @@ export default function LoginPage() {
           disabled={pending}
           className="btn w-full"
         >
-          {pending ? "Signing in…" : "Sign in"}
+          {pending ? t("submitPending") : t("submit")}
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-quiet">
-        No account yet?{" "}
+        {t("noAccount")}{" "}
         <Link href="/signup" className="font-medium text-carbon hover:underline">
-          Start for free
+          {t("signupCta")}
         </Link>
       </p>
     </div>

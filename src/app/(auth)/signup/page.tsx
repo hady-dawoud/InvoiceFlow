@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRequest } from "@/lib/use-request";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
 import { signUp } from "@/lib/auth-client";
 
 export default function SignupPage() {
+  const t = useTranslations("auth.signup");
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -20,7 +22,7 @@ export default function SignupPage() {
     if (!result) return;
     const { error } = result;
     if (error) {
-      setError(error.message ?? "Could not create your account.");
+      setError(error.message ?? t("genericError"));
       return;
     }
     router.push("/dashboard");
@@ -29,14 +31,14 @@ export default function SignupPage() {
 
   return (
     <div>
-      <h1 className="display text-2xl">Create your account</h1>
+      <h1 className="display text-2xl">{t("heading")}</h1>
       <p className="mt-1 text-sm text-quiet">
-        Free plan: {FREE_MONTHLY_LIMIT} invoices per month. No card required.
+        {t("subtitle", { limit: FREE_MONTHLY_LIMIT })}
       </p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
           <label htmlFor="name" className="block text-sm font-medium">
-            Your name
+            {t("nameLabel")}
           </label>
           <input
             id="name"
@@ -45,12 +47,12 @@ export default function SignupPage() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="field mt-1"
-            placeholder="Alex Doe"
+            placeholder={t("namePlaceholder")}
           />
         </div>
         <div>
           <label htmlFor="email" className="block text-sm font-medium">
-            Email
+            {t("emailLabel")}
           </label>
           <input
             id="email"
@@ -59,12 +61,12 @@ export default function SignupPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="field mt-1"
-            placeholder="you@example.com"
+            placeholder={t("emailPlaceholder")}
           />
         </div>
         <div>
           <label htmlFor="password" className="block text-sm font-medium">
-            Password
+            {t("passwordLabel")}
           </label>
           <input
             id="password"
@@ -74,7 +76,7 @@ export default function SignupPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="field mt-1"
-            placeholder="At least 8 characters"
+            placeholder={t("passwordPlaceholder")}
           />
         </div>
         {error && (
@@ -85,13 +87,13 @@ export default function SignupPage() {
           disabled={pending}
           className="btn w-full"
         >
-          {pending ? "Creating account…" : "Create free account"}
+          {pending ? t("submitPending") : t("submit")}
         </button>
       </form>
       <p className="mt-4 text-center text-sm text-quiet">
-        Already have an account?{" "}
+        {t("haveAccount")}{" "}
         <Link href="/login" className="font-medium text-carbon hover:underline">
-          Sign in
+          {t("loginCta")}
         </Link>
       </p>
     </div>
