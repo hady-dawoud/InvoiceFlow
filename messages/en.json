@@ -1,3 +1,96 @@
 {
-  "quota": "{count, plural, one {# invoice left this month} other {# invoices left this month}}"
+  "quota": "{count, plural, one {# invoice left this month} other {# invoices left this month}}",
+  "marketing": {
+    "nav": {
+      "pricing": "Pricing",
+      "signIn": "Sign in",
+      "startFree": "Start free"
+    },
+    "home": {
+      "steps": {
+        "step1": {
+          "title": "Add a client",
+          "body": "Name and billing email."
+        },
+        "step2": {
+          "title": "Write the invoice",
+          "body": "Line items, tax if you charge it, and a due date. The total updates as you type."
+        },
+        "step3": {
+          "title": "Share the link",
+          "body": "Your client opens it and prints it. Mark it paid when the money arrives."
+        }
+      },
+      "hero": {
+        "title": "Send the invoice before lunch.",
+        "subtitle": "Add a client, write the lines, share a link. InvoiceFlow is for freelancers who would rather do the work.",
+        "ctaPrimary": "Create your first invoice",
+        "ctaSecondary": "See pricing",
+        "freeNote": "No card. {limit} invoices free each month."
+      },
+      "sample": {
+        "ariaLabel": "Sample invoice",
+        "invoiceLabel": "Invoice",
+        "due": "Due",
+        "lineItem1": "Brand site, 18 hours",
+        "lineItem2": "Photography direction",
+        "total": "Total"
+      },
+      "stepsHeading": "Three steps. Then you are back to work.",
+      "plansTeaser": {
+        "heading": "Free until you send more than three.",
+        "free": {
+          "name": "Free",
+          "feature1": "{limit} invoices each calendar month",
+          "feature2": "Clients, links, and payment tracking"
+        },
+        "pro": {
+          "name": "Pro",
+          "perMonth": " / month",
+          "feature1": "Unlimited invoices",
+          "feature2": "PDF download"
+        }
+      },
+      "footer": {
+        "copyright": "© 2026 InvoiceFlow"
+      }
+    },
+    "pricing": {
+      "heading": "Simple pricing for freelancers",
+      "subtitle": "Start free. Upgrade when your client list grows. Cancel anytime.",
+      "perMonth": "/mo",
+      "free": {
+        "name": "Free",
+        "feature1": "{limit} invoices per month",
+        "feature2": "Client management",
+        "feature3": "Shareable invoice links",
+        "feature4": "PDF export"
+      },
+      "pro": {
+        "name": "Pro",
+        "feature1": "Unlimited invoices",
+        "feature2": "PDF export",
+        "feature3": "Payment & overdue tracking",
+        "feature4": "Priority support"
+      },
+      "cta": {
+        "startFree": "Start for free",
+        "manageSubscription": "Manage subscription",
+        "upgradeToPro": "Upgrade to Pro",
+        "billingNotConfigured": "Billing not configured"
+      },
+      "testMode": "Test mode active — card 4242 4242 4242 4242, no real charge.",
+      "faq": {
+        "heading": "Frequently asked questions",
+        "q1": "Is the free plan really free?",
+        "a1": "Yes — no card required. You can create up to {limit} invoices every calendar month.",
+        "q2": "What counts as an invoice?",
+        "a2": "Any invoice you save, draft or sent. Deleting an invoice does not restore monthly quota.",
+        "q3": "Can I cancel Pro anytime?",
+        "a3": "Yes, from the billing page in one click. You keep Pro until the end of the period; your invoices remain accessible on the free plan.",
+        "q4": "Do you take a cut of my invoice amounts?",
+        "a4": "Never. InvoiceFlow is a flat subscription — what your client pays is yours."
+      }
+    }
+  }
 }
