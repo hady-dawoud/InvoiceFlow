@@ -11,4 +11,9 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
+  oxc: {
+    jsx: {
+      runtime: "automatic",
+    },
+  },
 });
