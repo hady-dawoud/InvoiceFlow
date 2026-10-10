@@ -124,4 +124,25 @@ describe("RTL layout", () => {
     const formatted = allTextViolations.map((v) => `${v.file}: "${v.value}"`);
     expect(formatted).toEqual([]);
   });
+
+  it("uses logical CSS for the sheet accent and numeric columns", () => {
+    const css = readFileSync(path.join(process.cwd(), "src/app/globals.css"), "utf8");
+    expect(css).not.toMatch(/text-align:\s*(left|right)/);
+    expect(css).toMatch(/text-align:\s*end/);
+    expect(css).toMatch(/padding-inline-start/);
+    expect(css).not.toMatch(/linear-gradient\(\s*90deg/);
+  });
+});
+
+describe("user-visible error keys", () => {
+  it("does not hardcode the generic request-failed English sentence", () => {
+    const src = readFileSync(path.join(process.cwd(), "src/lib/use-request.ts"), "utf8");
+    expect(src).not.toMatch(/Request failed\. Please try again\./);
+    expect(src).toMatch(/requestFailed/);
+  });
+
+  it("maps invoice sequence overflow to a catalog key", () => {
+    const src = readFileSync(path.join(process.cwd(), "src/lib/actions/invoices.ts"), "utf8");
+    expect(src).toMatch(/"Invoice sequence is too large\.":\s*"invoice\.sequenceTooLarge"/);
+  });
 });

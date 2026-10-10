@@ -22,11 +22,20 @@ export type ActionResult =
 const WRITE_ERROR_KEYS: Record<string, string> = {
   "Unknown client.": "invoice.unknownClient",
   "Account not found.": "invoice.accountNotFound",
+  "Invoice sequence is too large.": "invoice.sequenceTooLarge",
 };
 
-function writeErrorResult(error: InvoiceWriteError): ActionResult {
+function writeErrorResult(error: Error): ActionResult {
   if (error.message === "quota") return { ok: false, error: "quota" };
   return { ok: false, error: WRITE_ERROR_KEYS[error.message] ?? error.message };
+}
+
+function mappedWriteError(error: unknown): ActionResult | null {
+  if (error instanceof InvoiceWriteError) return writeErrorResult(error);
+  if (error instanceof RangeError && error.message in WRITE_ERROR_KEYS) {
+    return writeErrorResult(error);
+  }
+  return null;
 }
 
 export async function createInvoiceAction(formData: FormData): Promise<ActionResult> {
@@ -39,8 +48,9 @@ export async function createInvoiceAction(formData: FormData): Promise<ActionRes
   let id: string;
   try { ({ id } = await createInvoice(userId, input)); }
   catch (error) {
-    if (!(error instanceof InvoiceWriteError)) throw error;
-    return writeErrorResult(error);
+    const mapped = mappedWriteError(error);
+    if (!mapped) throw error;
+    return mapped;
   }
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/invoices");
@@ -58,8 +68,9 @@ export async function updateInvoiceAction(
   let updated: boolean;
   try { updated = await updateInvoice(session.user.id, invoiceId, input); }
   catch (error) {
-    if (!(error instanceof InvoiceWriteError)) throw error;
-    return writeErrorResult(error);
+    const mapped = mappedWriteError(error);
+    if (!mapped) throw error;
+    return mapped;
   }
   if (!updated) return { ok: false, error: "invoice.notFound" };
 

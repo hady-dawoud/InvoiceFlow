@@ -87,11 +87,11 @@ body {
 }
 
 .sheet {
-  background:
-    linear-gradient(90deg, var(--color-carbon) 0 0.55rem, transparent 0.55rem),
-    var(--color-sheet);
+  background: var(--color-sheet);
+  border-inline-start: 0.55rem solid var(--color-carbon);
   box-shadow: 0.55rem 0.7rem 0 rgb(26 35 48 / 12%);
-  padding: 1.6rem 1.5rem 1.5rem 2rem;
+  padding: 1.6rem 1.5rem 1.5rem;
+  padding-inline-start: 2rem;
 }
 
 .stamp {
@@ -120,7 +120,7 @@ body {
 .ledger td {
   padding: 0.85rem 1rem;
   border-bottom: 1px solid var(--color-paper);
-  text-align: left;
+  text-align: start;
 }
 
 .ledger th {
@@ -131,7 +131,7 @@ body {
 
 .ledger th:last-child,
 .ledger td.num {
-  text-align: right;
+  text-align: end;
 }
 
 .ledger tbody tr:hover {

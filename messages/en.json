@@ -1,5 +1,6 @@
 {
   "quota": "{count, plural, one {# invoice left this month} other {# invoices left this month}}",
+  "requestFailed": "Request failed. Please try again.",
   "marketing": {
     "nav": {
       "pricing": "Pricing",
@@ -384,7 +385,8 @@
     "totalTooLarge": "Invoice total is too large.",
     "notFound": "Invoice not found.",
     "unknownClient": "Unknown client.",
-    "accountNotFound": "Account not found."
+    "accountNotFound": "Account not found.",
+    "sequenceTooLarge": "Invoice sequence is too large."
   },
   "client": {
     "nameRequired": "Client name is required.",
