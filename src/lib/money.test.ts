@@ -15,6 +15,8 @@ describe("formatCents", () => {
     expect(formatCents(123456, "usd")).toBe("$1,234.56");
     expect(formatCents(0, "usd")).toBe("$0.00");
     expect(formatCents(5, "usd")).toBe("$0.05");
+    expect(formatCents(5000, "usd")).toBe("$50.00");
+    expect(formatCents(-5000, "usd")).toBe("-$50.00");
   });
 
   it("handles large amounts with thousand separators", () => {

@@ -1,0 +1,3 @@
+{
+  "quota": "{count, plural, one {# invoice left this month} other {# invoices left this month}}"
+}
