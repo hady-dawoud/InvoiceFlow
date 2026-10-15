@@ -16,24 +16,31 @@ export type WalletPaymentInput = {
 
 export async function recordWalletPayment(input: WalletPaymentInput): Promise<{ id: string }> {
   return writeTransaction(async (tx) => {
-    const [pending] = await tx.select({ id: walletPayment.id }).from(walletPayment)
+    const [pending] = await tx.select().from(walletPayment)
       .where(and(eq(walletPayment.userId, input.userId), eq(walletPayment.status, "pending")))
       .limit(1);
-    if (pending) {
+    if (pending && sameCommercialTerms(pending, input)) {
       await tx.update(walletPayment).set({
-        method: input.method,
-        planId: input.planId,
-        months: input.months,
-        amountEgp: input.amountEgp,
         confirmation: input.confirmation,
         createdAt: new Date(),
       }).where(eq(walletPayment.id, pending.id));
       return { id: pending.id };
     }
+    if (pending) await tx.delete(walletPayment).where(eq(walletPayment.id, pending.id));
     const id = randomUUID();
     await tx.insert(walletPayment).values({ id, ...input, status: "pending" });
     return { id };
   });
+}
+
+function sameCommercialTerms(
+  pending: { method: string; planId: string; months: number; amountEgp: number },
+  input: WalletPaymentInput,
+): boolean {
+  return pending.method === input.method
+    && pending.planId === input.planId
+    && pending.months === input.months
+    && pending.amountEgp === input.amountEgp;
 }
 
 export async function activateWalletPayment(
