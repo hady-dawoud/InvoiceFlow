@@ -132,12 +132,7 @@ export default async function LandingPage() {
               </article>
               <article>
                 <h3 className="font-medium">{t("plansTeaser.pro.name")}</h3>
-                <p className="display money text-4xl">
-                  {proPrice}
-                  <span className="font-sans text-base font-normal">
-                    {t("plansTeaser.pro.perMonth")}
-                  </span>
-                </p>
+                <p className="display money text-4xl">{proPrice}</p>
                 <ul className="mt-3 space-y-1 text-quiet">
                   <li>{t("plansTeaser.pro.feature1")}</li>
                   <li>{t("plansTeaser.pro.feature2")}</li>

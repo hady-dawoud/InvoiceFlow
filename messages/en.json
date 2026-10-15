@@ -219,7 +219,7 @@
         "usage": "{used, plural, one {# invoice used this month.} other {# invoices used this month.}}",
         "blocked": "You've hit the limit — upgrade to keep invoicing.",
         "remaining": "{remaining, plural, one {# invoice left before the wall.} other {# invoices left before the wall.}}",
-        "upgrade": "Upgrade to Pro — {price}/mo"
+        "upgrade": "Upgrade to Pro — {price}"
       },
       "unpaidLabel": "Unpaid",
       "overdueNote": "Overdue amount: <ltr>{amount}</ltr>.",
@@ -329,7 +329,7 @@
       },
       "freeLimit": "{limit, plural, one {# invoice per calendar month} other {# invoices per calendar month}}",
       "manageSubscription": "Manage subscription",
-      "upgradeToPro": "Upgrade to Pro — {price}/mo",
+      "upgradeToPro": "Upgrade to Pro — {price}",
       "notConfiguredNotice": "Payment confirmations cannot be delivered yet. Your current plan and invoices remain accessible.",
       "testMode": "Stripe <strong>test mode</strong> is active — use card {card}, any future expiry, any CVC. No real charges.",
       "pro": {
@@ -388,7 +388,7 @@
         "heading": "Free plan limit reached",
         "usedAll": "{limit, plural, one {# free invoice used this month.} other {# free invoices used this month.}}",
         "upgradeNote": "Upgrade to Pro for unlimited invoices.",
-        "upgradeCta": "Upgrade to Pro — {price}/mo"
+        "upgradeCta": "Upgrade to Pro — {price}"
       }
     },
     "editor": {
@@ -418,7 +418,7 @@
         "heading": "Free plan limit reached",
         "usedAll": "{limit, plural, one {# free invoice used this month.} other {# free invoices used this month.}}",
         "upgradeNote": "Upgrade to Pro for unlimited invoices, PDF export and payment tracking.",
-        "upgradeCta": "Upgrade to Pro — {price}/mo"
+        "upgradeCta": "Upgrade to Pro — {price}"
       }
     },
     "items": {
