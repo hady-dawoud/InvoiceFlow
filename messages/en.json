@@ -1,4 +1,7 @@
 {
+  "price": {
+    "monthly": "{amount} EGP"
+  },
   "quota": "{count, plural, one {# invoice left this month} other {# invoices left this month}}",
   "requestFailed": "Request failed. Please try again.",
   "languageSwitcher": {
@@ -65,10 +68,17 @@
     },
     "pricing": {
       "metaTitle": "Pricing — simple plans for freelancers",
-      "metaDescription": "Start free with {limit} invoices a month. Upgrade to Pro for {price}/month for unlimited invoices, PDF export and payment tracking.",
+      "metaDescription": "Start free with {limit} invoices a month. Upgrade to Pro from {price} a month for unlimited invoices, PDF export and payment tracking.",
       "heading": "Simple pricing for freelancers",
-      "subtitle": "Start free. Upgrade when your client list grows. Cancel anytime.",
+      "subtitle": "Start free. Upgrade when your client list grows. Pay for 1, 6, or 12 months.",
       "perMonth": "/mo",
+      "freePerMonth": "/ month",
+      "egp": "EGP",
+      "termMonth": "1 month",
+      "termHalf": "6 months",
+      "termYear": "12 months",
+      "savingHalf": "One month free",
+      "savingYear": "Three months free",
       "free": {
         "name": "Free",
         "feature1": "{limit} invoices per month",
@@ -96,10 +106,10 @@
         "a1": "Yes — no card required. You can create up to {limit} invoices every calendar month.",
         "q2": "What counts as an invoice?",
         "a2": "Any invoice you save, draft or sent. Deleting an invoice does not restore monthly quota.",
-        "q3": "Can I cancel Pro anytime?",
-        "a3": "Yes, from the billing page in one click. You keep Pro until the end of the period; your invoices remain accessible on the free plan.",
+        "q3": "How long does Pro last?",
+        "a3": "Until the term you paid for ends. After that you are on the free plan, and your invoices stay.",
         "q4": "Do you take a cut of my invoice amounts?",
-        "a4": "Never. InvoiceFlow is a flat subscription — what your client pays is yours."
+        "a4": "Never. InvoiceFlow is a flat prepaid price. What your client pays is yours."
       }
     }
   },
@@ -283,8 +293,11 @@
       "metaTitle": "Billing",
       "heading": "Billing",
       "banner": {
-        "success": "Welcome to Pro! Your subscription is active — enjoy unlimited invoices.",
+        "success": "Welcome to Pro. Unlimited invoices are on.",
+        "sent": "Confirmation sent. Pro turns on after the payment is checked. Refresh this page to see your plan.",
         "pending": "Checkout received. Activation is pending payment confirmation. Refresh this page to check your plan.",
+        "notify": "The confirmation could not be sent. Submit it again.",
+        "invalid": "Choose a term, choose InstaPay or Orange Cash, and paste the confirmation from the wallet.",
         "existingSubscription": "You already have a subscription. Manage it using the customer portal.",
         "canceled": "Checkout canceled — no charge was made.",
         "notConfigured": "Billing is not configured on this server yet. Please try again once billing is available.",
@@ -294,17 +307,37 @@
       "currentPlanLabel": "Current plan",
       "unlimitedInvoices": "Unlimited invoices",
       "unlimitedSince": "Unlimited invoices · since {date}",
+      "unlimitedUntil": "Unlimited invoices · until {date}",
+      "wallet": {
+        "heading": "Pay with InstaPay or Orange Cash",
+        "body": "Send the amount for the term you pick, then paste the confirmation message from the wallet.",
+        "termLegend": "Term",
+        "termMonth": "Pro · 1 month — {amount} EGP",
+        "termHalf": "Pro · 6 months — {amount} EGP",
+        "termYear": "Pro · 12 months — {amount} EGP",
+        "savingHalf": "One month free",
+        "savingYear": "Three months free",
+        "methodLegend": "Wallet",
+        "instapay": "InstaPay",
+        "orangeCash": "Orange Cash",
+        "numberLabel": "Send to",
+        "copy": "Copy number",
+        "copied": "Copied",
+        "confirmationLabel": "Confirmation message",
+        "confirmationHint": "Paste the wallet message or reference",
+        "submit": "Send confirmation"
+      },
       "freeLimit": "{limit, plural, one {# invoice per calendar month} other {# invoices per calendar month}}",
       "manageSubscription": "Manage subscription",
       "upgradeToPro": "Upgrade to Pro — {price}/mo",
-      "notConfiguredNotice": "Billing is not configured. Your current plan and invoices remain accessible.",
+      "notConfiguredNotice": "Payment confirmations cannot be delivered yet. Your current plan and invoices remain accessible.",
       "testMode": "Stripe <strong>test mode</strong> is active — use card {card}, any future expiry, any CVC. No real charges.",
       "pro": {
         "heading": "What you get with Pro",
         "unlimitedFeature": "Unlimited invoices (free plan: {limit, plural, one {# invoice/month} other {# invoices/month}})",
         "pdfFeature": "PDF export for sending to clients",
         "trackingFeature": "Payment tracking dashboard",
-        "cancelNote": "Cancel anytime from the customer portal. Your invoices stay accessible on the free plan."
+        "cancelNote": "Pro lasts until the term you paid for ends. Your invoices stay on the free plan after that."
       }
     }
   },
