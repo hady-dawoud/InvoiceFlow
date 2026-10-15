@@ -7,6 +7,7 @@ import { consumeInvoiceCounters, InvoiceWriteError, monthKey } from "./invoice-c
 import { writeTransaction, type WriteTransaction } from "@/db/write-transaction";
 import { startOfMonth } from "@/lib/quota";
 import { recordProductEvent } from "@/lib/analytics";
+import { proIsActive } from "@/lib/wallet-billing";
 
 /** One invoice joined with its client and pre-computed item sum. */
 export type InvoiceSummary = Invoice & {
@@ -110,9 +111,14 @@ async function insertItems(tx: WriteTransaction, invoiceId: string, items: Invoi
 async function insertInvoice(userId: string, input: InvoiceInput, locale: DocumentLocale) {
   return writeTransaction(async (tx) => {
     await requireOwnedClient(tx, userId, input.clientId);
-    const [owner] = await tx.select({ id: user.id, isPro: user.isPro }).from(user).where(eq(user.id, userId));
+    const [owner] = await tx.select({
+      id: user.id, isPro: user.isPro, proUntil: user.proUntil,
+    }).from(user).where(eq(user.id, userId));
     if (!owner) throw new InvoiceWriteError("Account not found.");
-    const number = await consumeInvoiceCounters(tx, owner);
+    const number = await consumeInvoiceCounters(tx, {
+      id: owner.id,
+      isPro: proIsActive({ isPro: owner.isPro, proUntil: owner.proUntil }, new Date()),
+    });
     const invoiceId = randomUUID();
     const { items, documentLocale, ...fields } = input;
     await tx.insert(invoices).values({

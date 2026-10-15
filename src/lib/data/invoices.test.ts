@@ -53,6 +53,11 @@ describe("invoice persistence", () => {
     expect(await countInvoicesThisMonth("owner")).toBe(1);
     expect((await createInvoice("owner", input)).number).toMatch(/-0002$/);
   });
+  it("treats an ended wallet term as the free plan", async () => {
+    await db.update(user).set({ isPro: true, proUntil: new Date("2020-01-01T00:00:00.000Z") }).where(eq(user.id, "owner"));
+    const results = await Promise.allSettled(Array.from({ length: 4 }, () => createInvoice("owner", input)));
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(3);
+  });
   it("enforces the free quota during concurrent creation", async () => {
     const results = await Promise.allSettled(Array.from({ length: 6 }, () => createInvoice("owner", input)));
     expect(results.filter((r) => r.status === "fulfilled"), results.filter((r) => r.status === "rejected").map((r) => String(r.reason)).join(", ")).toHaveLength(3);

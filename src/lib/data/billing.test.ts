@@ -1,4 +1,5 @@
 import { afterAll, beforeAll, beforeEach, expect, it, vi } from "vitest";
+import { eq } from "drizzle-orm";
 vi.hoisted(() => { process.env.DATABASE_URL = "file::memory:"; });
 import { db } from "@/db";
 import { user } from "@/db/schema";
@@ -22,6 +23,11 @@ it("revocation preserves subscription identity for payment recovery", async () =
   expect(await owner()).toMatchObject({ isPro: false, stripeSubscriptionId: "sub_new" });
   await applyStripeAction({ type: "grant_pro", userId: "owner", subscriptionId: "sub_new", customerId: "cus_1" });
   expect((await owner()).isPro).toBe(true);
+});
+it("a Stripe grant replaces a wallet end date with open-ended Pro", async () => {
+  await db.update(user).set({ proUntil: new Date("2027-01-01T00:00:00.000Z") }).where(eq(user.id, "owner"));
+  await applyStripeAction({ type: "grant_pro", userId: "owner", subscriptionId: "sub_new", customerId: "cus_1" });
+  expect(await owner()).toMatchObject({ isPro: true, proUntil: null });
 });
 it("duplicate grant preserves the original activation date", async () => {
   await applyStripeAction({ type: "grant_pro", userId: "owner", subscriptionId: "sub_new", customerId: "cus_1" });

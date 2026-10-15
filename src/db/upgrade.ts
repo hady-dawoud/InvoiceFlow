@@ -33,7 +33,32 @@ export async function upgradeInvoiceCounters() {
   });
 }
 
+export async function upgradeWalletBilling() {
+  await writeTransaction(async (tx) => {
+    const columns = await columnNames(tx, "user");
+    if (!columns.has("pro_until")) await tx.run(sql.raw("ALTER TABLE user ADD COLUMN pro_until INTEGER"));
+    await tx.run(sql.raw(`CREATE TABLE IF NOT EXISTS wallet_payment (
+      id TEXT PRIMARY KEY NOT NULL,
+      user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,
+      method TEXT NOT NULL,
+      plan_id TEXT NOT NULL,
+      amount_egp INTEGER NOT NULL,
+      months INTEGER NOT NULL,
+      confirmation TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'pending',
+      created_at INTEGER NOT NULL,
+      activated_at INTEGER
+    )`));
+    await tx.run(sql.raw("CREATE INDEX IF NOT EXISTS wallet_payment_user_idx ON wallet_payment (user_id)"));
+    await tx.run(sql.raw(
+      "CREATE UNIQUE INDEX IF NOT EXISTS wallet_payment_one_pending ON wallet_payment (user_id) WHERE status = 'pending'",
+    ));
+  });
+}
+
 export async function runUpgrade() {
-  try { await upgradeInvoiceCounters(); }
-  finally { db.$client.close(); }
+  try {
+    await upgradeInvoiceCounters();
+    await upgradeWalletBilling();
+  } finally { db.$client.close(); }
 }

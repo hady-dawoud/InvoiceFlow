@@ -5,7 +5,14 @@ import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { user } from "@/db/schema";
+import { recordWalletPayment } from "@/lib/data/wallet-payments";
 import { getStripe, proLineItem } from "@/lib/stripe";
+import {
+  deliverWalletNotice,
+  parseWalletSubmission,
+  paymentNotice,
+  walletChannels,
+} from "@/lib/wallet-billing";
 import { ENDED_STATUSES } from "@/lib/stripe-events";
 import { checkoutLocale, createPortalSession, portalLocale } from "@/lib/stripe-locale";
 import { resolveLocale } from "@/lib/locale";
@@ -154,4 +161,38 @@ export async function openCustomerPortalAction(): Promise<void> {
     },
   );
   redirect(url);
+}
+
+export async function submitWalletPaymentAction(formData: FormData): Promise<void> {
+  const session = await getSession();
+  const parsed = parseWalletSubmission({
+    plan: formData.get("plan"),
+    method: formData.get("method"),
+    confirmation: formData.get("confirmation"),
+  });
+  if (!parsed.ok) redirect("/dashboard/billing?error=invalid");
+  const channels = walletChannels(process.env);
+  if (channels.length === 0) redirect("/dashboard/billing?error=not-configured");
+  const saved = await recordWalletPayment({
+    userId: session.user.id,
+    method: parsed.method,
+    planId: parsed.plan.id,
+    months: parsed.plan.months,
+    amountEgp: parsed.plan.amountEgp,
+    confirmation: parsed.confirmation,
+  });
+  try {
+    await deliverWalletNotice(paymentNotice({
+      requestId: saved.id,
+      userId: session.user.id,
+      email: session.user.email,
+      method: parsed.method,
+      months: parsed.plan.months,
+      amountEgp: parsed.plan.amountEgp,
+      confirmation: parsed.confirmation,
+    }), channels, fetch);
+  } catch {
+    redirect("/dashboard/billing?error=notify");
+  }
+  redirect("/dashboard/billing?sent=1");
 }

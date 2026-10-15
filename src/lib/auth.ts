@@ -4,7 +4,7 @@ import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { recordSignup } from "@/lib/analytics";
-import { authRateLimit, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, trustedOrigins } from "@/lib/auth-policy";
+import { deliverPasswordReset } from "@/lib/password-reset";
 
 export const auth = betterAuth({
   appName: "InvoiceFlow",
@@ -26,6 +26,9 @@ export const auth = betterAuth({
     enabled: true,
     minPasswordLength: PASSWORD_MIN_LENGTH,
     maxPasswordLength: PASSWORD_MAX_LENGTH,
+    sendResetPassword: async ({ user, url }) => {
+      await deliverPasswordReset({ to: user.email, url });
+    },
   },
   databaseHooks: {
     user: {
@@ -45,6 +48,7 @@ export const auth = betterAuth({
       stripeCustomerId: { type: "string", required: false, input: false },
       stripeSubscriptionId: { type: "string", required: false, input: false },
       proSince: { type: "date", required: false, input: false },
+      proUntil: { type: "date", required: false, input: false },
     },
   },
   plugins: [nextCookies()],

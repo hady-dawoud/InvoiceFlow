@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   index,
   integer,
@@ -39,6 +39,8 @@ export const user = sqliteTable("user", {
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   proSince: integer("pro_since", { mode: "timestamp" }),
+  /** When set, Pro lasts until this instant. Null means open-ended (Stripe or demo). */
+  proUntil: integer("pro_until", { mode: "timestamp" }),
 }, (table) => [uniqueIndex("user_stripe_customer_id_idx").on(table.stripeCustomerId)]);
 
 export const session = sqliteTable(
@@ -181,6 +183,30 @@ export const productEvents = sqliteTable(
       .$defaultFn(() => new Date()),
   },
   (table) => [index("product_events_name_idx").on(table.name)],
+);
+
+export const walletPayment = sqliteTable(
+  "wallet_payment",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    method: text("method", { enum: ["instapay", "orange_cash"] }).notNull(),
+    planId: text("plan_id").notNull(),
+    amountEgp: integer("amount_egp").notNull(),
+    months: integer("months").notNull(),
+    confirmation: text("confirmation").notNull(),
+    status: text("status", { enum: ["pending", "activated"] }).notNull().default("pending"),
+    createdAt: integer("created_at", { mode: "timestamp" })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    activatedAt: integer("activated_at", { mode: "timestamp" }),
+  },
+  (table) => [
+    index("wallet_payment_user_idx").on(table.userId),
+    uniqueIndex("wallet_payment_one_pending").on(table.userId).where(sql`status = 'pending'`),
+  ],
 );
 
 export const invoiceSequences = sqliteTable("invoice_sequences", {
