@@ -4,6 +4,7 @@ import Link from "next/link";
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
+import { pricingCallToAction } from "@/lib/pricing-cta";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
 import { withProAccess } from "@/lib/session";
 import { formatWalletAmount, WALLET_PLANS } from "@/lib/wallet-billing";
@@ -24,6 +25,7 @@ export default async function PricingPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   const user = session?.user ? withProAccess(session.user) : undefined;
   const t = await getTranslations("marketing.pricing");
+  const tNav = await getTranslations("marketing.nav");
 
   const faq = [
     { q: t("faq.q1"), a: t("faq.a1", { limit: FREE_MONTHLY_LIMIT }) },
@@ -32,11 +34,7 @@ export default async function PricingPage() {
     { q: t("faq.q4"), a: t("faq.a4") },
   ];
 
-  const primaryCta = !user
-    ? { href: "/signup", label: t("cta.startFree") }
-    : user.isPro
-      ? { href: "/dashboard/billing", label: t("cta.manageSubscription") }
-      : { href: "/dashboard/billing", label: t("cta.upgradeToPro") };
+  const cta = pricingCallToAction(user);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-16">
@@ -45,7 +43,14 @@ export default async function PricingPage() {
           <Link href="/" className="wordmark text-2xl">
             InvoiceFlow
           </Link>
-          <LanguageSwitcher />
+          <div className="flex items-center gap-3">
+            {!user && (
+              <Link href="/login" className="text-sm text-quiet hover:text-ink">
+                {tNav("signIn")}
+              </Link>
+            )}
+            <LanguageSwitcher />
+          </div>
         </div>
         <h1 className="display mt-8 text-4xl text-ink sm:text-5xl">
           {t("heading")}
@@ -93,26 +98,19 @@ export default async function PricingPage() {
               <li>✓ {t("pro.feature3")}</li>
               <li>✓ {t("pro.feature4")}</li>
             </ul>
-            {user && !user.isPro && (
-              <Link href="/dashboard/billing" className="btn mt-6 w-full">
-                {t("cta.upgradeToPro")}
-              </Link>
-            )}
+            <Link href={cta.href} className="btn mt-6 w-full">
+              {t(`cta.${cta.label}`)}
+            </Link>
           </div>
           );
         })}
       </div>
 
-      {user && !user.isPro && (
-        <div className="mt-8 text-center">
-          <Link
-            href={primaryCta.href}
-            className="btn"
-          >
-            {primaryCta.label}
-          </Link>
-        </div>
-      )}
+      <div className="mt-8 text-center">
+        <Link href={cta.href} className="btn">
+          {t(`cta.${cta.label}`)}
+        </Link>
+      </div>
 
       <section className="mt-16">
         <h2 className="text-center text-xl font-bold text-ink">
