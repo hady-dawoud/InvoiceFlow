@@ -35,8 +35,10 @@ export async function upgradeInvoiceCounters() {
 
 export async function upgradeWalletBilling() {
   await writeTransaction(async (tx) => {
-    const columns = await columnNames(tx, "user");
-    if (!columns.has("pro_until")) await tx.run(sql.raw("ALTER TABLE user ADD COLUMN pro_until INTEGER"));
+    const columns = await tx.all(sql.raw("SELECT name FROM pragma_table_info('user')")) as { name: string }[];
+    if (!columns.some((column) => column.name === "pro_until")) {
+      await tx.run(sql.raw("ALTER TABLE user ADD COLUMN pro_until INTEGER"));
+    }
     await tx.run(sql.raw(`CREATE TABLE IF NOT EXISTS wallet_payment (
       id TEXT PRIMARY KEY NOT NULL,
       user_id TEXT NOT NULL REFERENCES user(id) ON DELETE CASCADE,

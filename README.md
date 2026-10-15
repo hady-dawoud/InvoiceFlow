@@ -12,7 +12,7 @@ seconds, track who paid, get paid.
 - **Next.js 15** (App Router, TypeScript) + **Tailwind CSS v4**
 - **Drizzle ORM** + **libsql/SQLite** (local file DB; swap `DATABASE_URL` to Turso for prod)
 - **better-auth** (email + password)
-- **Stripe** Checkout subscriptions (test mode until you add live keys)
+- **InstaPay and Orange Cash** for prepaid Pro. Stripe Checkout remains for an existing subscription portal.
 - **pdfkit** for Pro PDF export, **vitest** for tests
 
 ## Quick start
@@ -35,8 +35,9 @@ npm run dev
 ```
 
 For an existing database, back it up and run `npm run db:upgrade` from the repo
-root before starting the updated app. This additive upgrade creates and
-initializes invoice counters without changing invoices or authentication data.
+root before starting the updated app. This additive upgrade creates invoice
+counters, adds `user.pro_until`, and creates `wallet_payment`. It does not
+rewrite existing invoice rows.
 Upgrade and seed commands load Next.js environment files before connecting;
 explicit shell environment variables take precedence.
 Do not replace an existing `.env` with the example.

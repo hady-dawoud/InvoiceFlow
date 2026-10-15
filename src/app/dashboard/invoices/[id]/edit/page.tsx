@@ -5,6 +5,7 @@ import { InvoiceEditor } from "@/components/invoice-editor";
 import { listClientOptions } from "@/lib/data/clients";
 import { getInvoiceDetail } from "@/lib/data/invoices";
 import { getSession } from "@/lib/session";
+import { formatWalletAmount, WALLET_PLANS } from "@/lib/wallet-billing";
 import { centsToDecimal } from "@/lib/money";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -19,6 +20,9 @@ export default async function EditInvoicePage({
 }) {
   const session = await getSession();
   const t = await getTranslations("invoice.edit");
+  const proPrice = (await getTranslations("price"))("monthly", {
+    amount: formatWalletAmount(WALLET_PLANS[0].amountEgp),
+  });
   const { id } = await params;
   const [detail, clientOptions] = await Promise.all([
     getInvoiceDetail(session.user.id, id),
@@ -34,6 +38,7 @@ export default async function EditInvoicePage({
       <InvoiceEditor
         clients={clientOptions}
         currency={session.user.currency}
+        proPriceLabel={proPrice}
         invoiceId={invoice.id}
         initial={{
           clientId: invoice.clientId,

@@ -10,6 +10,7 @@ await vi.hoisted(async () => {
 
 import { deleteClient, listClientsWithStats } from "./clients";
 import { createClient } from "@libsql/client";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { invoiceItems, invoices, invoiceMonthlyUsage, invoiceSequences, user } from "@/db/schema";
 import { upgradeInvoiceCounters } from "@/db/upgrade";
