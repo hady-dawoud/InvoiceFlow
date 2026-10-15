@@ -74,18 +74,18 @@ export default async function PricingPage() {
           )}
         </div>
 
-        {WALLET_PLANS.map((plan) => (
+        {WALLET_PLANS.map((plan) => {
+          const termName = plan.id === "1" ? t("termMonth") : plan.id === "6" ? t("termHalf") : t("termYear");
+          const saving = plan.id === "6" ? t("savingHalf") : plan.id === "12" ? t("savingYear") : null;
+          return (
           <div key={plan.id} className="bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
-            <h2 className="text-lg font-medium text-ink">{t(`terms.${plan.id}.name`)}</h2>
+            <h2 className="text-lg font-medium text-ink">{t("pro.name")}</h2>
+            <p className="mt-1 text-sm text-quiet">{termName}</p>
             <p className="display money mt-2 text-4xl text-ink">
               {formatWalletAmount(plan.amountEgp)}
               <span className="text-base font-normal text-quiet"> {t("egp")}</span>
             </p>
-            {plan.id !== "1" ? (
-              <p className="mt-1 text-sm text-quiet">{t(`terms.${plan.id}.saving`)}</p>
-            ) : (
-              <p className="mt-1 text-sm text-quiet">{t("pro.name")}</p>
-            )}
+            {saving ? <p className="mt-1 text-sm text-quiet">{saving}</p> : null}
             <ul className="mt-4 space-y-2 text-sm text-quiet">
               <li>✓ {t("pro.feature1")}</li>
               <li>✓ {t("pro.feature2")}</li>
@@ -98,7 +98,8 @@ export default async function PricingPage() {
               </Link>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {user && !user.isPro && (
