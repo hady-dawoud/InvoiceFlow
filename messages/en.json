@@ -157,7 +157,8 @@
       "dashboard": "Dashboard",
       "invoices": "Invoices",
       "clients": "Clients",
-      "billing": "Billing"
+      "billing": "Billing",
+      "settings": "Settings"
     },
     "plan": {
       "pro": "Pro",
@@ -182,6 +183,7 @@
       "unpaidLabel": "Unpaid",
       "overdueNote": "Overdue amount: <ltr>{amount}</ltr>.",
       "noOverdue": "Nothing is past its due date.",
+      "alsoUnpaid": "{amount} unpaid in another currency",
       "stats": {
         "billed": "Billed (sent + paid)",
         "paid": "Paid",
@@ -231,6 +233,20 @@
         "saving": "Saving…",
         "cancel": "Cancel"
       }
+    },
+    "settings": {
+      "metaTitle": "Settings",
+      "heading": "Business details",
+      "intro": "These appear on every invoice you send.",
+      "businessNameLabel": "Business name",
+      "currencyLabel": "Currency for new invoices",
+      "taxIdLabel": "Tax ID",
+      "taxIdPlaceholder": "Optional",
+      "paymentInstructionsLabel": "How clients should pay",
+      "paymentInstructionsPlaceholder": "Bank name, IBAN, or another way to pay you",
+      "save": "Save",
+      "saving": "Saving…",
+      "saved": "Saved. New invoices use this currency."
     },
     "billing": {
       "metaTitle": "Billing",
@@ -377,6 +393,8 @@
       "taxLabel": "Tax <rate>({pct}%)</rate>",
       "totalDue": "Total due",
       "notes": "Notes",
+      "howToPay": "How to pay",
+      "taxId": "Tax ID",
       "footer": "Created with InvoiceFlow",
       "continued": "(continued)"
     },
@@ -428,6 +446,14 @@
     "addressTooLong": "Address must be 500 characters or fewer.",
     "notFound": "Client not found.",
     "hasInvoices": "This client has invoices — delete those first."
+  },
+  "business": {
+    "nameRequired": "Business name is required.",
+    "nameTooLong": "Business name must be 120 characters or fewer.",
+    "invalidCurrency": "Choose a supported currency.",
+    "taxIdTooLong": "Tax ID must be 40 characters or fewer.",
+    "instructionsTooLong": "Payment instructions must be 500 characters or fewer.",
+    "accountNotFound": "Account not found."
   },
   "pay": {
     "metaTitle": "Your invoice",

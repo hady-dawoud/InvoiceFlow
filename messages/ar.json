@@ -157,7 +157,8 @@
       "dashboard": "لوحة التحكم",
       "invoices": "الفواتير",
       "clients": "العملاء",
-      "billing": "الفوترة"
+      "billing": "الفوترة",
+      "settings": "الإعدادات"
     },
     "plan": {
       "pro": "برو",
@@ -182,6 +183,7 @@
       "unpaidLabel": "غير مدفوع",
       "overdueNote": "مبلغ متأخر قدره <ltr>{amount}</ltr>.",
       "noOverdue": "لا توجد فواتير تجاوزت تاريخ استحقاقها.",
+      "alsoUnpaid": "{amount} غير مدفوع بعملة أخرى",
       "stats": {
         "billed": "المفوترة (مرسلة + مدفوعة)",
         "paid": "مدفوعة",
@@ -231,6 +233,20 @@
         "saving": "جارٍ الحفظ…",
         "cancel": "إلغاء"
       }
+    },
+    "settings": {
+      "metaTitle": "الإعدادات",
+      "heading": "بيانات النشاط",
+      "intro": "تظهر هذه البيانات على كل فاتورة ترسلها.",
+      "businessNameLabel": "اسم النشاط",
+      "currencyLabel": "عملة الفواتير الجديدة",
+      "taxIdLabel": "الرقم الضريبي",
+      "taxIdPlaceholder": "اختياري",
+      "paymentInstructionsLabel": "كيف يدفع العميل",
+      "paymentInstructionsPlaceholder": "اسم البنك أو رقم الآيبان أو طريقة دفع أخرى",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ…",
+      "saved": "تم الحفظ. الفواتير الجديدة تستخدم هذه العملة."
     },
     "billing": {
       "metaTitle": "الفوترة",
@@ -377,6 +393,8 @@
       "taxLabel": "الضريبة <rate>({pct}%)</rate>",
       "totalDue": "الإجمالي المستحق",
       "notes": "ملاحظات",
+      "howToPay": "طريقة الدفع",
+      "taxId": "الرقم الضريبي",
       "footer": "أُنشئت باستخدام InvoiceFlow",
       "continued": "(يتبع)"
     },
@@ -428,6 +446,14 @@
     "addressTooLong": "يجب ألا يتجاوز العنوان 500 حرف.",
     "notFound": "لم يتم العثور على العميل.",
     "hasInvoices": "لدى هذا العميل فواتير — احذفها أولاً."
+  },
+  "business": {
+    "nameRequired": "اسم النشاط مطلوب.",
+    "nameTooLong": "يجب ألا يتجاوز اسم النشاط 120 حرفًا.",
+    "invalidCurrency": "اختر عملة مدعومة.",
+    "taxIdTooLong": "يجب ألا يتجاوز الرقم الضريبي 40 حرفًا.",
+    "instructionsTooLong": "يجب ألا تتجاوز تعليمات الدفع 500 حرفًا.",
+    "accountNotFound": "الحساب غير موجود."
   },
   "pay": {
     "metaTitle": "فاتورتك",

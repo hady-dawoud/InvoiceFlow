@@ -6,7 +6,7 @@ import { OverdueNote } from "@/components/overdue-note";
 import { StatusBadge } from "@/components/status-badge";
 import { listInvoiceSummaries } from "@/lib/data/invoices";
 import { listClientsWithStats } from "@/lib/data/clients";
-import { invoiceOverview } from "@/lib/invoice-overview";
+import { overviewByCurrency } from "@/lib/invoice-overview";
 import { formatCents } from "@/lib/money";
 import { getQuotaState } from "@/lib/quota";
 import { countInvoicesThisMonth } from "@/lib/data/invoices";
@@ -20,7 +20,6 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function DashboardPage() {
   const session = await getSession();
   const { user } = session;
-  const currency = user.currency;
   const [t, uiLocale] = await Promise.all([getTranslations("dashboard.home"), getLocale()]);
 
   const [summaries, usedThisMonth, clients] = await Promise.all([
@@ -30,7 +29,10 @@ export default async function DashboardPage() {
   ]);
   const quota = getQuotaState(user.isPro, usedThisMonth);
 
-  const { billed, paid, outstanding, overdue } = invoiceOverview(summaries);
+  const groups = overviewByCurrency(summaries);
+  const primary = groups[0] ?? { currency: user.currency, billed: 0n, paid: 0n, outstanding: 0n, overdue: 0n };
+  const { currency, billed, paid, outstanding, overdue } = primary;
+  const otherUnpaid = groups.slice(1).filter((group) => group.outstanding + group.overdue > 0n);
 
   const recent = summaries.slice(0, 5);
 
@@ -66,6 +68,11 @@ export default async function DashboardPage() {
         <p className="mt-2 text-quiet">
           {overdue > 0 ? <OverdueNote amount={formatCents(overdue, currency)} /> : t("noOverdue")}
         </p>
+        {otherUnpaid.map((group) => (
+          <p key={group.currency} className="mt-1 text-quiet">
+            {t("alsoUnpaid", { amount: formatCents(group.outstanding + group.overdue, group.currency) })}
+          </p>
+        ))}
         <dl className="mt-6 grid grid-cols-3 gap-4 border-t border-line pt-4 text-sm">
           {stats.filter((stat) => stat.key !== "outstanding").map((stat) => (
             <div key={stat.key}>
@@ -114,7 +121,7 @@ export default async function DashboardPage() {
                   <td>
                     <StatusBadge status={inv.status} dueDate={inv.dueDate} locale={uiLocale} />
                   </td>
-                  <td className="num money">{formatCents(inv.totalCents, currency)}</td>
+                  <td className="num money">{formatCents(inv.totalCents, inv.currency)}</td>
                 </tr>
               ))}
             </tbody>

@@ -1,6 +1,16 @@
 import { expect, it } from "vitest";
-import { invoiceOverview } from "@/lib/invoice-overview";
+import { invoiceOverview, overviewByCurrency } from "@/lib/invoice-overview";
 import { formatCents } from "@/lib/money";
+
+it("keeps each currency's totals separate", () => {
+  expect(overviewByCurrency([
+    { status: "sent", dueDate: "2000-01-01", totalCents: 100, currency: "usd" },
+    { status: "sent", dueDate: "2000-01-01", totalCents: 50, currency: "eur" },
+  ])).toEqual([
+    { currency: "usd", billed: 100n, paid: 0n, outstanding: 0n, overdue: 100n },
+    { currency: "eur", billed: 50n, paid: 0n, outstanding: 0n, overdue: 50n },
+  ]);
+});
 
 it.each([
   ["paid", "9999-12-31", "paid"],

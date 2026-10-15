@@ -33,6 +33,22 @@ function paragraphs(value: string): string[] {
   return value.split(/\r?\n/);
 }
 
+function labeledParagraphs(label: string, value: string, locale: DocumentLocale) {
+  return (
+    <div className="mt-8 border-t border-paper pt-4">
+      <p className="text-quiet">{label}</p>
+      {paragraphs(value).map((paragraph, index) => (
+        <p
+          key={index}
+          className={`mt-1 whitespace-pre-line text-sm text-quiet ${notesAlignClass(paragraph, locale)}`}
+        >
+          <StoredBdi value={paragraph} />
+        </p>
+      ))}
+    </div>
+  );
+}
+
 /**
  * Print-friendly invoice document shared by the owner detail page and the
  * public client-facing page. Pure presentation — no actions.
@@ -45,6 +61,8 @@ export function InvoiceDocument({
   items,
   businessName,
   businessEmail,
+  taxId,
+  paymentInstructions,
   currency,
 }: {
   invoice: Pick<
@@ -55,6 +73,8 @@ export function InvoiceDocument({
   items: Pick<InvoiceItem, "description" | "quantity" | "unitPriceCents">[];
   businessName: string;
   businessEmail?: string;
+  taxId?: string | null;
+  paymentInstructions?: string | null;
   currency: string;
 }) {
   const totals = calcTotals(items, invoice.taxBps);
@@ -85,6 +105,11 @@ export function InvoiceDocument({
           {businessEmail && (
             <p className="text-quiet">
               <StoredBdi value={businessEmail} />
+            </p>
+          )}
+          {taxId && (
+            <p className="text-quiet">
+              {t("taxId")} <LtrBdi value={taxId} />
             </p>
           )}
         </div>
@@ -173,19 +198,8 @@ export function InvoiceDocument({
         </div>
       </div>
 
-      {invoice.notes && (
-        <div className="mt-8 border-t border-paper pt-4">
-          <p className="text-quiet">{t("notes")}</p>
-          {paragraphs(invoice.notes).map((paragraph, index) => (
-            <p
-              key={index}
-              className={`mt-1 whitespace-pre-line text-sm text-quiet ${notesAlignClass(paragraph, locale)}`}
-            >
-              <StoredBdi value={paragraph} />
-            </p>
-          ))}
-        </div>
-      )}
+      {invoice.notes && labeledParagraphs(t("notes"), invoice.notes, locale)}
+      {paymentInstructions && labeledParagraphs(t("howToPay"), paymentInstructions, locale)}
     </div>
   );
 }

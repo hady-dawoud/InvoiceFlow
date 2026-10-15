@@ -35,6 +35,8 @@ export const user = sqliteTable("user", {
   // --- InvoiceFlow application fields (better-auth user.additionalFields) ---
   businessName: text("business_name"),
   currency: text("currency").notNull().default("usd"),
+  taxId: text("tax_id"),
+  paymentInstructions: text("payment_instructions"),
   isPro: integer("is_pro", { mode: "boolean" }).notNull().default(false),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
@@ -136,6 +138,8 @@ export const invoices = sqliteTable(
     notes: text("notes"),
     /** Sheet, print, public invoice, and PDF language: en | ar. */
     documentLocale: text("document_locale").notNull().default("en"),
+    /** Currency copied from the account when the invoice is created. */
+    currency: text("currency").notNull().default("usd"),
     /** Opaque public token for the shareable client-facing invoice link. */
     token: text("token").notNull().unique(),
     ...timestamps,

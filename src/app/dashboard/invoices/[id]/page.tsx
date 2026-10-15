@@ -73,7 +73,9 @@ export default async function InvoiceDetailPage({
         items={items}
         businessName={businessName}
         businessEmail={session.user.email}
-        currency={session.user.currency}
+        taxId={session.user.taxId}
+        paymentInstructions={session.user.paymentInstructions}
+        currency={invoice.currency}
       />
     </div>
   );

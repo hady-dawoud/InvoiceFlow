@@ -10,9 +10,11 @@ await vi.hoisted(async () => {
 
 import { deleteClient, listClientsWithStats } from "./clients";
 import { createClient } from "@libsql/client";
+import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { invoiceItems, invoices, invoiceMonthlyUsage, invoiceSequences, user } from "@/db/schema";
-import { upgradeInvoiceCounters } from "@/db/upgrade";
+import { upgradeBusinessIdentity, upgradeInvoiceCounters } from "@/db/upgrade";
+import { updateBusinessProfile } from "./business-profile";
 import { createTestSchema, seedOwners } from "@/test/database";
 import { countInvoicesThisMonth, createInvoice, deleteInvoice, getInvoiceDetail, listInvoiceSummaries, updateInvoice, type InvoiceInput } from "./invoices";
 
@@ -74,6 +76,75 @@ it("persists document locale on create and update", async () => {
   expect((await getInvoiceDetail("owner", created.id))?.invoice.documentLocale).toBe("ar");
   await updateInvoice("owner", created.id, { ...input, documentLocale: "en" });
   expect((await getInvoiceDetail("owner", created.id))?.invoice.documentLocale).toBe("en");
+});
+
+it("snapshots the account currency onto a new invoice", async () => {
+  await db.update(user).set({ currency: "eur" }).where(eq(user.id, "owner"));
+  const created = await createInvoice("owner", input);
+  expect((await getInvoiceDetail("owner", created.id))?.invoice.currency).toBe("eur");
+  await db.update(user).set({ currency: "gbp" }).where(eq(user.id, "owner"));
+  expect((await getInvoiceDetail("owner", created.id))?.invoice.currency).toBe("eur");
+  const next = await createInvoice("owner", input);
+  expect((await getInvoiceDetail("owner", next.id))?.invoice.currency).toBe("gbp");
+});
+
+it("saves payment details for that account only", async () => {
+  expect(await updateBusinessProfile("owner", {
+    businessName: "Ada Studio",
+    currency: "sar",
+    taxId: "300",
+    paymentInstructions: "Transfer to IBAN SA00",
+  })).toBe(true);
+  const [owner] = await db.select().from(user).where(eq(user.id, "owner"));
+  const [other] = await db.select().from(user).where(eq(user.id, "other"));
+  expect(owner).toMatchObject({ businessName: "Ada Studio", currency: "sar", taxId: "300", paymentInstructions: "Transfer to IBAN SA00" });
+  expect(other.businessName).toBeNull();
+  expect(other.taxId).toBeNull();
+});
+
+it("upgrade copies the account currency onto invoices created before that column", async () => {
+  await db.update(user).set({ currency: "eur" }).where(eq(user.id, "owner"));
+  await db.$client.executeMultiple(`
+    PRAGMA foreign_keys = OFF;
+    ALTER TABLE user DROP COLUMN tax_id;
+    ALTER TABLE user DROP COLUMN payment_instructions;
+    DROP TABLE invoices;
+    CREATE TABLE invoices (
+      id TEXT PRIMARY KEY NOT NULL,
+      user_id TEXT NOT NULL,
+      client_id TEXT NOT NULL,
+      number TEXT NOT NULL,
+      status TEXT NOT NULL DEFAULT 'draft',
+      issue_date TEXT NOT NULL,
+      due_date TEXT NOT NULL,
+      tax_bps INTEGER NOT NULL DEFAULT 0,
+      notes TEXT,
+      document_locale TEXT NOT NULL DEFAULT 'en',
+      token TEXT NOT NULL,
+      created_at INTEGER NOT NULL,
+      updated_at INTEGER NOT NULL
+    );
+    PRAGMA foreign_keys = ON;
+  `);
+  const now = Math.floor(Date.now() / 1000);
+  await db.$client.execute({
+    sql: `INSERT INTO invoices (id, user_id, client_id, number, status, issue_date, due_date, token, created_at, updated_at)
+          VALUES (?, ?, ?, ?, 'sent', ?, ?, ?, ?, ?)`,
+    args: ["legacy-currency", "owner", "owner-client", "INV-2026-0101", input.issueDate, input.dueDate, "legacy-currency-token", now, now],
+  });
+  try {
+    await upgradeBusinessIdentity();
+    expect((await getInvoiceDetail("owner", "legacy-currency"))?.invoice.currency).toBe("eur");
+    await upgradeBusinessIdentity();
+    expect((await getInvoiceDetail("owner", "legacy-currency"))?.invoice.currency).toBe("eur");
+  } finally {
+    await db.$client.executeMultiple(`
+      CREATE UNIQUE INDEX IF NOT EXISTS invoices_user_number_idx ON invoices (user_id, number);
+      CREATE INDEX IF NOT EXISTS invoices_user_id_idx ON invoices (user_id);
+      CREATE INDEX IF NOT EXISTS invoices_user_issue_idx ON invoices (user_id, issue_date);
+      CREATE INDEX IF NOT EXISTS invoices_client_id_idx ON invoices (client_id);
+    `);
+  }
 });
 
 it("stores the caller locale when documentLocale is omitted on create", async () => {

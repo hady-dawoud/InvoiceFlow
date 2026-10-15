@@ -33,7 +33,7 @@ export default async function EditInvoicePage({
       <h1 className="text-xl font-bold text-ink">{t("heading", { number: invoice.number })}</h1>
       <InvoiceEditor
         clients={clientOptions}
-        currency={session.user.currency}
+        currency={invoice.currency}
         invoiceId={invoice.id}
         initial={{
           clientId: invoice.clientId,

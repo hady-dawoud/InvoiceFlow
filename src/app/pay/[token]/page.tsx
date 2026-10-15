@@ -31,7 +31,9 @@ export default async function PublicInvoicePage({
       ownerName: user.name,
       ownerBusiness: user.businessName,
       ownerEmail: user.email,
-      currency: user.currency,
+      ownerTaxId: user.taxId,
+      ownerPaymentInstructions: user.paymentInstructions,
+      currency: invoices.currency,
     })
     .from(invoices)
     .innerJoin(clients, and(eq(invoices.clientId, clients.id), eq(invoices.userId, clients.userId)))
@@ -64,6 +66,8 @@ export default async function PublicInvoicePage({
         items={items}
         businessName={row.ownerBusiness ?? row.ownerName}
         businessEmail={row.ownerEmail}
+        taxId={row.ownerTaxId}
+        paymentInstructions={row.ownerPaymentInstructions}
         currency={row.currency}
       />
 

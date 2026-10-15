@@ -83,3 +83,12 @@ limited to JavaScript’s safe-integer range. Tax is rounded once per invoice.
 Checkout fulfillment checks payment eligibility and current subscription state;
 subscription identity remains stored after revocation so recovery and delayed
 old events can be reconciled safely. past_due keeps access as a grace policy.
+
+## D11 — Business identity on the invoice (2026-10-15)
+
+The account stores the business name, default currency, tax ID, and payment
+instructions. A new invoice copies the account currency, so changing the
+default later does not relabel invoices already sent. Payment instructions stay
+on the account and are shown on the current invoice and PDF, because that is
+the instruction the client needs in order to pay. Collecting the payment
+inside the app remains out of scope.

@@ -17,7 +17,13 @@ export type PdfInvoice = {
   client: { name: string; email: string | null; address: string | null };
   items: InvoiceInput["items"];
 };
-export type PdfOwner = { businessName: string; email: string; currency: string };
+export type PdfOwner = {
+  businessName: string;
+  email: string;
+  currency: string;
+  taxId?: string | null;
+  paymentInstructions?: string | null;
+};
 export type PdfLabels = {
   title: string;
   billedTo: string;
@@ -31,6 +37,8 @@ export type PdfLabels = {
   tax: string;
   totalDue: string;
   notes: string;
+  howToPay: string;
+  taxId: string;
   footer: string;
   continued: string;
 };
@@ -637,7 +645,7 @@ class InvoicePdfRenderer {
     this.doc.fillColor("#555");
     this.columns([
       { text: this.detail.invoice.number, x: LEFT, width: 240, align: "start" },
-      { text: `${this.owner.businessName}\n${this.owner.email}`, x: 322, width: 240, align: "end" },
+      { text: this.sellerLines(), x: 322, width: 240, align: "end" },
     ]);
     this.y += 24;
     const { client, invoice } = this.detail;
@@ -712,7 +720,17 @@ class InvoicePdfRenderer {
       this.columns([{ text: this.labels.notes, x: LEFT, width: RIGHT - LEFT, align: "start" }]);
       this.columns([{ text: this.detail.invoice.notes, x: LEFT, width: RIGHT - LEFT, align: "notes" }]);
     }
+    if (this.owner.paymentInstructions) {
+      this.doc.fillColor("#555");
+      this.columns([{ text: this.labels.howToPay, x: LEFT, width: RIGHT - LEFT, align: "start" }]);
+      this.columns([{ text: this.owner.paymentInstructions, x: LEFT, width: RIGHT - LEFT, align: "notes" }]);
+    }
     this.footer();
+  }
+
+  private sellerLines() {
+    const taxId = this.owner.taxId ? `${this.labels.taxId} ${this.owner.taxId}` : "";
+    return [this.owner.businessName, this.owner.email, taxId].filter((line) => line.length > 0).join("\n");
   }
 }
 

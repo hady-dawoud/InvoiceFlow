@@ -86,6 +86,26 @@ it("keeps the Arabic tax percent in an ltr bdi", async () => {
   expect(bdiDir(html, "(8.5%)")).toBe("ltr");
 });
 
+it("shows the tax id and payment instructions in the document language", async () => {
+  const node = await InvoiceDocument({
+    ...sheetProps,
+    taxId: "300",
+    paymentInstructions: "حول إلى IBAN",
+  });
+  const html = renderToStaticMarkup(createElement(Provider, { locale: "en", messages: en }, node));
+
+  expect(html).toContain(leaf(ar, "invoice.document.howToPay"));
+  expect(html).toContain(leaf(ar, "invoice.document.taxId"));
+  expect(html).not.toContain(leaf(en, "invoice.document.howToPay"));
+  expect(bdiDir(html, "300")).toBe("ltr");
+  expect(bdiDir(html, "حول إلى IBAN")).toBe("rtl");
+});
+
+it("omits payment instructions when the account has none", async () => {
+  const html = await renderSheet();
+  expect(html).not.toContain(leaf(ar, "invoice.document.howToPay"));
+});
+
 it("keeps a leading minus on an ltr amount bdi inside rtl", () => {
   const html = renderToStaticMarkup(
     createElement("div", { dir: "rtl" }, createElement(LtrBdi, { value: formatCents(-5000, "usd") })),

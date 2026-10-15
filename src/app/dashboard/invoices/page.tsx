@@ -103,7 +103,7 @@ export default async function InvoicesPage({
                 <td>
                   <StatusBadge status={inv.status} dueDate={inv.dueDate} locale={uiLocale} />
                 </td>
-                <td className="num money">{formatCents(inv.totalCents, session.user.currency)}</td>
+                <td className="num money">{formatCents(inv.totalCents, inv.currency)}</td>
               </tr>
             ))}
           </tbody>

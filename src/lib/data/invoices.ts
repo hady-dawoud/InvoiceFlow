@@ -110,7 +110,7 @@ async function insertItems(tx: WriteTransaction, invoiceId: string, items: Invoi
 async function insertInvoice(userId: string, input: InvoiceInput, locale: DocumentLocale) {
   return writeTransaction(async (tx) => {
     await requireOwnedClient(tx, userId, input.clientId);
-    const [owner] = await tx.select({ id: user.id, isPro: user.isPro }).from(user).where(eq(user.id, userId));
+    const [owner] = await tx.select({ id: user.id, isPro: user.isPro, currency: user.currency }).from(user).where(eq(user.id, userId));
     if (!owner) throw new InvoiceWriteError("Account not found.");
     const number = await consumeInvoiceCounters(tx, owner);
     const invoiceId = randomUUID();
@@ -118,6 +118,7 @@ async function insertInvoice(userId: string, input: InvoiceInput, locale: Docume
     await tx.insert(invoices).values({
       id: invoiceId, userId, number, token: randomBytes(24).toString("hex"), ...fields,
       documentLocale: documentLocale ?? locale,
+      currency: owner.currency,
     });
     await insertItems(tx, invoiceId, items);
     return { id: invoiceId, number };

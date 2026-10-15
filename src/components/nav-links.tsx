@@ -9,6 +9,7 @@ const LINKS = [
   { href: "/dashboard/invoices", key: "invoices" },
   { href: "/dashboard/clients", key: "clients" },
   { href: "/dashboard/billing", key: "billing" },
+  { href: "/dashboard/settings", key: "settings" },
 ] as const;
 
 export function NavLinks() {

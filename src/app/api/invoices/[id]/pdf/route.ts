@@ -28,6 +28,8 @@ function pdfLabels(locale: "en" | "ar", taxBps: number): PdfLabels {
     tax: String(t.rich("taxLabel", { pct: taxBps / 100, rate: (chunks) => chunks })),
     totalDue: t("totalDue"),
     notes: t("notes"),
+    howToPay: t("howToPay"),
+    taxId: t("taxId"),
     footer: t("footer"),
     continued: t("continued"),
   };
@@ -51,7 +53,9 @@ export async function GET(
     {
       businessName: session.user.businessName ?? session.user.name,
       email: session.user.email,
-      currency: session.user.currency,
+      currency: detail.invoice.currency,
+      taxId: session.user.taxId,
+      paymentInstructions: session.user.paymentInstructions,
     },
     pdfLabels(documentLocale, detail.invoice.taxBps),
     documentLocale,

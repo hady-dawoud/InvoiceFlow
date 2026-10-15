@@ -14,6 +14,8 @@ const enLabels: PdfLabels = {
   tax: "Tax (8.5%)",
   totalDue: "Total due",
   notes: "NOTES",
+  howToPay: "How to pay",
+  taxId: "Tax ID",
   footer: "Created with InvoiceFlow",
   continued: "(continued)",
 };

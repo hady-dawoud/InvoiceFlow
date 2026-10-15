@@ -41,6 +41,8 @@ export const auth = betterAuth({
       // All billing-sensitive fields are server-managed: never client-settable.
       businessName: { type: "string", required: false, input: false },
       currency: { type: "string", defaultValue: "usd", input: false },
+      taxId: { type: "string", required: false, input: false },
+      paymentInstructions: { type: "string", required: false, input: false },
       isPro: { type: "boolean", defaultValue: false, input: false },
       stripeCustomerId: { type: "string", required: false, input: false },
       stripeSubscriptionId: { type: "string", required: false, input: false },

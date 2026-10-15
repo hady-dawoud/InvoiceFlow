@@ -28,6 +28,8 @@ const enLabels: PdfLabels = {
   notes: "NOTES",
   footer: "Created with InvoiceFlow",
   continued: "(continued)",
+  howToPay: "How to pay",
+  taxId: "Tax ID",
 };
 
 const arLabels: PdfLabels = {
@@ -45,6 +47,8 @@ const arLabels: PdfLabels = {
   notes: "ملاحظات",
   footer: "أُنشئت باستخدام InvoiceFlow",
   continued: "(يتبع)",
+  howToPay: "طريقة الدفع",
+  taxId: "الرقم الضريبي",
 };
 
 function pdfFixture(count: number, clientName = "Example Client"): PdfInvoice {
@@ -54,6 +58,27 @@ function pdfFixture(count: number, clientName = "Example Client"): PdfInvoice {
     items: Array.from({ length: count }, (_, index) => ({ description: `Service ${index + 1}`, quantity: 2, unitPriceCents: 10000 })),
   };
 }
+
+function encodedPdfText(buffer: Buffer): string {
+  const source = buffer.toString("latin1");
+  return [...source.matchAll(/stream\n/g)]
+    .flatMap((match) => [...pdfStream(buffer, source, (match.index ?? 0) - 20).matchAll(/<([0-9A-Fa-f]+)>/g)])
+    .map((hex) => Buffer.from(hex[1], "hex").toString("latin1"))
+    .join("");
+}
+
+it("prints the tax id and payment instructions", async () => {
+  const buffer = await renderInvoicePdf(
+    pdfFixture(1),
+    { ...owner, taxId: "300", paymentInstructions: "Transfer to IBAN GB00TEST" },
+    enLabels,
+    "en",
+  );
+  const encoded = encodedPdfText(buffer);
+  expect(encoded).toContain("Tax ID 300");
+  expect(encoded).toContain("How to pay");
+  expect(encoded).toContain("Transfer to IBAN GB00TEST");
+});
 
 it.each([[1, 1], [30, 2]])("renders %i line items in %i pages", async (count, pages) => {
   const buffer = await renderInvoicePdf(pdfFixture(count), owner, enLabels, "en");
