@@ -16,7 +16,8 @@ export function isBillingConfigured(): boolean {
 }
 
 export function isTestMode(): boolean {
-  return (process.env.STRIPE_SECRET_KEY ?? "").startsWith("sk_test_");
+  const key = process.env.STRIPE_SECRET_KEY ?? "";
+  return key.startsWith("sk_test_") || key.startsWith("rk_test_") || key.startsWith("rkcs_test_");
 }
 
 /** Stripe Price ID from the dashboard, or an inline $9/mo price is created. */

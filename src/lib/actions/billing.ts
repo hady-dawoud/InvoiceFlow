@@ -9,6 +9,7 @@ import { getStripe, proLineItem } from "@/lib/stripe";
 import { ENDED_STATUSES } from "@/lib/stripe-events";
 import { checkoutLocale, createPortalSession, portalLocale } from "@/lib/stripe-locale";
 import { resolveLocale } from "@/lib/locale";
+import { siteOrigin } from "@/lib/site";
 import type Stripe from "stripe";
 import type { User } from "@/db/schema";
 import { randomBytes } from "node:crypto";
@@ -68,7 +69,7 @@ const PORTAL_LOCALES = [
 ] as const;
 
 function appUrl(): string {
-  return process.env.APP_URL ?? "http://localhost:3000";
+  return siteOrigin();
 }
 
 function cookieValue(header: string | null, name: string): string | null {
