@@ -3,6 +3,7 @@ import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { clients, invoiceItems, invoices, invoiceMonthlyUsage, user, type Invoice } from "@/db/schema";
 import { calcTotals } from "@/lib/money";
+import { allowedTransitions } from "@/lib/invoice";
 import { consumeInvoiceCounters, InvoiceWriteError, monthKey } from "./invoice-counters";
 import { writeTransaction, type WriteTransaction } from "@/db/write-transaction";
 import { startOfMonth } from "@/lib/quota";
@@ -132,6 +133,7 @@ async function insertInvoice(userId: string, input: InvoiceInput, locale: Docume
 }
 
 export async function createInvoice(userId: string, input: InvoiceInput, locale: DocumentLocale = "en") {
+  if (input.status === "paid") throw new InvoiceWriteError("Invalid status.");
   calcTotals(input.items, input.taxBps);
   try {
     const created = await insertInvoice(userId, input, locale);
@@ -149,8 +151,11 @@ export async function updateInvoice(userId: string, invoiceId: string, input: In
   calcTotals(input.items, input.taxBps);
   return writeTransaction(async (tx) => {
     const owned = and(eq(invoices.id, invoiceId), eq(invoices.userId, userId));
-    const [invoice] = await tx.select({ id: invoices.id }).from(invoices).where(owned);
+    const [invoice] = await tx.select({ status: invoices.status }).from(invoices).where(owned);
     if (!invoice) return false;
+    if (input.status !== invoice.status && !allowedTransitions(invoice.status).includes(input.status)) {
+      throw new InvoiceWriteError("Invalid status.");
+    }
     await requireOwnedClient(tx, userId, input.clientId);
     const { items, documentLocale, ...fields } = input;
     await tx.update(invoices).set({
@@ -169,11 +174,14 @@ export async function setInvoiceStatus(
   invoiceId: string,
   status: Invoice["status"],
 ): Promise<boolean> {
-  const result = await db
-    .update(invoices)
-    .set({ status, updatedAt: new Date() })
-    .where(and(eq(invoices.id, invoiceId), eq(invoices.userId, userId)));
-  return result.rowsAffected > 0;
+  return writeTransaction(async (tx) => {
+    const owned = and(eq(invoices.id, invoiceId), eq(invoices.userId, userId));
+    const [invoice] = await tx.select({ status: invoices.status }).from(invoices).where(owned);
+    if (!invoice) return false;
+    if (!allowedTransitions(invoice.status).includes(status)) throw new InvoiceWriteError("Invalid status.");
+    await tx.update(invoices).set({ status, updatedAt: new Date() }).where(owned);
+    return true;
+  });
 }
 
 export async function deleteInvoice(userId: string, invoiceId: string): Promise<boolean> {

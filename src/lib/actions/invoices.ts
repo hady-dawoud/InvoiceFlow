@@ -23,6 +23,7 @@ const WRITE_ERROR_KEYS: Record<string, string> = {
   "Unknown client.": "invoice.unknownClient",
   "Account not found.": "invoice.accountNotFound",
   "Invoice sequence is too large.": "invoice.sequenceTooLarge",
+  "Invalid status.": "invoice.invalidStatus",
 };
 
 function writeErrorResult(error: Error): ActionResult {
@@ -89,7 +90,13 @@ export async function setInvoiceStatusAction(
     return { ok: false, error: "invoice.invalidStatus" };
   }
   const session = await getSession();
-  const updated = await setInvoiceStatus(session.user.id, invoiceId, status);
+  let updated: boolean;
+  try { updated = await setInvoiceStatus(session.user.id, invoiceId, status); }
+  catch (error) {
+    const mapped = mappedWriteError(error);
+    if (!mapped) throw error;
+    return mapped;
+  }
   if (!updated) return { ok: false, error: "invoice.notFound" };
 
   revalidatePath("/dashboard");
