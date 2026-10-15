@@ -32,6 +32,8 @@ export const SIGN_UP_AUTH_ERROR_CODES = [
 /** Sign-out itself does not throw; origin middleware can still reject the POST. */
 export const SIGN_OUT_AUTH_ERROR_CODES = ["INVALID_ORIGIN", "MISSING_OR_NULL_ORIGIN"] as const;
 
+export const RESET_AUTH_ERROR_CODES = ["INVALID_TOKEN", "PASSWORD_TOO_SHORT", "PASSWORD_TOO_LONG"] as const;
+
 type AuthTranslator = {
   has: (key: string) => boolean;
   (key: string): string;
@@ -67,4 +69,11 @@ export function signOutFailureMessage(
   error: { code?: unknown; message?: unknown },
 ): string {
   return messageForCode(t, error, SIGN_OUT_AUTH_ERROR_CODES);
+}
+
+export function resetFailureMessage(
+  t: AuthTranslator,
+  error: { code?: unknown; message?: unknown },
+): string {
+  return messageForCode(t, error, RESET_AUTH_ERROR_CODES);
 }

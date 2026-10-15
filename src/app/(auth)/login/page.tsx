@@ -72,6 +72,11 @@ export default function LoginPage() {
           {pending ? t("submitPending") : t("submit")}
         </button>
       </form>
+      <p className="mt-4 text-center text-sm">
+        <Link href="/forgot-password" className="font-medium text-carbon hover:underline">
+          {t("forgotCta")}
+        </Link>
+      </p>
       <p className="mt-4 text-center text-sm text-quiet">
         {t("noAccount")}{" "}
         <Link href="/signup" className="font-medium text-carbon hover:underline">

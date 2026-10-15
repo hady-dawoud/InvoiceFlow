@@ -10,7 +10,7 @@ afterEach(() => {
 
 describe("public site index", () => {
   it("lists marketing and account pages and hides private ones", () => {
-    expect(PUBLIC_PATHS).toEqual(["/", "/pricing", "/login", "/signup"]);
+    expect(PUBLIC_PATHS).toEqual(["/", "/pricing", "/login", "/signup", "/forgot-password"]);
     process.env.APP_URL = "https://invoiceflow.example/";
     expect(robotsPolicy()).toEqual({
       rules: {
@@ -25,6 +25,7 @@ describe("public site index", () => {
       "https://invoiceflow.example/pricing",
       "https://invoiceflow.example/login",
       "https://invoiceflow.example/signup",
+      "https://invoiceflow.example/forgot-password",
     ]);
   });
 });

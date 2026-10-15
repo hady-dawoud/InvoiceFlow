@@ -121,6 +121,7 @@
       },
       "submit": "Sign in",
       "submitPending": "Signing in…",
+      "forgotCta": "Forgot your password?",
       "noAccount": "No account yet?",
       "signupCta": "Start for free"
     },
@@ -148,6 +149,36 @@
       "submitPending": "Creating account…",
       "haveAccount": "Already have an account?",
       "loginCta": "Sign in"
+    },
+    "forgot": {
+      "heading": "Reset your password",
+      "subtitle": "We'll email you a link if an account exists for that address.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "you@example.com",
+      "submit": "Send reset link",
+      "submitPending": "Sending…",
+      "sent": "If an account exists for that email, a reset link is on its way.",
+      "notConfigured": "Password reset email is not set up on this server yet.",
+      "invalidEmail": "Enter a valid email address.",
+      "genericError": "Could not send the reset link. Please try again.",
+      "backToLogin": "Back to sign in"
+    },
+    "reset": {
+      "heading": "Choose a new password",
+      "subtitle": "Use at least 8 characters.",
+      "passwordLabel": "New password",
+      "passwordPlaceholder": "At least 8 characters",
+      "submit": "Update password",
+      "submitPending": "Updating…",
+      "done": "Password updated. You can sign in.",
+      "invalidLink": "This reset link is invalid or has expired.",
+      "genericError": "Could not update the password. Please try again.",
+      "errors": {
+        "INVALID_TOKEN": "This reset link is invalid or has expired.",
+        "PASSWORD_TOO_SHORT": "Password must be at least 8 characters.",
+        "PASSWORD_TOO_LONG": "Password must be at most 128 characters."
+      },
+      "signInCta": "Sign in"
     }
   },
   "dashboard": {

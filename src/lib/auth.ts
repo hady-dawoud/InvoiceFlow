@@ -4,6 +4,7 @@ import { nextCookies } from "better-auth/next-js";
 import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { recordSignup } from "@/lib/analytics";
+import { authRateLimit, PASSWORD_MAX_LENGTH, PASSWORD_MIN_LENGTH, trustedOrigins } from "@/lib/auth-policy";
 import { deliverPasswordReset } from "@/lib/password-reset";
 
 export const auth = betterAuth({

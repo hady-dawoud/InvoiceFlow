@@ -7,9 +7,11 @@ import ar from "../../messages/ar.json";
 import en from "../../messages/en.json";
 import {
   LOGIN_AUTH_ERROR_CODES,
+  RESET_AUTH_ERROR_CODES,
   SIGN_OUT_AUTH_ERROR_CODES,
   SIGN_UP_AUTH_ERROR_CODES,
   loginFailureMessage,
+  resetFailureMessage,
   signOutFailureMessage,
   signUpFailureMessage,
 } from "./auth-error";
@@ -31,6 +33,11 @@ const flows = [
     namespace: "dashboard.signOut",
     codes: SIGN_OUT_AUTH_ERROR_CODES,
     message: signOutFailureMessage,
+  },
+  {
+    namespace: "auth.reset",
+    codes: RESET_AUTH_ERROR_CODES,
+    message: resetFailureMessage,
   },
 ] as const;
 
@@ -70,6 +77,7 @@ describe("auth failure messages", () => {
     const files = [
       "src/app/(auth)/login/page.tsx",
       "src/app/(auth)/signup/page.tsx",
+      "src/components/reset-password-form.tsx",
       "src/components/sign-out-button.tsx",
     ];
     for (const file of files) {

@@ -1,4 +1,4 @@
-export const PUBLIC_PATHS = ["/", "/pricing", "/login", "/signup"] as const;
+export const PUBLIC_PATHS = ["/", "/pricing", "/login", "/signup", "/forgot-password"] as const;
 
 export function siteOrigin() {
   const configured = process.env.APP_URL?.trim().replace(/\/$/, "");

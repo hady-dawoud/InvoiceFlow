@@ -92,3 +92,10 @@ default later does not relabel invoices already sent. Payment instructions stay
 on the account and are shown on the current invoice and PDF, because that is
 the instruction the client needs in order to pay. Collecting the payment
 inside the app remains out of scope.
+
+## D12 — Password reset email (2026-10-15)
+
+Forgot-password sends a link only when `RESEND_API_KEY` and `EMAIL_FROM` are
+both set. Without them the page says email is not configured and does not
+claim a link was sent. The reset link is the better-auth token redirect to
+`/reset-password`. Invoice email to clients stays deferred.
