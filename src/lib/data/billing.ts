@@ -26,6 +26,7 @@ export async function applyStripeAction(action: StripeAction): Promise<void> {
     stripeCustomerId: action.customerId,
     stripeSubscriptionId: action.subscriptionId,
     proSince: granting ? sql`CASE WHEN ${user.isPro} = 1 THEN ${user.proSince} ELSE ${Math.floor(Date.now() / 1000)} END` : user.proSince,
+    ...(granting ? { proUntil: null } : {}),
     updatedAt: new Date(),
   }).where(matches);
   if (previous && !previous.isPro) await recordProductEvent("pro_conversion", previous.id);

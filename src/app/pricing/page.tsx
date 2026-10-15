@@ -1,28 +1,28 @@
 import type { Metadata } from "next";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { headers } from "next/headers";
 import { getTranslations } from "next-intl/server";
 import { auth } from "@/lib/auth";
-import { isBillingConfigured, isTestMode } from "@/lib/stripe";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
+import { withProAccess } from "@/lib/session";
+import { formatWalletAmount, WALLET_PLANS } from "@/lib/wallet-billing";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("marketing.pricing");
+  const price = await getTranslations("price");
   return {
     title: t("metaTitle"),
     description: t("metaDescription", {
       limit: FREE_MONTHLY_LIMIT,
-      price: PRO_MONTHLY_PRICE_LABEL,
+      price: price("monthly", { amount: formatWalletAmount(WALLET_PLANS[0].amountEgp) }),
     }),
   };
 }
 
 export default async function PricingPage() {
   const session = await auth.api.getSession({ headers: await headers() });
-  const user = session?.user;
-  const configured = isBillingConfigured();
+  const user = session?.user ? withProAccess(session.user) : undefined;
   const t = await getTranslations("marketing.pricing");
 
   const faq = [
@@ -36,12 +36,10 @@ export default async function PricingPage() {
     ? { href: "/signup", label: t("cta.startFree") }
     : user.isPro
       ? { href: "/dashboard/billing", label: t("cta.manageSubscription") }
-      : configured
-        ? { href: "/dashboard/billing", label: t("cta.upgradeToPro") }
-        : { href: "/dashboard/billing", label: t("cta.billingNotConfigured") };
+      : { href: "/dashboard/billing", label: t("cta.upgradeToPro") };
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-16">
+    <main className="mx-auto max-w-6xl px-4 py-16">
       <div>
         <div className="flex flex-wrap items-center justify-between gap-4">
           <Link href="/" className="wordmark text-2xl">
@@ -57,11 +55,11 @@ export default async function PricingPage() {
         </p>
       </div>
 
-      <div className="mt-12 grid gap-6 sm:grid-cols-2">
+      <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
           <h2 className="text-lg font-medium text-ink">{t("free.name")}</h2>
           <p className="display money mt-2 text-4xl text-ink">
-            $0<span className="text-base font-normal text-quiet">{t("perMonth")}</span>
+            $0<span className="text-base font-normal text-quiet">{t("freePerMonth")}</span>
           </p>
           <ul className="mt-4 space-y-2 text-sm text-quiet">
             <li>✓ {t("free.feature1", { limit: FREE_MONTHLY_LIMIT })}</li>
@@ -70,35 +68,37 @@ export default async function PricingPage() {
             <li className="text-quiet">✗ {t("free.feature4")}</li>
           </ul>
           {!user && (
-            <Link
-              href="/signup"
-              className="btn btn-ghost mt-6 w-full"
-            >
+            <Link href="/signup" className="btn btn-ghost mt-6 w-full">
               {t("cta.startFree")}
             </Link>
           )}
         </div>
 
-        <div className="bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
-          <h2 className="text-lg font-medium text-ink">{t("pro.name")}</h2>
-          <p className="display money mt-2 text-4xl text-ink">
-            {PRO_MONTHLY_PRICE_LABEL}<span className="text-base font-normal text-quiet">{t("perMonth")}</span>
-          </p>
-          <ul className="mt-4 space-y-2 text-sm text-quiet">
-            <li>✓ {t("pro.feature1")}</li>
-            <li>✓ {t("pro.feature2")}</li>
-            <li>✓ {t("pro.feature3")}</li>
-            <li>✓ {t("pro.feature4")}</li>
-          </ul>
-          {user && !user.isPro && configured && (
-            <Link
-              href="/dashboard/billing"
-              className="btn mt-6 w-full"
-            >
-              {t("cta.upgradeToPro")}
-            </Link>
-          )}
-        </div>
+        {WALLET_PLANS.map((plan) => (
+          <div key={plan.id} className="bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
+            <h2 className="text-lg font-medium text-ink">{t(`terms.${plan.id}.name`)}</h2>
+            <p className="display money mt-2 text-4xl text-ink">
+              {formatWalletAmount(plan.amountEgp)}
+              <span className="text-base font-normal text-quiet"> {t("egp")}</span>
+            </p>
+            {plan.id !== "1" ? (
+              <p className="mt-1 text-sm text-quiet">{t(`terms.${plan.id}.saving`)}</p>
+            ) : (
+              <p className="mt-1 text-sm text-quiet">{t("pro.name")}</p>
+            )}
+            <ul className="mt-4 space-y-2 text-sm text-quiet">
+              <li>✓ {t("pro.feature1")}</li>
+              <li>✓ {t("pro.feature2")}</li>
+              <li>✓ {t("pro.feature3")}</li>
+              <li>✓ {t("pro.feature4")}</li>
+            </ul>
+            {user && !user.isPro && (
+              <Link href="/dashboard/billing" className="btn mt-6 w-full">
+                {t("cta.upgradeToPro")}
+              </Link>
+            )}
+          </div>
+        ))}
       </div>
 
       {user && !user.isPro && (
@@ -109,11 +109,6 @@ export default async function PricingPage() {
           >
             {primaryCta.label}
           </Link>
-          {configured && isTestMode() && (
-            <p className="mt-2 text-xs text-quiet">
-              {t("testMode")}
-            </p>
-          )}
         </div>
       )}
 

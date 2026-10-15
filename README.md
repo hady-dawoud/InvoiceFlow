@@ -45,9 +45,16 @@ Demo login after seeding: `demo@invoiceflow.dev` / `demo12345` (Pro plan, with
 sample clients and invoices). New signups get the free plan — 3 invoices per
 calendar month. Deleted invoices still count toward that month’s quota.
 
-Without Stripe keys the app runs with billing disabled (upgrade buttons show a
-notice). With test keys, the whole checkout flow works using card
-`4242 4242 4242 4242` and any future expiry/CVC.
+Pro is prepaid in EGP through InstaPay or Orange Cash. The customer picks 1,
+6, or 12 months, sends the amount to +201274026227, and pastes the wallet
+confirmation. That message is posted to Slack or Telegram. Your bot then
+calls `POST /api/billing/wallet-activation` with
+`Authorization: Bearer $BILLING_ACTIVATION_SECRET` and
+`{"requestId":"<id>"}` to turn Pro on until the term ends.
+
+Stripe checkout remains for an existing subscription portal. Without Stripe
+keys the portal button stays disabled. With test keys, checkout still accepts
+card `4242 4242 4242 4242` and any future expiry/CVC.
 
 ## Docs
 
