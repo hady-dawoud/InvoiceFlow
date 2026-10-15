@@ -18,12 +18,20 @@ export function formatCents(cents: number | bigint, currency: string): string {
     .map((part) => part.type === "fraction" ? fraction : part.value).join("");
 }
 
+/** Arabic-Indic (U+0660) and Persian (U+06F0) digits, plus their decimal and thousands separators. */
+export function latinDigits(input: string): string {
+  return input
+    .replace(/[\u0660-\u0669\u06F0-\u06F9]/g, (digit) => String(digit.charCodeAt(0) & 0xf))
+    .replace(/\u066B/g, ".")
+    .replace(/[\u066C\u060C]/g, "");
+}
+
 /**
  * Parse a user-typed amount ("1,200.50", "1200.5", "800") into integer cents.
  * Returns null for anything that is not a non-negative amount with ≤2 decimals.
  */
 export function parseAmountToCents(input: string): number | null {
-  const trimmed = input.trim().replace(/,/g, "");
+  const trimmed = latinDigits(input).trim().replace(/,/g, "");
   if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return null;
   const [whole, fraction = ""] = trimmed.split(".");
   const cents = BigInt(whole) * 100n + BigInt(fraction.padEnd(2, "0"));

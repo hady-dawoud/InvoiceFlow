@@ -16,7 +16,7 @@ import { invoiceItems, invoices, invoiceMonthlyUsage, invoiceSequences, user } f
 import { upgradeBusinessIdentity, upgradeInvoiceCounters } from "@/db/upgrade";
 import { updateBusinessProfile } from "./business-profile";
 import { createTestSchema, seedOwners } from "@/test/database";
-import { countInvoicesThisMonth, createInvoice, deleteInvoice, getInvoiceDetail, listInvoiceSummaries, updateInvoice, type InvoiceInput } from "./invoices";
+import { countInvoicesThisMonth, createInvoice, deleteInvoice, getInvoiceDetail, listInvoiceSummaries, setInvoiceStatus, updateInvoice, type InvoiceInput } from "./invoices";
 
 const input: InvoiceInput = {
   clientId: "owner-client", status: "draft", issueDate: "2026-10-01", dueDate: "2026-10-31",
@@ -73,6 +73,22 @@ describe("invoice persistence", () => {
     finally { await db.$client.execute("DROP TRIGGER fail_items"); }
     expect(await countInvoicesThisMonth("owner")).toBe(0);
     expect((await createInvoice("owner", input)).number).toMatch(/-0001$/);
+  });
+  it("refuses to create an invoice that is already paid", async () => {
+    await expect(createInvoice("owner", { ...input, status: "paid" })).rejects.toThrow("Invalid status.");
+    expect(await countInvoicesThisMonth("owner")).toBe(0);
+  });
+  it("allows only the manual status transitions", async () => {
+    const created = await createInvoice("owner", input);
+    await expect(setInvoiceStatus("owner", created.id, "paid")).rejects.toThrow("Invalid status.");
+    expect((await getInvoiceDetail("owner", created.id))?.invoice.status).toBe("draft");
+    expect(await setInvoiceStatus("owner", created.id, "sent")).toBe(true);
+    expect(await setInvoiceStatus("owner", created.id, "paid")).toBe(true);
+    await expect(setInvoiceStatus("owner", created.id, "draft")).rejects.toThrow("Invalid status.");
+    expect((await getInvoiceDetail("owner", created.id))?.invoice.status).toBe("paid");
+    await expect(updateInvoice("owner", created.id, { ...input, status: "draft" })).rejects.toThrow("Invalid status.");
+    expect(await updateInvoice("owner", created.id, { ...input, status: "paid", notes: "Kept" })).toBe(true);
+    expect((await getInvoiceDetail("owner", created.id))?.invoice.notes).toBe("Kept");
   });
 });
 

@@ -1,5 +1,5 @@
 import type { InvoiceInput } from "@/lib/data/invoices";
-import { calcTotals, parseAmountToCents } from "@/lib/money";
+import { calcTotals, latinDigits, parseAmountToCents } from "@/lib/money";
 
 const MAX_ITEMS_JSON_CHARS = 100_000;
 const MAX_LINE_ITEMS = 40;
@@ -20,9 +20,10 @@ const CALC_TOTALS_ERROR_KEYS: Record<string, string> = {
 type ParsedItems = { description: string; quantity: number; unitPriceCents: number }[];
 
 export function parseQuantity(value: unknown): number | null {
-  if (typeof value === "string" && !/^\d+$/.test(value.trim())) return null;
-  if (typeof value !== "number" && typeof value !== "string") return null;
-  const quantity = Number(value);
+  const normalized = typeof value === "string" ? latinDigits(value).trim() : value;
+  if (typeof normalized === "string" && !/^\d+$/.test(normalized)) return null;
+  if (typeof normalized !== "number" && typeof normalized !== "string") return null;
+  const quantity = Number(normalized);
   return Number.isSafeInteger(quantity) && quantity > 0 ? quantity : null;
 }
 

@@ -41,7 +41,19 @@ async function owner() {
   return (await db.select().from(user))[0];
 }
 
-it("keeps one pending confirmation and replaces it when the account submits again", async () => {
+it("keeps the same request when only the confirmation changes", async () => {
+  const first = await recordWalletPayment(payment);
+  const second = await recordWalletPayment({
+    ...payment,
+    confirmation: "InstaPay reference 44556677 updated",
+  });
+  expect(second.id).toBe(first.id);
+  const rows = await db.select().from(walletPayment);
+  expect(rows).toHaveLength(1);
+  expect(rows[0].confirmation).toBe("InstaPay reference 44556677 updated");
+});
+
+it("retires the previous request id when the pending term changes", async () => {
   const first = await recordWalletPayment(payment);
   const second = await recordWalletPayment({
     ...payment,
@@ -51,10 +63,13 @@ it("keeps one pending confirmation and replaces it when the account submits agai
     amountEgp: 500,
     confirmation: "Orange Cash 99887766",
   });
-  expect(second.id).toBe(first.id);
+  expect(second.id).not.toBe(first.id);
+  expect(await activateWalletPayment(first.id, now)).toBeNull();
+  expect((await owner()).isPro).toBe(false);
   const rows = await db.select().from(walletPayment);
   expect(rows).toHaveLength(1);
   expect(rows[0]).toMatchObject({
+    id: second.id,
     status: "pending",
     method: "orange_cash",
     amountEgp: 500,

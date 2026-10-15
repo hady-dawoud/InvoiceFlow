@@ -17,6 +17,7 @@ import { ENDED_STATUSES } from "@/lib/stripe-events";
 import { checkoutLocale, createPortalSession, portalLocale } from "@/lib/stripe-locale";
 import { resolveLocale } from "@/lib/locale";
 import { siteOrigin } from "@/lib/site";
+import { proIsActive } from "@/lib/wallet-billing";
 import type Stripe from "stripe";
 import type { User } from "@/db/schema";
 import { randomBytes } from "node:crypto";
@@ -101,7 +102,7 @@ async function requestStripeLocale(): Promise<{ cookie: string | null; locale: "
 }
 
 async function requireUpgradeEligibility(stripe: Stripe, account: User) {
-  if (account.isPro) redirect("/dashboard/billing");
+  if (proIsActive({ isPro: account.isPro, proUntil: account.proUntil }, new Date())) redirect("/dashboard/billing");
   if (account.stripeSubscriptionId) {
     const subscription = await stripe.subscriptions.retrieve(account.stripeSubscriptionId);
     if (!ENDED_STATUSES.has(subscription.status)) redirect("/dashboard/billing?error=existing-subscription");
@@ -171,6 +172,9 @@ export async function submitWalletPaymentAction(formData: FormData): Promise<voi
     confirmation: formData.get("confirmation"),
   });
   if (!parsed.ok) redirect("/dashboard/billing?error=invalid");
+  const [account] = await db.select({ isPro: user.isPro, proUntil: user.proUntil }).from(user).where(eq(user.id, session.user.id));
+  if (!account) redirect("/login");
+  if (account.isPro && account.proUntil == null) redirect("/dashboard/billing?error=open-ended");
   const channels = walletChannels(process.env);
   if (channels.length === 0) redirect("/dashboard/billing?error=not-configured");
   const saved = await recordWalletPayment({

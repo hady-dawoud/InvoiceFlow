@@ -18,6 +18,11 @@ describe("invoice input validation", () => {
   it("preserves valid leap dates and zero prices", () => {
     expect(parseInvoiceInput(form())).toMatchObject({ issueDate: "2024-02-29", items: [{ quantity: 1, unitPriceCents: 0 }] });
   });
+  it("accepts an Arabic-Indic quantity", () => {
+    expect(parseInvoiceInput(form({ itemsJson: JSON.stringify([{ description: "Work", quantity: "٢", price: "١" }]) }))).toMatchObject({
+      items: [{ quantity: 2, unitPriceCents: 100 }],
+    });
+  });
   it("rejects overflowing line totals", () => {
     expect(typeof parseInvoiceInput(form({ itemsJson: JSON.stringify([{ description: "Work", quantity: "2", price: "90071992547409.91" }]) }))).toBe("string");
   });

@@ -35,14 +35,14 @@ vi.mock("stripe", async (original) => {
 });
 
 import { db } from "@/db";
-import { user } from "@/db/schema";
+import { user, walletPayment } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { resolveStripeAction } from "@/lib/stripe-webhook";
 import { getStripe } from "@/lib/stripe";
 import { applyStripeAction } from "@/lib/data/billing";
 import { auth } from "@/lib/auth";
 import { createTestSchema } from "@/test/database";
-import { openCustomerPortalAction, upgradeToProAction } from "./billing";
+import { openCustomerPortalAction, submitWalletPaymentAction, upgradeToProAction } from "./billing";
 let ownerId: string;
 
 beforeAll(createTestSchema);
@@ -74,6 +74,26 @@ it("concurrent upgrades store one idempotently created customer", async () => {
 it("a customer who has lost Pro can still open the portal", async () => {
   await db.update(user).set({ stripeCustomerId: "cus_existing", isPro: false }).where(eq(user.id, ownerId));
   await expect(openCustomerPortalAction()).rejects.toThrow("redirect:https://billing.stripe.test/portal");
+});
+
+it("lets an expired prepaid term start Stripe checkout", async () => {
+  await db.update(user).set({ isPro: true, proUntil: new Date("2020-01-01T00:00:00.000Z") }).where(eq(user.id, ownerId));
+  await expect(upgradeToProAction()).rejects.toThrow("redirect:https://checkout.stripe.test/session");
+});
+
+it("does not record a wallet payment for open-ended Pro", async () => {
+  await db.update(user).set({ isPro: true, proUntil: null }).where(eq(user.id, ownerId));
+  process.env.SLACK_BILLING_WEBHOOK_URL = "https://hooks.slack.test/billing";
+  const form = new FormData();
+  form.set("plan", "12");
+  form.set("method", "instapay");
+  form.set("confirmation", "InstaPay reference 11223344");
+  try {
+    await expect(submitWalletPaymentAction(form)).rejects.toThrow("redirect:/dashboard/billing?error=open-ended");
+  } finally {
+    delete process.env.SLACK_BILLING_WEBHOOK_URL;
+  }
+  expect(await db.select().from(walletPayment)).toHaveLength(0);
 });
 
 it.each([

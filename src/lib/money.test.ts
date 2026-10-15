@@ -36,6 +36,11 @@ describe("parseAmountToCents", () => {
     expect(parseAmountToCents(" 0.10 ")).toBe(10);
   });
 
+  it("parses Arabic-Indic and Persian digits", () => {
+    expect(parseAmountToCents("١٢٣٫٥٠")).toBe(12350);
+    expect(parseAmountToCents("۱٬۲۰۰.۵")).toBe(120050);
+  });
+
   it("rejects invalid input", () => {
     expect(parseAmountToCents("")).toBeNull();
     expect(parseAmountToCents("abc")).toBeNull();

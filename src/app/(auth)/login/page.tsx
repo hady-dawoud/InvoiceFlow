@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { useRequest } from "@/lib/use-request";
 import { loginFailureMessage } from "@/lib/auth-error";
 import { signIn } from "@/lib/auth-client";
+import { safeDashboardNext } from "@/lib/return-path";
 
 export default function LoginPage() {
   const t = useTranslations("auth.login");
@@ -24,7 +25,7 @@ export default function LoginPage() {
       setError(loginFailureMessage(t, error));
       return;
     }
-    router.push("/dashboard");
+    router.push(safeDashboardNext(new URLSearchParams(window.location.search).get("next")));
     router.refresh();
   }
 

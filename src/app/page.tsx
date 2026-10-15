@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
+import { formatCents } from "@/lib/money";
 import { formatWalletAmount, WALLET_PLANS } from "@/lib/wallet-billing";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -83,15 +84,15 @@ export default async function LandingPage() {
             <div className="mt-5 space-y-2 border-t border-paper pt-4 text-sm">
               <div className="flex justify-between gap-4">
                 <span>{t("sample.lineItem1")}</span>
-                <span className="money">$1,710.00</span>
+                <span className="money">{formatCents(171_000, "egp")}</span>
               </div>
               <div className="flex justify-between gap-4">
                 <span>{t("sample.lineItem2")}</span>
-                <span className="money">$130.00</span>
+                <span className="money">{formatCents(13_000, "egp")}</span>
               </div>
               <div className="flex justify-between gap-4 border-t border-paper pt-3 font-medium">
                 <span>{t("sample.total")}</span>
-                <span className="money">$1,840.00</span>
+                <span className="money">{formatCents(184_000, "egp")}</span>
               </div>
             </div>
           </article>

@@ -28,6 +28,7 @@ const BANNER_STYLE: Record<string, { messageKey: string; className: string }> = 
   "checkout-failed": { messageKey: "banner.checkoutFailed", className: "text-overdue" },
   notify: { messageKey: "banner.notify", className: "text-overdue" },
   invalid: { messageKey: "banner.invalid", className: "text-overdue" },
+  "open-ended": { messageKey: "banner.openEnded", className: "text-ink" },
 };
 
 export default async function BillingPage({
