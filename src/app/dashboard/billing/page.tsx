@@ -92,15 +92,24 @@ export default async function BillingPage({
 
           <fieldset className="mt-5 space-y-2">
             <legend className="text-sm font-medium text-ink">{t("wallet.termLegend")}</legend>
-            {WALLET_PLANS.map((plan) => (
+            {WALLET_PLANS.map((plan) => {
+              const amount = formatWalletAmount(plan.amountEgp);
+              const label = plan.id === "1"
+                ? t("wallet.termMonth", { amount })
+                : plan.id === "6"
+                  ? t("wallet.termHalf", { amount })
+                  : t("wallet.termYear", { amount });
+              const saving = plan.id === "6" ? t("wallet.savingHalf") : plan.id === "12" ? t("wallet.savingYear") : null;
+              return (
               <label key={plan.id} className="flex items-baseline justify-between gap-3 border border-line bg-white px-3 py-2">
                 <span className="flex items-center gap-2">
                   <input className="size-4" type="radio" name="plan" value={plan.id} required />
-                  <span>{t(`wallet.term.${plan.id}`, { amount: formatWalletAmount(plan.amountEgp) })}</span>
+                  <span>{label}</span>
                 </span>
-                {plan.id !== "1" && <span className="text-sm text-quiet">{t(`wallet.saving.${plan.id}`)}</span>}
+                {saving ? <span className="text-sm text-quiet">{saving}</span> : null}
               </label>
-            ))}
+              );
+            })}
           </fieldset>
 
           <fieldset className="mt-5 space-y-2">
