@@ -124,7 +124,7 @@ export default async function LandingPage() {
             <div className="grid gap-8 sm:grid-cols-2">
               <article>
                 <h3 className="font-medium">{t("plansTeaser.free.name")}</h3>
-                <p className="display money text-4xl">$0</p>
+                <p className="display money text-4xl">{tPrice("monthly", { amount: "0" })}</p>
                 <ul className="mt-3 space-y-1 text-quiet">
                   <li>{t("plansTeaser.free.feature1", { limit: FREE_MONTHLY_LIMIT })}</li>
                   <li>{t("plansTeaser.free.feature2")}</li>
