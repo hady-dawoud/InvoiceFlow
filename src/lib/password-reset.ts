@@ -2,17 +2,23 @@ const RESEND_URL = "https://api.resend.com/emails";
 
 type MailEnv = { RESEND_API_KEY?: string; EMAIL_FROM?: string };
 
-export function passwordResetConfigured(env: MailEnv = process.env): boolean {
-  return Boolean(env.RESEND_API_KEY?.trim() && env.EMAIL_FROM?.trim());
+function readMailEnv(env?: MailEnv) {
+  return env ?? process.env;
+}
+
+export function passwordResetConfigured(env?: MailEnv): boolean {
+  const source = readMailEnv(env);
+  return Boolean(source.RESEND_API_KEY?.trim() && source.EMAIL_FROM?.trim());
 }
 
 export async function deliverPasswordReset(
   message: { to: string; url: string },
-  env: MailEnv = process.env,
+  env?: MailEnv,
   fetchImpl: typeof fetch = fetch,
 ): Promise<void> {
-  const apiKey = env.RESEND_API_KEY?.trim();
-  const from = env.EMAIL_FROM?.trim();
+  const source = readMailEnv(env);
+  const apiKey = source.RESEND_API_KEY?.trim();
+  const from = source.EMAIL_FROM?.trim();
   if (!apiKey || !from) throw new Error("password-reset-not-configured");
   const response = await fetchImpl(RESEND_URL, {
     method: "POST",

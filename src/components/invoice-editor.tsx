@@ -1,6 +1,5 @@
 "use client";
 
-import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -29,11 +28,13 @@ export type EditorInitial = {
 export function InvoiceEditor({
   clients,
   currency,
+  proPriceLabel,
   invoiceId,
   initial,
 }: {
   clients: { id: string; name: string }[];
   currency: string;
+  proPriceLabel: string;
   /** Present in edit mode. */
   invoiceId?: string;
   initial: EditorInitial;
@@ -108,7 +109,7 @@ export function InvoiceEditor({
           href="/pricing"
           className="mt-4 inline-block btn"
         >
-          {t("quotaBlocked.upgradeCta", { price: PRO_MONTHLY_PRICE_LABEL })}
+          {t("quotaBlocked.upgradeCta", { price: proPriceLabel })}
         </Link>
       </div>
     );

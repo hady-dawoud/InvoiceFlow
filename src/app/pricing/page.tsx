@@ -58,8 +58,9 @@ export default async function PricingPage() {
       <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         <div className="bg-sheet p-6 shadow-[0.45rem_0.55rem_0_rgb(26_35_48/10%)]">
           <h2 className="text-lg font-medium text-ink">{t("free.name")}</h2>
+          <p className="mt-1 text-sm text-quiet">{t("freePerMonth")}</p>
           <p className="display money mt-2 text-4xl text-ink">
-            $0<span className="text-base font-normal text-quiet">{t("freePerMonth")}</span>
+            0<span className="text-base font-normal text-quiet"> {t("egp")}</span>
           </p>
           <ul className="mt-4 space-y-2 text-sm text-quiet">
             <li>✓ {t("free.feature1", { limit: FREE_MONTHLY_LIMIT })}</li>

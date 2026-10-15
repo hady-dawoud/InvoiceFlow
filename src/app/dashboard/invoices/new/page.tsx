@@ -1,4 +1,4 @@
-import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
+import { formatWalletAmount, WALLET_PLANS } from "@/lib/wallet-billing";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
@@ -16,7 +16,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function NewInvoicePage() {
   const session = await getSession();
-  const t = await getTranslations("invoice.new");
+  const [t, tPrice] = await Promise.all([
+    getTranslations("invoice.new"),
+    getTranslations("price"),
+  ]);
+  const proPrice = tPrice("monthly", { amount: formatWalletAmount(WALLET_PLANS[0].amountEgp) });
   const [clientOptions, usedThisMonth] = await Promise.all([
     listClientOptions(session.user.id),
     countInvoicesThisMonth(session.user.id),
@@ -59,13 +63,14 @@ export default async function NewInvoicePage() {
             href="/pricing"
             className="mt-4 inline-block btn"
           >
-            {t("quotaBlocked.upgradeCta", { price: PRO_MONTHLY_PRICE_LABEL })}
+            {t("quotaBlocked.upgradeCta", { price: proPrice })}
           </Link>
         </div>
       ) : (
         <InvoiceEditor
           clients={clientOptions}
           currency={session.user.currency}
+          proPriceLabel={proPrice}
           initial={{
             clientId: clientOptions[0]!.id,
             issueDate: today,

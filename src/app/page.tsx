@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getTranslations } from "next-intl/server";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { FREE_MONTHLY_LIMIT } from "@/lib/quota";
-import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
+import { formatWalletAmount, WALLET_PLANS } from "@/lib/wallet-billing";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("marketing.home");
@@ -18,6 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function LandingPage() {
   const tNav = await getTranslations("marketing.nav");
+  const tPrice = await getTranslations("price");
+  const proPrice = tPrice("monthly", { amount: formatWalletAmount(WALLET_PLANS[0].amountEgp) });
   const t = await getTranslations("marketing.home");
 
   const steps = [
@@ -122,7 +124,7 @@ export default async function LandingPage() {
             <div className="grid gap-8 sm:grid-cols-2">
               <article>
                 <h3 className="font-medium">{t("plansTeaser.free.name")}</h3>
-                <p className="display money text-4xl">$0</p>
+                <p className="display money text-4xl">{tPrice("monthly", { amount: "0" })}</p>
                 <ul className="mt-3 space-y-1 text-quiet">
                   <li>{t("plansTeaser.free.feature1", { limit: FREE_MONTHLY_LIMIT })}</li>
                   <li>{t("plansTeaser.free.feature2")}</li>
@@ -131,7 +133,7 @@ export default async function LandingPage() {
               <article>
                 <h3 className="font-medium">{t("plansTeaser.pro.name")}</h3>
                 <p className="display money text-4xl">
-                  {PRO_MONTHLY_PRICE_LABEL}
+                  {proPrice}
                   <span className="font-sans text-base font-normal">
                     {t("plansTeaser.pro.perMonth")}
                   </span>

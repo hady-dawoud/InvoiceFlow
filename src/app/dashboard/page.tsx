@@ -1,4 +1,4 @@
-import { PRO_MONTHLY_PRICE_LABEL } from "@/lib/plans";
+import { formatWalletAmount, WALLET_PLANS } from "@/lib/wallet-billing";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getLocale, getTranslations } from "next-intl/server";
@@ -20,7 +20,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function DashboardPage() {
   const session = await getSession();
   const { user } = session;
-  const [t, uiLocale] = await Promise.all([getTranslations("dashboard.home"), getLocale()]);
+  const [t, tPrice, uiLocale] = await Promise.all([
+    getTranslations("dashboard.home"),
+    getTranslations("price"),
+    getLocale(),
+  ]);
+  const proPrice = tPrice("monthly", { amount: formatWalletAmount(WALLET_PLANS[0].amountEgp) });
 
   const [summaries, usedThisMonth, clients] = await Promise.all([
     listInvoiceSummaries(user.id),
@@ -55,7 +60,7 @@ export default async function DashboardPage() {
               : t("quotaNotice.remaining", { remaining: quota.remaining })}
           </p>
           <Link href="/pricing" className="btn">
-            {t("quotaNotice.upgrade", { price: PRO_MONTHLY_PRICE_LABEL })}
+            {t("quotaNotice.upgrade", { price: proPrice })}
           </Link>
         </div>
       )}
